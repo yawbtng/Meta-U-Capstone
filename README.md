@@ -1,5 +1,5 @@
 # Meta-U-Capstone-Project
-# <App Name Here>
+## Lynk
 
 **Deployed site**: <add a link to your deployment here, if you create one>
 
@@ -8,7 +8,8 @@
 
 
 ## Links
-**Project Plan**: [doc]<add link to your project plan here>
+**Project Plan**: [doc](https://docs.google.com/document/d/1247j3yXhOr8HSFaHEmbuIilBysTZ2g5dqh01ur1Pmog) <br>
+
 **Wireframes**: [here]<add a link to wire frames>
 <img src="OR_INSERT_INLINE_YOUR_WIREFRAME_IMAGE_URL" width=600>
 
