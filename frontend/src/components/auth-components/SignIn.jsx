@@ -34,11 +34,11 @@ const SignIn = () => {
             <form onSubmit={handleSignIn}>
                 <h2> Sign in!</h2>
                 <p>
-                    Don't have an account? <Link to="/signin">Sign In!</Link>
+                    Don't have an account? <Link to="/signup">Sign Up!</Link>
                 </p>
                 <div> 
-                    <input onChange={(e) => setEmail(e.target.value)} type="email" id="" placeholder="email"/>
-                    <input onChange={(e) => setPassword(e.target.value)} type="password" id="" placeholder="password"/>
+                    <input onChange={(e) => setEmail(e.target.value)} type="email" className="user-email" placeholder="email"/>
+                    <input onChange={(e) => setPassword(e.target.value)} type="password" className="user-password" placeholder="password"/>
                     <button type="submit" disabled={loading}>Sign In</button>
                     {error && <p>{error}</p>}
                 </div>
