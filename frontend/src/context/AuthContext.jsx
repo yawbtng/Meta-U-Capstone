@@ -24,26 +24,33 @@ export const AuthContextProvider = ({children}) => {
             return {success: true, data}
         } catch (error) {
             console.error(error)
+            return { success: false, error: error.message };
         }
     }
 
     // sign up a new user
     const signUpNewUser = async (email, password, name) => {
-        const {data, error} = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            optons: {
-                data: {
-                    display_name: name
+        try {
+            const {data, error} = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                optons: {
+                    data: {
+                        display_name: name,
+                    }
                 }
-            }
-        });
+            });
 
-        if (error) {
-            console.log(`Error signing up: ${error}`)
-            return {success: false, error}
+            if (error) {
+                console.log(`Error signing up: ${error.message}`)
+                return {success: false, error}
+            }
+            return {success: true, data};
+        } catch (error) {
+            console.error(error)
+            return {success: false, error: error.message}
         }
-        return {success: true, data};
+
     }
 
     // sign out a user

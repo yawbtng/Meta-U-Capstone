@@ -16,60 +16,89 @@ const SignUp = () => {
     const handleSignUp = async (e) => {
         e.preventDefault();
         setLoading(true)
+
         try {
             const result = await signUpNewUser(email, password, name)
 
             if (result.success) {
-                navigate('/home')
+                alert("Account created successfully✅")
+                navigate("/signin")
+                alert("You can now log in")
+            } else {
+                setError(result.error.message)
             }
-        } catch (error) {
-            setError("error occurred: ", error)
-        } finally {
             setLoading(false);
+        } catch (error) {
+            console.log(error)
         }
     }
 
+
+
     return (
-        <div className="flex justify-center items-center min-h-1">
-            <form onSubmit={handleSignUp}>
-                <h2 className="text-xl font-bold mb-6 text-center"> Sign up today!</h2>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+          <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
+            <h2 className="text-2xl font-bold text-center mb-2">Sign up today!</h2>
+            <p className="text-center text-sm text-gray-600 mb-6">
+              Already have an account?{" "}
+              <Link to="/signin" className="text-blue-600 hover:underline">
+                Sign in
+              </Link>
+            </p>
+            <form onSubmit={handleSignUp} className="space-y-4">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter your name"
+                  className="mt-1 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
 
-                <p className="mb-4 text-center">
-                    Already have an account? <Link to="/signin">Sign In!</Link>
-                </p>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="mt-1 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
 
-                <div className="flex flex-col justify-between gap-y-3">
-                    <input
-                    onChange={(e) => setName(e.target.value)}
-                    type="text"
-                    placeholder="name"
-                    />
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Create a password"
+                  className="mt-1 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
 
-                    <input
-                    onChange={(e) => setEmail(e.target.value)}
-                    type="email"
-                    placeholder="email"
-                    />
+              {error && <p className="text-sm text-red-500">{error}</p>}
 
-                    <input
-                    onChange={(e) => setPassword(e.target.value)}
-                    type="password"
-                    placeholder="password"
-                    />
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className={`p-2 bg-sky-500 hover:bg-sky-700 rounded ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
-                    >
-                        Sign Up
-                    </button>
-                    {error && <p className="text-red-500">{error}</p>}
-                </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full py-2 px-4 text-white rounded-md ${
+                  loading
+                    ? "bg-blue-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+              >
+                Sign Up
+              </button>
             </form>
+          </div>
         </div>
-
-    )
+      );
 }
 
 export default SignUp;

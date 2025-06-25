@@ -9,7 +9,7 @@ import { Outlet } from 'react-router-dom'
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/signup" />, // Redirect to signup
+    element: <Navigate to="/signup" />, // Redirect to signup as the default
   },
   {
     path: '/',

@@ -12,7 +12,7 @@ const Dashboard = () => {
         try {
             await signOut();
             navigate("/")
-            
+
         } catch( error) {
             console.error(error)
         }
@@ -21,10 +21,13 @@ const Dashboard = () => {
 
     return (
         <div>
-            <h1>Dashboard</h1>
+            <h1 className="bg-blue-500">Dashboard</h1>
             <h2>Welcome, {session?.user?.email}</h2>
-            <div>
-                <p onClick={handleSignOut}> Sign out</p>
+            <div className="flex justify-center">
+                <button onClick={handleSignOut}
+                className="m-10 border p-3 text-white">
+                Sign out
+                </button>
             </div>
         </div>
 
