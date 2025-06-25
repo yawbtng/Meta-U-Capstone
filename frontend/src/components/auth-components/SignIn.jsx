@@ -31,7 +31,7 @@ const SignIn = () => {
 
     return (
         <div>
-            <form onSubmit={handleSignIn} className="bg-blue-800">
+            <form onSubmit={handleSignIn} className="">
                 <h2> Sign in!</h2>
                 <p>
                     Don't have an account? <Link to="/signup">Sign Up!</Link>

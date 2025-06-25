@@ -30,7 +30,7 @@ const SignUp = () => {
     }
 
     return (
-        <div className="flex justify-center items-center min-h-10 bg-blue-100">
+        <div className="flex justify-center items-center min-h-1">
             <form onSubmit={handleSignUp}>
                 <h2 className="text-xl font-bold mb-6 text-center"> Sign up today!</h2>
 
@@ -60,7 +60,7 @@ const SignUp = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className={`p-2 bg-sky-500 hover:bg-sky-700 text-white rounded ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
+                        className={`p-2 bg-sky-500 hover:bg-sky-700 rounded ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
                     >
                         Sign Up
                     </button>
