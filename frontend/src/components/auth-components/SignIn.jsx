@@ -20,7 +20,7 @@ const SignIn = () => {
             const result = await signInUser(email, password)
 
             if (result.success) {
-                navigate('/dashboard')
+                navigate('/home')
             }
         } catch (error) {
             setError("error occurred: ", error)
@@ -31,12 +31,12 @@ const SignIn = () => {
 
     return (
         <div>
-            <form onSubmit={handleSignIn}>
+            <form onSubmit={handleSignIn} className="bg-blue-800">
                 <h2> Sign in!</h2>
                 <p>
                     Don't have an account? <Link to="/signup">Sign Up!</Link>
                 </p>
-                <div> 
+                <div>
                     <input onChange={(e) => setEmail(e.target.value)} type="email" className="user-email" placeholder="email"/>
                     <input onChange={(e) => setPassword(e.target.value)} type="password" className="user-password" placeholder="password"/>
                     <button type="submit" disabled={loading}>Sign In</button>

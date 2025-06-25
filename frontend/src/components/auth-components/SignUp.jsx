@@ -20,7 +20,7 @@ const SignUp = () => {
             const result = await signUpNewUser(email, password, name)
 
             if (result.success) {
-                navigate('/dashboard')
+                navigate('/home')
             }
         } catch (error) {
             setError("error occurred: ", error)
@@ -30,18 +30,41 @@ const SignUp = () => {
     }
 
     return (
-        <div>
+        <div className="flex justify-center items-center min-h-10 bg-blue-100">
             <form onSubmit={handleSignUp}>
-                <h2> Sign up today!</h2>
-                <p>
+                <h2 className="text-xl font-bold mb-6 text-center"> Sign up today!</h2>
+
+                <p className="mb-4 text-center">
                     Already have an account? <Link to="/signin">Sign In!</Link>
                 </p>
-                <div>
-                    <input onChange={(e) => setName(e.target.value)} type="text" className="user-name" placeholder="name"/> 
-                    <input onChange={(e) => setEmail(e.target.value)} type="email" className="user-email" placeholder="email"/>
-                    <input onChange={(e) => setPassword(e.target.value)} type="password" className="user-password" placeholder="password"/>
-                    <button type="submit" disabled={loading}>Sign Up</button>
-                    {error && <p>{error}</p>}
+
+                <div className="flex flex-col justify-between gap-y-3">
+                    <input
+                    onChange={(e) => setName(e.target.value)}
+                    type="text"
+                    placeholder="name"
+                    />
+
+                    <input
+                    onChange={(e) => setEmail(e.target.value)}
+                    type="email"
+                    placeholder="email"
+                    />
+
+                    <input
+                    onChange={(e) => setPassword(e.target.value)}
+                    type="password"
+                    placeholder="password"
+                    />
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className={`p-2 bg-sky-500 hover:bg-sky-700 text-white rounded ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
+                    >
+                        Sign Up
+                    </button>
+                    {error && <p className="text-red-500">{error}</p>}
                 </div>
             </form>
         </div>
