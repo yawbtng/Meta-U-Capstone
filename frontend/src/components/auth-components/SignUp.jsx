@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react";
 import { UserAuth } from "../../context/AuthContext";
+import { Button } from "../ui/button";
 
 const SignUp = () => {
     const [name, setName] = useState("");
@@ -84,17 +85,16 @@ const SignUp = () => {
 
               {error && <p className="text-sm text-red-500">{error}</p>}
 
-              <button
+              <Button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-2 px-4 text-white rounded-md ${
-                  loading
-                    ? "bg-blue-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
+                className={`w-full py-2 px-4 text-white rounded-md
+                  ${loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-black hover:bg-gray-500"}`}
               >
                 Sign Up
-              </button>
+              </Button>
             </form>
           </div>
         </div>
