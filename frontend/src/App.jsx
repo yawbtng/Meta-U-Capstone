@@ -5,6 +5,9 @@ import SignIn from './components/auth-components/SignIn';
 import Dashboard from './pages/Dashboard'
 import PrivateRoute from './context/PrivateRoute';
 import { Outlet } from 'react-router-dom'
+import UserProfile from './pages/Settings';
+import AddContact from './pages/AddContact';
+import AllContacts from './pages/AllContacts';
 
 export const router = createBrowserRouter([
   {
@@ -18,6 +21,9 @@ export const router = createBrowserRouter([
       { path: 'signup', element: <SignUp /> },
       { path: 'signin', element: <SignIn /> },
       { path: 'home', element: <PrivateRoute><Dashboard /></PrivateRoute> },
+      { path: 'settings', element: <PrivateRoute><UserProfile /></PrivateRoute> },
+      { path: 'add-contact', element: <PrivateRoute><AddContact /></PrivateRoute> },
+      { path: 'all-contacts', element: <PrivateRoute><AllContacts /></PrivateRoute> },
     ],
   },
 ]);
