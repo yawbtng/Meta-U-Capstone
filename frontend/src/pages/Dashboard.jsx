@@ -2,10 +2,14 @@ import React from "react";
 import { UserAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
 import { Button } from "../components/ui/button"
+import { supabase } from "../providers/supabaseClient";
+
 
 const Dashboard = () => {
     const {session, signOut} = UserAuth();
     const navigate = useNavigate();
+
+
 
 
     const handleSignOut = async (e) => {
@@ -41,7 +45,7 @@ const Dashboard = () => {
             </nav>
 
             <h1 className="bg-blue-500">Dashboard</h1>
-            <h2>Welcome, {session?.user?.email}</h2>
+            <h2>Welcome, {session?.user?.user_metadata?.display_name}</h2>
 
 
             <div className="flex justify-center">

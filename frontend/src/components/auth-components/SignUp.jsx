@@ -28,6 +28,9 @@ const SignUp = () => {
             } else {
                 setError(result.error.message)
             }
+
+
+
             setLoading(false);
         } catch (error) {
             console.log(error)
