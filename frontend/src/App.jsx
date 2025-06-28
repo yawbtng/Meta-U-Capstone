@@ -8,6 +8,7 @@ import { Outlet } from 'react-router-dom'
 import UserProfile from './pages/Settings';
 import AddContact from './pages/AddContact';
 import AllContacts from './pages/AllContacts';
+import { Toaster } from "sonner";
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,8 @@ function App() {
 
   return (
     <>
+      <Toaster richColors position="bottom-center" />
+
       <header>
     <h1 className="text-center text-xl ">Lynk!</h1>
       </header>
