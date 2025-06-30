@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState} from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar22 } from '../components/ui/date-picker';
+import { CollapsibleSection } from '../components/CollapsibleSection';
+import { UserAuth } from '../context/AuthContext';
 
 export default function AddContact() {
     // Form state
@@ -44,6 +46,10 @@ export default function AddContact() {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    //  current user who is adding the contact
+    const { session } = UserAuth();
+    const uid = session?.user.id;
+
     // Collapsible sections state
     const [openSections, setOpenSections] = useState({
         basic: true,        // Basic info starts open w/ required fields
@@ -61,6 +67,25 @@ export default function AddContact() {
         }));
     };
 
+    // const inputRefs = useRef({});
+    // const handleInputChange = useCallback((field, value) => {
+    //     setFormData(prev => ({
+    //         ...prev,
+    //         [field]: value
+    //     }));
+
+    //     if (errors[field]) {
+    //         setErrors(prev => ({
+    //             ...prev,
+    //             [field]: ""
+    //         }));
+    //     }
+    //     if (!inputRefs.current[field]) {
+    //         inputRefs.current[field] = document.getElementById(field);
+    //     }
+    //     inputRefs.current[field].focus();
+    // }, [setFormData, errors]);
+
     // Handle input changes
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
@@ -77,15 +102,6 @@ export default function AddContact() {
         }
     };
 
-    // Handle relationship type changes (multiple selection)
-    const handleRelationshipTypeChange = (type) => {
-        setFormData(prev => ({
-            ...prev,
-            relationship_type: prev.relationship_type.includes(type)
-                ? prev.relationship_type.filter(t => t !== type)
-                : [...prev.relationship_type, type]
-        }));
-    };
 
     // Handle tags input (comma-separated)
     const handleTagsChange = (value) => {
@@ -105,14 +121,12 @@ export default function AddContact() {
             newErrors.name = 'Name is required';
         }
 
-        // https://mailtrap.io/blog/javascript-email-validation/
         // Email validation (if provided)
         if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = 'Please enter a valid email address';
         }
 
         // Phone validation (if provided) - matches the database constraint
-        // https://stackoverflow.com/questions/4338267/validate-phone-number-with-javascript
         if (formData.phone_number && !/^\+?[1-9]\d{1,14}$/.test(formData.phone_number)) {
             newErrors.phone_number = 'Please enter a valid phone number (e.g., 1234567890)';
         }
@@ -150,6 +164,12 @@ export default function AddContact() {
 
             // TODO: Submit to Supabase
             console.log('Submitting contact:', submissionData);
+            try {
+
+            } catch (error) {
+
+            }
+
 
             // Reset form on success
             setFormData({
@@ -173,35 +193,6 @@ export default function AddContact() {
     // Check if form is valid for submit button
     const isFormValid = formData.name.trim() !== '';
 
-    // Collapsible Section Component
-    const CollapsibleSection = ({ title, isOpen, onToggle, required = false, children }) => (
-        <div className="space-y-3">
-            <Button
-                type="button"
-                variant="ghost"
-                onClick={onToggle}
-                className="w-full justify-between p-0 h-auto hover:bg-transparent"
-            >
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                    {title}
-                    {required && <span className="text-destructive">*</span>}
-                </h3>
-                {isOpen ? (
-                    <ChevronDown className="h-4 w-4" />
-                ) : (
-                    <ChevronRight className="h-4 w-4" />
-                )}
-            </Button>
-
-            {isOpen && (
-                <Card>
-                    <CardContent className="space-y-4 pt-6">
-                        {children}
-                    </CardContent>
-                </Card>
-            )}
-        </div>
-    );
 
     return (
         <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -213,6 +204,7 @@ export default function AddContact() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+
                 {/* Basic Information */}
                 <CollapsibleSection
                     title="Basic Information"
@@ -222,7 +214,7 @@ export default function AddContact() {
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
-                            <Label htmlFor="name">Name *</Label>
+                            <Label className="my-2" htmlFor="name">Name *</Label>
                             <Input
                                 id="name"
                                 value={formData.name}
@@ -236,7 +228,7 @@ export default function AddContact() {
                         </div>
 
                         <div>
-                            <Label htmlFor="email">Email</Label>
+                            <Label className="my-2" htmlFor="email">Email</Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -251,7 +243,7 @@ export default function AddContact() {
                         </div>
 
                         <div>
-                            <Label htmlFor="phone">Phone Number</Label>
+                            <Label className="my-2" htmlFor="phone">Phone Number</Label>
                             <Input
                                 id="phone"
                                 type="tel"
@@ -275,7 +267,7 @@ export default function AddContact() {
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <Label htmlFor="company">Company</Label>
+                            <Label className="my-2" htmlFor="company">Company</Label>
                             <Input
                                 id="company"
                                 value={formData.company}
@@ -285,7 +277,7 @@ export default function AddContact() {
                         </div>
 
                         <div>
-                            <Label htmlFor="role">Role/Position</Label>
+                            <Label className="my-2" htmlFor="role">Role/Position</Label>
                             <Input
                                 id="role"
                                 value={formData.role}
@@ -295,7 +287,7 @@ export default function AddContact() {
                         </div>
 
                         <div className="md:col-span-2">
-                            <Label htmlFor="industry">Industry</Label>
+                            <Label className="my-2" htmlFor="industry">Industry</Label>
                             <Input
                                 id="industry"
                                 value={formData.industry}
@@ -314,7 +306,7 @@ export default function AddContact() {
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <Label htmlFor="school">School/University</Label>
+                            <Label className="my-2" htmlFor="school">School/University</Label>
                             <Input
                                 id="school"
                                 value={formData.school}
@@ -324,7 +316,7 @@ export default function AddContact() {
                         </div>
 
                         <div>
-                            <Label htmlFor="last_contact">Last Contact Date</Label>
+                            <Label className="my-2" htmlFor="last_contact">Last Contact Date</Label>
                             <Calendar22 className="outline-2 outline-solid outline-black"
                                 selectedDate={formData.last_contact_at ? new Date(formData.last_contact_at) : undefined}
                                 onDateChange={(date) => handleInputChange('last_contact_at', date ? date.toISOString().split('T')[0] : '')}
@@ -332,7 +324,7 @@ export default function AddContact() {
                         </div>
 
                         <div className="md:col-span-2">
-                            <Label htmlFor="where_met">Where We Met</Label>
+                            <Label className="my-2" htmlFor="where_met">Where We Met</Label>
                             <Input
                                 id="where_met"
                                 value={formData.where_met}
@@ -351,7 +343,7 @@ export default function AddContact() {
                 >
                     <div className="space-y-4">
                         <div>
-                            <Label className="text-base font-medium">Relationship Type</Label>
+                            <Label className="my-2 text-base font-medium">Relationship Type</Label>
                             <div className="flex flex-wrap gap-10 mt-3">
                                 {['professional', 'personal', 'social'].map((type) => (
                                     <div key={type} className="flex items-center space-x-2">
@@ -377,7 +369,7 @@ export default function AddContact() {
                                         />
                                         <Label
                                             htmlFor={`relationship-${type}`}
-                                            className="text-md font-normal capitalize cursor-pointer"
+                                            className="my-2 text-md font-normal capitalize cursor-pointer"
                                         >
                                             {type}
                                         </Label>
@@ -387,7 +379,7 @@ export default function AddContact() {
                         </div>
 
                         <div>
-                            <Label htmlFor="tags">Tags</Label>
+                            <Label className="my-2" htmlFor="tags">Tags</Label>
                             <Input
                                 id="tags"
                                 value={formData.tags.join(', ')}
@@ -407,7 +399,7 @@ export default function AddContact() {
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <Label htmlFor="linkedin">LinkedIn</Label>
+                                <Label className="my-2" htmlFor="linkedin">LinkedIn</Label>
                                 <Input
                                     id="linkedin"
                                     value={formData.linkedin}
@@ -417,7 +409,7 @@ export default function AddContact() {
                             </div>
 
                             <div>
-                                <Label htmlFor="twitter">Twitter</Label>
+                                <Label className="my-2" htmlFor="twitter">Twitter</Label>
                                 <Input
                                     id="twitter"
                                     value={formData.twitter}
@@ -427,7 +419,7 @@ export default function AddContact() {
                             </div>
 
                             <div>
-                                <Label htmlFor="instagram">Instagram</Label>
+                                <Label className="my-2" htmlFor="instagram">Instagram</Label>
                                 <Input
                                     id="instagram"
                                     value={formData.instagram}
@@ -438,7 +430,7 @@ export default function AddContact() {
                         </div>
 
                         <div>
-                            <Label htmlFor="notes">Notes</Label>
+                            <Label className="my-2" htmlFor="notes">Notes</Label>
                             <Textarea
                                 id="notes"
                                 value={formData.notes}
