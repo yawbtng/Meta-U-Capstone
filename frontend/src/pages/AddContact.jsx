@@ -6,47 +6,47 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Separator } from '@/components/ui/separator';
+import { Calendar22 } from '../components/ui/date-picker';
 
 export default function AddContact() {
     // Form state
     const [formData, setFormData] = useState({
         // Required fields
         name: '',
-        
+
         // Basic contact info
         email: '',
         phone_number: '',
-        
+
         // Professional info
         company: '',
         role: '',
         industry: '',
-        
+
         // Background
         school: '',
         where_met: '',
         last_contact_at: '',
-        
+
         // Relationship & categorization
         relationship_type: [],
         tags: [],
-        
+
         // Social media (as individual fields that will be combined into jsonb)
         linkedin: '',
         twitter: '',
         instagram: '',
-        
+
         // Additional info
         notes: ''
     });
 
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     // Collapsible sections state
     const [openSections, setOpenSections] = useState({
-        basic: true,        // Basic info starts open since it has required fields
+        basic: true,        // Basic info starts open w/ required fields
         professional: false,
         background: false,
         relationship: false,
@@ -67,7 +67,7 @@ export default function AddContact() {
             ...prev,
             [field]: value
         }));
-        
+
         // Clear error when user starts typing
         if (errors[field]) {
             setErrors(prev => ({
@@ -99,22 +99,24 @@ export default function AddContact() {
     // Validate form
     const validateForm = () => {
         const newErrors = {};
-        
+
         // Required field validation
         if (!formData.name.trim()) {
             newErrors.name = 'Name is required';
         }
-        
+
+        // https://mailtrap.io/blog/javascript-email-validation/
         // Email validation (if provided)
         if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = 'Please enter a valid email address';
         }
-        
+
         // Phone validation (if provided) - matches the database constraint
+        // https://stackoverflow.com/questions/4338267/validate-phone-number-with-javascript
         if (formData.phone_number && !/^\+?[1-9]\d{1,14}$/.test(formData.phone_number)) {
-            newErrors.phone_number = 'Please enter a valid phone number (e.g., +1234567890)';
+            newErrors.phone_number = 'Please enter a valid phone number (e.g., 1234567890)';
         }
-        
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -122,13 +124,13 @@ export default function AddContact() {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!validateForm()) {
             return;
         }
-        
+
         setIsSubmitting(true);
-        
+
         try {
             // Prepare data for submission
             const submissionData = {
@@ -140,26 +142,26 @@ export default function AddContact() {
                     ...(formData.instagram && { instagram: formData.instagram })
                 }
             };
-            
+
             // Remove individual social media fields
             delete submissionData.linkedin;
             delete submissionData.twitter;
             delete submissionData.instagram;
-            
+
             // TODO: Submit to Supabase
             console.log('Submitting contact:', submissionData);
-            
+
             // Reset form on success
             setFormData({
-                name: '', email: '', phone_number: '', company: '', role: '', 
+                name: '', email: '', phone_number: '', company: '', role: '',
                 industry: '', school: '', where_met: '', last_contact_at: '',
-                relationship_type: [], tags: [], linkedin: '', twitter: '', 
+                relationship_type: [], tags: [], linkedin: '', twitter: '',
                 instagram: '', notes: ''
             });
-            
+
             // TODO: Show success message and redirect
             alert('Contact added successfully!');
-            
+
         } catch (error) {
             console.error('Error adding contact:', error);
             // TODO: Show error message
@@ -190,7 +192,7 @@ export default function AddContact() {
                     <ChevronRight className="h-4 w-4" />
                 )}
             </Button>
-            
+
             {isOpen && (
                 <Card>
                     <CardContent className="space-y-4 pt-6">
@@ -232,7 +234,7 @@ export default function AddContact() {
                                 <p className="text-destructive text-sm mt-1">{errors.name}</p>
                             )}
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="email">Email</Label>
                             <Input
@@ -247,7 +249,7 @@ export default function AddContact() {
                                 <p className="text-destructive text-sm mt-1">{errors.email}</p>
                             )}
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="phone">Phone Number</Label>
                             <Input
@@ -255,7 +257,7 @@ export default function AddContact() {
                                 type="tel"
                                 value={formData.phone_number}
                                 onChange={(e) => handleInputChange('phone_number', e.target.value)}
-                                placeholder="+1234567890"
+                                placeholder="1234567890"
                                 className={errors.phone_number ? 'border-destructive' : ''}
                             />
                             {errors.phone_number && (
@@ -281,7 +283,7 @@ export default function AddContact() {
                                 placeholder="Company name"
                             />
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="role">Role/Position</Label>
                             <Input
@@ -291,7 +293,7 @@ export default function AddContact() {
                                 placeholder="Job title"
                             />
                         </div>
-                        
+
                         <div className="md:col-span-2">
                             <Label htmlFor="industry">Industry</Label>
                             <Input
@@ -320,17 +322,15 @@ export default function AddContact() {
                                 placeholder="Educational institution"
                             />
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="last_contact">Last Contact Date</Label>
-                            <Input
-                                id="last_contact"
-                                type="date"
-                                value={formData.last_contact_at}
-                                onChange={(e) => handleInputChange('last_contact_at', e.target.value)}
+                            <Calendar22 className="outline-2 outline-solid outline-black"
+                                selectedDate={formData.last_contact_at ? new Date(formData.last_contact_at) : undefined}
+                                onDateChange={(date) => handleInputChange('last_contact_at', date ? date.toISOString().split('T')[0] : '')}
                             />
                         </div>
-                        
+
                         <div className="md:col-span-2">
                             <Label htmlFor="where_met">Where We Met</Label>
                             <Input
@@ -352,29 +352,32 @@ export default function AddContact() {
                     <div className="space-y-4">
                         <div>
                             <Label className="text-base font-medium">Relationship Type</Label>
-                            <div className="flex flex-wrap gap-6 mt-3">
+                            <div className="flex flex-wrap gap-10 mt-3">
                                 {['professional', 'personal', 'social'].map((type) => (
                                     <div key={type} className="flex items-center space-x-2">
                                         <Checkbox
+                                            className="outline-2 outline-solid outline-black *:checked:outline-destructive"
                                             id={`relationship-${type}`}
                                             checked={formData.relationship_type.includes(type)}
                                             onCheckedChange={(checked) => {
                                                 if (checked) {
+                                                    // add to relationship_type array
                                                     setFormData(prev => ({
                                                         ...prev,
                                                         relationship_type: [...prev.relationship_type, type]
                                                     }));
                                                 } else {
                                                     setFormData(prev => ({
+                                                        // remove from relationship_type array
                                                         ...prev,
                                                         relationship_type: prev.relationship_type.filter(t => t !== type)
                                                     }));
                                                 }
                                             }}
                                         />
-                                        <Label 
+                                        <Label
                                             htmlFor={`relationship-${type}`}
-                                            className="text-sm font-normal capitalize cursor-pointer"
+                                            className="text-md font-normal capitalize cursor-pointer"
                                         >
                                             {type}
                                         </Label>
@@ -382,7 +385,7 @@ export default function AddContact() {
                                 ))}
                             </div>
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="tags">Tags</Label>
                             <Input
@@ -412,7 +415,7 @@ export default function AddContact() {
                                     placeholder="LinkedIn profile URL"
                                 />
                             </div>
-                            
+
                             <div>
                                 <Label htmlFor="twitter">Twitter</Label>
                                 <Input
@@ -422,7 +425,7 @@ export default function AddContact() {
                                     placeholder="@username"
                                 />
                             </div>
-                            
+
                             <div>
                                 <Label htmlFor="instagram">Instagram</Label>
                                 <Input
@@ -433,7 +436,7 @@ export default function AddContact() {
                                 />
                             </div>
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="notes">Notes</Label>
                             <Textarea
@@ -449,15 +452,15 @@ export default function AddContact() {
 
                 {/* Form Actions */}
                 <div className="flex justify-end space-x-4 pt-6">
-                    <Button 
-                        type="button" 
+                    <Button
+                        type="button"
                         variant="outline"
                         onClick={() => window.history.back()}
                     >
                         Cancel
                     </Button>
-                    <Button 
-                        type="submit" 
+                    <Button
+                        type="submit"
                         disabled={!isFormValid || isSubmitting}
                     >
                         {isSubmitting ? 'Adding Contact...' : 'Add Contact'}

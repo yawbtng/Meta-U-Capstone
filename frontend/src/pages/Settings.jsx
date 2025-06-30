@@ -252,9 +252,6 @@ export default function UserProfile() {
     }
   };
 
-  //----------------------------------------------------------------
-  // Render
-  //----------------------------------------------------------------
   return (
     <div className="container mx-auto py-5 space-y-8">
       <h1 className="font-bold">Profile & Settings</h1>
@@ -277,7 +274,7 @@ export default function UserProfile() {
       </section>
 
       <div className="flex justify-center">
-        <Button className=""
+        <Button className="text-lg font-bold py-2 px-4 rounded"
         onClick={() => navigate("/home")}>Return to Dashboard</Button>
       </div>
     </div>
