@@ -1,6 +1,4 @@
 import { useState} from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -11,6 +9,16 @@ import { CollapsibleSection } from '../components/CollapsibleSection';
 import { UserAuth } from '../context/AuthContext';
 import { supabase } from '../providers/supabaseClient';
 import { useNavigate } from 'react-router';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu"
+import { industries } from '../providers/industries';
+import { ComboboxDemo } from '../components/Combobox';
 
 export default function AddContact() {
     //  current user who is adding the contact
@@ -287,12 +295,8 @@ export default function AddContact() {
 
                         <div className="md:col-span-2">
                             <Label className="my-2" htmlFor="industry">Industry</Label>
-                            <Input
-                                id="industry"
-                                value={formData.industry}
-                                onChange={(e) => handleInputChange('industry', e.target.value)}
-                                placeholder="e.g., Technology, Healthcare, Finance"
-                            />
+                            <ComboboxDemo id="industry"  value={formData.industry}
+                            className="flex outline-gray-400" inputs={industries}></ComboboxDemo>
                         </div>
                     </div>
                 </CollapsibleSection>
