@@ -85,7 +85,7 @@ export default function AddContact() {
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
             ...prev,
-            [field]: value
+            [field]: field === 'tags' ? value.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : value
         }));
 
         // Clear error when user starts typing
@@ -126,6 +126,23 @@ export default function AddContact() {
             }
         }
 
+        // linkedIn URL validation
+        if (formData.linkedin) {
+            const linkedInPattern = /^https?:\/\/(www\.)?linkedin\.com\/.*$/i;
+            if (!linkedInPattern.test(formData.linkedin)) {
+                newErrors.linkedin = "Not a valid LinkedIn URL";
+            }
+        }
+
+        // Tags validation
+        if (formData.tags.length > 0) {
+            const invalidTags = formData.tags.filter(tag => tag.includes(' '));
+            if (invalidTags.length > 0) {
+                newErrors.tags = 'Tags must be comma-separated without spaces';
+            }
+        }
+
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -134,9 +151,6 @@ export default function AddContact() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(formData)
-
-        // Process tags from raw input
-
 
 
         if (!validateForm()) {
@@ -148,19 +162,14 @@ export default function AddContact() {
         try {
 
             // Prepare data for submission
-            const newTags = tags.value
-            const processedTags = newTags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
-            console.log(processedTags)
             const submissionData = {
                 ...formData,
                 // Combine social media into jsonb object
                 socials: {
-                    ...(formData.linkedin && { linkedin: formData.linkedin }),
+                    ...(formData.linkedin && { linkedin: new URL(formData.linkedin) }),
                     ...(formData.twitter && { twitter: formData.twitter }),
                     ...(formData.instagram && { instagram: formData.instagram })
                 },
-                tags : processedTags
-
             };
 
             // Remove individual social media fields
@@ -199,7 +208,6 @@ export default function AddContact() {
 
     // Check if form is valid for submit button
     const isFormValid = formData.name.trim() !== '';
-
 
     return (
         <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -410,6 +418,9 @@ export default function AddContact() {
                                     onChange={(e) => handleInputChange('linkedin', e.target.value)}
                                     placeholder="LinkedIn profile URL"
                                 />
+                                {errors.linkedin && (
+                                <p className="text-destructive text-sm mt-1">{errors.linkedin}</p>
+                            )}
                             </div>
 
                             <div>
