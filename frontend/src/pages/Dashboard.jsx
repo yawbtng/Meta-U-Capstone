@@ -2,7 +2,7 @@ import React from "react";
 import { UserAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
 import { Button } from "../components/ui/button"
-import { supabase } from "../providers/supabaseClient";
+
 
 
 const Dashboard = () => {
