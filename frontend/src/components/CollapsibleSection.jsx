@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 // Collapsible Section Component
 export const CollapsibleSection = ({ title, isOpen, onToggle, required = false, children }) => (
-    <div className="space-y-3">
+    <div className={ isOpen ? "space-y-3" : "space-y-3 border-2 rounded-2xl"}>
         <Button
             type="button"
             variant="ghost"
@@ -24,7 +24,7 @@ export const CollapsibleSection = ({ title, isOpen, onToggle, required = false, 
 
         {isOpen && (
             <Card>
-                <CardContent className="space-y-4 pt-6">
+                <CardContent className="space-y-4">
                     {children}
                 </CardContent>
             </Card>

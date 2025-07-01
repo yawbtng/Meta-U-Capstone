@@ -9,10 +9,20 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar22 } from '../components/ui/date-picker';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { UserAuth } from '../context/AuthContext';
+import { supabase } from '../providers/supabaseClient';
+import { useNavigate } from 'react-router';
 
 export default function AddContact() {
+    //  current user who is adding the contact
+    const { session } = UserAuth();
+    const uid = session?.user.id;
+
+    const navigate = useNavigate();
+
     // Form state
     const [formData, setFormData] = useState({
+        user_id: uid,
+
         // Required fields
         name: '',
 
@@ -46,10 +56,6 @@ export default function AddContact() {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    //  current user who is adding the contact
-    const { session } = UserAuth();
-    const uid = session?.user.id;
-
     // Collapsible sections state
     const [openSections, setOpenSections] = useState({
         basic: true,        // Basic info starts open w/ required fields
@@ -67,25 +73,6 @@ export default function AddContact() {
         }));
     };
 
-    // const inputRefs = useRef({});
-    // const handleInputChange = useCallback((field, value) => {
-    //     setFormData(prev => ({
-    //         ...prev,
-    //         [field]: value
-    //     }));
-
-    //     if (errors[field]) {
-    //         setErrors(prev => ({
-    //             ...prev,
-    //             [field]: ""
-    //         }));
-    //     }
-    //     if (!inputRefs.current[field]) {
-    //         inputRefs.current[field] = document.getElementById(field);
-    //     }
-    //     inputRefs.current[field].focus();
-    // }, [setFormData, errors]);
-
     // Handle input changes
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
@@ -102,15 +89,6 @@ export default function AddContact() {
         }
     };
 
-
-    // Handle tags input (comma-separated)
-    const handleTagsChange = (value) => {
-        const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
-        setFormData(prev => ({
-            ...prev,
-            tags
-        }));
-    };
 
     // Validate form
     const validateForm = () => {
@@ -131,6 +109,15 @@ export default function AddContact() {
             newErrors.phone_number = 'Please enter a valid phone number (e.g., 1234567890)';
         }
 
+        // Last contact date validation
+        if (formData.last_contact_at) {
+            const lastContactDate = new Date(formData.last_contact_at);
+            const currentDate = new Date();
+            if (lastContactDate > currentDate) {
+                newErrors.last_contact_at = 'Last contact date cannot be in the future';
+            }
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -138,6 +125,11 @@ export default function AddContact() {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log(formData)
+
+        // Process tags from raw input
+
+
 
         if (!validateForm()) {
             return;
@@ -146,7 +138,11 @@ export default function AddContact() {
         setIsSubmitting(true);
 
         try {
+
             // Prepare data for submission
+            const newTags = tags.value
+            const processedTags = newTags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+            console.log(processedTags)
             const submissionData = {
                 ...formData,
                 // Combine social media into jsonb object
@@ -154,7 +150,9 @@ export default function AddContact() {
                     ...(formData.linkedin && { linkedin: formData.linkedin }),
                     ...(formData.twitter && { twitter: formData.twitter }),
                     ...(formData.instagram && { instagram: formData.instagram })
-                }
+                },
+                tags : processedTags
+
             };
 
             // Remove individual social media fields
@@ -164,27 +162,28 @@ export default function AddContact() {
 
             // TODO: Submit to Supabase
             console.log('Submitting contact:', submissionData);
-            try {
+            const {data, error} = await supabase.from("connections").insert(submissionData)
 
-            } catch (error) {
+            if (error) {
+                console.error('Error adding contact:', error);
+                alert('Failed to add contact. Please try again.');
+            } else {
+                // Reset form on success
+                setFormData({
+                    name: '', email: '', phone_number: '', company: '', role: '',
+                    industry: '', school: '', where_met: '', last_contact_at: '',
+                    relationship_type: [], tags: [], linkedin: '', twitter: '',
+                    instagram: '', notes: ''
+                });
 
+                // TODO: Show success message and redirect
+                alert('Contact added successfully!');
+                navigate("/all-contacts")
             }
 
-
-            // Reset form on success
-            setFormData({
-                name: '', email: '', phone_number: '', company: '', role: '',
-                industry: '', school: '', where_met: '', last_contact_at: '',
-                relationship_type: [], tags: [], linkedin: '', twitter: '',
-                instagram: '', notes: ''
-            });
-
-            // TODO: Show success message and redirect
-            alert('Contact added successfully!');
-
         } catch (error) {
-            console.error('Error adding contact:', error);
-            // TODO: Show error message
+            console.error('Unexpected error adding contact:', error);
+            alert('An unexpected error occurred. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
@@ -321,6 +320,7 @@ export default function AddContact() {
                                 selectedDate={formData.last_contact_at ? new Date(formData.last_contact_at) : undefined}
                                 onDateChange={(date) => handleInputChange('last_contact_at', date ? date.toISOString().split('T')[0] : '')}
                             />
+                            {errors.last_contact_at && (<p className="text-destructive text-sm mt-1">{errors.last_contact_at}</p>)}
                         </div>
 
                         <div className="md:col-span-2">
@@ -382,8 +382,8 @@ export default function AddContact() {
                             <Label className="my-2" htmlFor="tags">Tags</Label>
                             <Input
                                 id="tags"
-                                value={formData.tags.join(', ')}
-                                onChange={(e) => handleTagsChange(e.target.value)}
+                                value={formData.tags}
+                                onChange={(e) => handleInputChange("tags", e.target.value)}
                                 placeholder="e.g., mentor, client, friend (separate with commas)"
                             />
                         </div>
