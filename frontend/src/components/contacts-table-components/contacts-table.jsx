@@ -16,7 +16,7 @@ const ContactsTable = () => {
       const { data, error } = await supabase
         .from("connections")
         .select("*")
-        .eq("user_id", session.user.id);
+        .eq("user_id", session?.user?.id);
 
       if (error) console.error(error);
       else setData(data);

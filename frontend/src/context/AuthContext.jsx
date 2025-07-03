@@ -21,7 +21,6 @@ export const AuthContextProvider = ({children}) => {
                 console.error(`Sign in error occured ${error}`)
                 return { success: false, error: error.message}
             }
-            console.log("sign-in success: ", data);
             return {success: true, data}
         } catch (error) {
             console.error(error)
