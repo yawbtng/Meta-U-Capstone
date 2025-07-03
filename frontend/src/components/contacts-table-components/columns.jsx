@@ -1,7 +1,7 @@
 import {z} from 'zod';
 
 
-const ContactSchema = z.object({
+export const ContactSchema = z.object({
     id: z.uuid(),
     user_id: z.string(),
     name: z.string(),
