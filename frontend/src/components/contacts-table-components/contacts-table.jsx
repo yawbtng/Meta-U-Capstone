@@ -23,7 +23,7 @@ const ContactsTable = () => {
     };
 
     fetchContacts();
-  }, [session]);
+  }, [session])
 
   return (
     <div className="container mx-auto py-10">
