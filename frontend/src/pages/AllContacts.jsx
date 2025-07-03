@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 
 const AllContacts = () => {
-    const [contacts, setContacts] = useState([]);
+    const [contacts, setContacts] = useState([])
 
     return(
         <div>
