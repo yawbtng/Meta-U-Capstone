@@ -24,6 +24,7 @@
     "@supabase/supabase-js": "^2.50.1",
     "@tailwindcss/postcss": "^4.1.10",
     "@tailwindcss/vite": "^4.1.10",
+    "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -42,7 +43,8 @@
     "sonner": "^2.0.5",
     "supabase": "^2.26.9",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.10"
+    "tailwindcss": "^4.1.10",
+    "zod": "^3.25.69"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
