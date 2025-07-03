@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../providers/supabaseClient";
-import { useUserAuth } from "../../providers/UserAuth";
-import { columns } from "./columns";
+import { UserAuth } from "../../context/AuthContext";
+import { columns, Contact } from "./columns";
 import DataTable from "./data-table";
 
-export default function ContactsPage() {
-  const { session } = useUserAuth();
+const ContactsTable = () => {
+  const { session } = UserAuth();
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -31,3 +31,5 @@ export default function ContactsPage() {
     </div>
   );
 }
+
+export default ContactsTable;

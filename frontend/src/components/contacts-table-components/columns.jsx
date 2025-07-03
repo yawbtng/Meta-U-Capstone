@@ -1,24 +1,23 @@
-import {z} from 'zod';
+import { z } from "zod";
 
-
-export const ContactSchema = z.object({
-    id: z.uuid(),
-    user_id: z.string(),
-    name: z.string(),
-    email: z.email(),
-    phone_number: z.string(),
-    linkedin: z.url(),
-    twitter: z.string(),
-    instagram: z.string(),
-    relationship_type: z.enum(["personal", "professional", "social"]),
-    avatar_url: z.url(),
-    industry: z.string(),
-    company: z.string(),
-    role: z.string(),
-    last_contact_at: z.date(),
-    interaction_count: z.number(),
-    tags: z.array(z.string())
-})
+export const Contact = z.object({
+  id: z.string().uuid(),
+  user_id: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+  phone_number: z.string().optional(),
+  linkedin: z.string().url().optional(),
+  twitter: z.string().optional(),
+  instagram: z.string().optional(),
+  relationship_type: z.enum(["personal", "professional", "social"]),
+  avatar_url: z.string().url().optional(),
+  industry: z.string().optional(),
+  company: z.string().optional(),
+  role: z.string().optional(),
+  last_contact_at: z.date().optional(),
+  interaction_count: z.number().int().optional(),
+  tags: z.array(z.string()).default([]),
+});
 
 
 export const columns = [
