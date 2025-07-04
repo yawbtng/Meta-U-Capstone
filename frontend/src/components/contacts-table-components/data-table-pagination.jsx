@@ -9,20 +9,20 @@ import { Button } from "@/components/ui/button"
 
 export function DataTablePagination({ table }) {
   return (
-    <div className="flex items-center justify-between px-2 py-4">
-      <div className="text-muted-foreground flex-1 text-sm">
+    <div className="flex items-center justify-between px-2 py-4 overflow-x-auto scrollbar-hide">
+      <div className="text-muted-foreground flex-1 text-sm min-w-0">
         Showing {table.getRowModel().rows.length} of{" "}
         {table.getFilteredRowModel().rows.length} row(s)
       </div>
-      <div className="flex items-center space-x-6 lg:space-x-8">
+      <div className="flex items-center space-x-4 lg:space-x-6 flex-shrink-0">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+          <p className="text-sm font-medium whitespace-nowrap">Rows per page</p>
           <select
             value={table.getState().pagination.pageSize}
             onChange={(e) => {
               table.setPageSize(Number(e.target.value))
             }}
-            className="h-8 w-[70px] rounded border border-gray-300 px-2 text-sm"
+            className="h-8 w-[70px] rounded border border-gray-300 px-2 text-sm flex-shrink-0"
           >
             {[10, 20, 25, 30, 40, 50].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
@@ -31,11 +31,11 @@ export function DataTablePagination({ table }) {
             ))}
           </select>
         </div>
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+        <div className="flex w-[100px] items-center justify-center text-sm font-medium whitespace-nowrap">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 lg:space-x-2">
           <Button
             variant="outline"
             size="sm"

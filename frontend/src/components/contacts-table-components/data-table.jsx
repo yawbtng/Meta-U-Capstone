@@ -26,7 +26,7 @@ export default function DataTable({ columns, data }) {
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center pt-5 pb-4">
+      <div className="flex items-center pt-5 pb-4 overflow-x-auto scrollbar-hide">
         <Table className="border mx-auto">
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
