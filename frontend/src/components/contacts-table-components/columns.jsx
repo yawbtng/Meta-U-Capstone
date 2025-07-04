@@ -48,7 +48,7 @@ const ContactActionsDropdown = ({ contact }) => {
           Edit Contact
         </DropdownMenuItem>
         <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 text-red-600 cursor-pointer">
-          <Trash className="h-5 w-5 text-red-600" />
+          <Trash className="h-5 w-5 text-red-600 hover:text-red-600" />
           Delete Contact
         </DropdownMenuItem>
       </DropdownMenuContent>
