@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { MoreHorizontal, Eye, Edit, Trash } from "lucide-react"
+import { MoreHorizontal, Eye, Edit, Trash, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -63,7 +63,17 @@ export const columns = [
   },
   {
     accessorKey: "name",
-    header: () => <div className="text-center">Name</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({row}) => {
       const name = row.getValue("name")
       return <div className="text-left font-medium text-xl">{name}</div>
@@ -71,7 +81,17 @@ export const columns = [
   },
   {
     accessorKey: "email",
-    header: () => <div className="text-center">Email</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Email
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({row}) => {
       const email = row.getValue("email")
       return <div className="text-left text-lg font-medium">{email}</div>
@@ -160,7 +180,17 @@ export const columns = [
   },
   {
     accessorKey: "industry",
-    header: () => <div className="text-center">Industry</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Industry
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({row}) => {
       const industry = row.getValue("industry")
       return <div className="text-left text-lg font-medium">{industry}</div>
@@ -168,7 +198,17 @@ export const columns = [
   },
   {
     accessorKey: "company",
-    header: () => <div className="text-center">Company</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Company
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({row}) => {
       const company = row.getValue("company")
       return <div className="text-left text-lg font-medium">{company}</div>
@@ -176,7 +216,17 @@ export const columns = [
   },
   {
     accessorKey: "role",
-    header: () => <div className="text-center">Role</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Role
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({row}) => {
       const role = row.getValue("role")
       return <div className="text-left text-lg font-medium">{role}</div>

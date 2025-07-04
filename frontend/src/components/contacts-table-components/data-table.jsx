@@ -1,8 +1,10 @@
+import { useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  getPaginationRowModel
+  getPaginationRowModel,
+  getSortedRowModel,
 } from "@tanstack/react-table"
 
 import {
@@ -17,11 +19,18 @@ import {
 import { DataTablePagination } from "./data-table-pagination";
 
 export default function DataTable({ columns, data }) {
+  const [sorting, setSorting] = useState([]);
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    state: {
+      sorting,
+    },
   });
 
   return (
