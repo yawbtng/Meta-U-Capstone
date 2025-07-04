@@ -8,6 +8,7 @@ const ContactsTable = () => {
   const { session } = UserAuth();
   const [data, setData] = useState([]);
 
+
   useEffect(() => {
 
     if (!session) return;
@@ -26,7 +27,7 @@ const ContactsTable = () => {
   }, [session])
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="mx-auto my-10 ">
       <DataTable columns={columns} data={data} />
     </div>
   );

@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+
 export const Contact = z.object({
   id: z.string().uuid(),
   user_id: z.string(),
@@ -22,55 +23,150 @@ export const Contact = z.object({
 
 export const columns = [
   {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "phone_number",
-    header: "Phone #",
-  },
-  {
-    accessorKey: "linkedin",
-    header: "LinkedIn",
-  },
-  {
-    accessorKey: "twitter",
-    header: "Twitter",
-  },
-  {
-    accessorKey: "instagram",
-    header: "Instagram",
-  },
-  {
-    accessorKey: "relationship_type",
-    header: "Relationship Type",
-  },
-  {
     accessorKey: "avatar_url",
     header: "Photo",
   },
   {
+    accessorKey: "name",
+    header: () => <div className="text-center">Name</div>,
+    cell: ({row}) => {
+      const name = row.getValue("name")
+      return <div className="text-left font-medium text-xl">{name}</div>
+    }
+  },
+  {
+    accessorKey: "email",
+    header: () => <div className="text-center">Email</div>,
+    cell: ({row}) => {
+      const email = row.getValue("email")
+      return <div className="text-left text-lg font-medium">{email}</div>
+    }
+  },
+  {
+    accessorKey: "phone_number",
+    header: () => <div className="text-center">Phone #</div>,
+    cell: ({row}) => {
+      const phone = row.getValue("phone_number")
+      let parsed;
+      if (phone.length === 10) {
+        parsed = `${phone.substring(0, 3)}-${phone.substring(3, 6)}-${phone.substring(6, 10)}`
+      } else {
+        parsed = phone;
+      }
+      return <div className="text-center text-lg font-medium">{parsed}</div>
+    }
+
+  },
+  {
+    accessorKey: "socials.linkedin",
+    header: () => <div className="text-center">LinkedIn</div>,
+    cell: ({row}) => {
+      const linkedin = row.getValue("socials_linkedin")
+      return (
+        <div className="text-left underline text-lg">
+          <a href={`https://${linkedin}`} target="_blank" className="!text-gray-600">
+            {linkedin}
+          </a>
+        </div>
+        
+      )
+    }
+  },
+  {
+    accessorKey: "socials.twitter",
+    header: () => <div className="text-center">Twitter</div>,
+    cell: ({row}) => {
+      const twitter = row.getValue("socials_twitter")
+      return (
+        <div className="text-left underline text-lg">
+          <a href={`https://twitter.com/${twitter}`} target="_blank" className="!text-gray-600">
+            {twitter}
+          </a>
+        </div>
+        
+      )
+    }
+  },
+  {
+    accessorKey: "socials.instagram",
+    header: () => <div className="text-center">Instagram</div>,
+    cell: ({row}) => {
+      const instagram = row.getValue("socials_instagram")
+      return (
+        <div className="text-left underline text-lg">
+          <a href={`https://instagram.com/${instagram}`} target="_blank" className="!text-gray-600">
+            {instagram}
+          </a>
+        </div>
+        
+      )
+    }
+  },
+  {
+    accessorKey: "relationship_type",
+    header: () => <div className="text-center">Type</div>,
+    cell: ({row}) => {
+      const types = row.getValue("relationship_type")
+      const colorMap = {
+        personal: "bg-purple-100",
+        professional: "bg-green-100",
+        social: "bg-blue-100"
+      }
+      return (
+        <div className="text-left text-md flex gap-2">
+          {types.map((type, index) => (
+            <p key={index} className={`px-2 py-1 rounded ${colorMap[type.toLowerCase()]}`}>
+              {type}
+            </p>
+          ))}
+        </div>
+      )
+    }
+  },
+  {
     accessorKey: "industry",
-    header: "Industry",
+    header: () => <div className="text-center">Industry</div>,
+    cell: ({row}) => {
+      const industry = row.getValue("industry")
+      return <div className="text-left text-lg font-medium">{industry}</div>
+    }
   },
   {
     accessorKey: "company",
-    header: "Company",
+    header: () => <div className="text-center">Company</div>,
+    cell: ({row}) => {
+      const company = row.getValue("company")
+      return <div className="text-left text-lg font-medium">{company}</div>
+    }
   },
   {
     accessorKey: "role",
-    header: "Role",
+    header: () => <div className="text-center">Role</div>,
+    cell: ({row}) => {
+      const role = row.getValue("role")
+      return <div className="text-left text-lg font-medium">{role}</div>
+    }
   },
   {
-    accessorKey: "interaction_count",
-    header: "# of Interactions",
+    accessorKey: "interactions_count",
+    header: () => <div className="text-center"># of Interactions</div>,
+    cell: ({row}) => {
+      const amount = parseInt(row.getValue("interactions_count"))
+      return <div className="text-center font-medium text-xl">{amount}</div>
+    }
   },
   {
     accessorKey: "tags",
-    header: "Tags",
+    header: () => <div className="text-center">Tags</div>,
+    cell: ({row}) => {
+      const tags = row.getValue("tags")
+      return (
+        <div className="text-left text-md flex gap-2">
+          {tags.map((tag, index) => (
+            <p key={index} className="px-2 py-1 rounded bg-gray-100">{tag}</p>
+          ))}
+        </div>
+      )
+    }
   },
 ]
