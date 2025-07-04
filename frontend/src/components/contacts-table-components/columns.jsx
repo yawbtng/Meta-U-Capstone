@@ -233,6 +233,34 @@ export const columns = [
     }
   },
   {
+    accessorKey: "last_contact_at",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Last Contact
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({row}) => {
+      const lastContact = row.getValue("last_contact_at")
+      if (!lastContact) return <div className="text-center text-lg font-medium">-</div>
+      
+      // Format the date (assuming it's in YYYY-MM-DD format)
+      const date = new Date(lastContact)
+      const formatted = date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      })
+      
+      return <div className="text-center text-lg font-medium">{formatted}</div>
+    }
+  },
+  {
     accessorKey: "interactions_count",
     header: () => <div className="text-center"># of Interactions</div>,
     cell: ({row}) => {
