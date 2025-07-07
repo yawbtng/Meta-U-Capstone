@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { MoreHorizontal, Eye, Edit, Trash } from "lucide-react"
+import { MoreHorizontal, Eye, Edit, Trash, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export const Contact = z.object({
   id: z.string().uuid(),
@@ -58,12 +59,44 @@ const ContactActionsDropdown = ({ contact }) => {
 
 export const columns = [
   {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox className="border-black"
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
     accessorKey: "avatar_url",
     header: "Photo",
   },
   {
     accessorKey: "name",
-    header: () => <div className="text-center">Name</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({row}) => {
       const name = row.getValue("name")
       return <div className="text-left font-medium text-xl">{name}</div>
@@ -71,7 +104,17 @@ export const columns = [
   },
   {
     accessorKey: "email",
-    header: () => <div className="text-center">Email</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Email
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({row}) => {
       const email = row.getValue("email")
       return <div className="text-left text-lg font-medium">{email}</div>
@@ -160,7 +203,17 @@ export const columns = [
   },
   {
     accessorKey: "industry",
-    header: () => <div className="text-center">Industry</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Industry
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({row}) => {
       const industry = row.getValue("industry")
       return <div className="text-left text-lg font-medium">{industry}</div>
@@ -168,7 +221,17 @@ export const columns = [
   },
   {
     accessorKey: "company",
-    header: () => <div className="text-center">Company</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Company
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({row}) => {
       const company = row.getValue("company")
       return <div className="text-left text-lg font-medium">{company}</div>
@@ -176,10 +239,48 @@ export const columns = [
   },
   {
     accessorKey: "role",
-    header: () => <div className="text-center">Role</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Role
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({row}) => {
       const role = row.getValue("role")
       return <div className="text-left text-lg font-medium">{role}</div>
+    }
+  },
+  {
+    accessorKey: "last_contact_at",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Last Contact
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({row}) => {
+      const lastContact = row.getValue("last_contact_at")
+      if (!lastContact) return <div className="text-center text-lg font-medium">-</div>
+      
+      // Format the date (assuming it's in YYYY-MM-DD format)
+      const date = new Date(lastContact)
+      const formatted = date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      })
+      
+      return <div className="text-center text-lg font-medium">{formatted}</div>
     }
   },
   {
@@ -206,6 +307,7 @@ export const columns = [
   },
   {
     id: "actions",
+    enableHiding: false,
     cell: ({ row }) => {
       const contact = row.original
       return <ContactActionsDropdown contact={contact} />

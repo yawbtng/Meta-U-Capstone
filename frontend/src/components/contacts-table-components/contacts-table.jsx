@@ -7,6 +7,7 @@ import DataTable from "./data-table";
 const ContactsTable = () => {
   const { session } = UserAuth();
   const [data, setData] = useState([]);
+  console.log(data)
 
 
   useEffect(() => {
