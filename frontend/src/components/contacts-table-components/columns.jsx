@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
 import AvatarDemo from "../avatar-01"
-
+import { supabase } from "../../providers/supabaseClient"
+import { toast } from "sonner";
 
 export const Contact = z.object({
   id: z.string().uuid(),
@@ -31,6 +32,25 @@ export const Contact = z.object({
 });
 
 const ContactActionsDropdown = ({ contact }) => {
+
+  const onDeleteClicked = (e) => {
+    e.preventDefault();
+    console.log(contact.id)
+
+    const deleteContact = async (id) => {
+      const {data, error} = await supabase.from("connections").delete().eq("id", id)
+
+      if (error) {
+        toast.error("There was an error deleting this contact")
+      } else {
+        toast.success("Contact successfully deleted ✅")
+      }
+    }
+    
+    deleteContact(contact.id)
+  }
+
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -48,7 +68,7 @@ const ContactActionsDropdown = ({ contact }) => {
           <Edit className="h-5 w-5" />
           Edit Contact
         </DropdownMenuItem>
-        <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 text-red-600 cursor-pointer">
+        <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 text-red-600 cursor-pointer" onClick={onDeleteClicked}>
           <Trash className="h-5 w-5 text-red-600 hover:text-red-600" />
           Delete Contact
         </DropdownMenuItem>
