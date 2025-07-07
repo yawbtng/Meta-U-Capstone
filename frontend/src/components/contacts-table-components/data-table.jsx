@@ -16,12 +16,48 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Settings2 } from "lucide-react";
 
 import { DataTablePagination } from "./data-table-pagination";
 
+const getColumnDisplayName = (column) => {
+  const displayNameMap = {
+    'select': 'Select',
+    'avatar_url': 'Photo', 
+    'name': 'Name',
+    'email': 'Email',
+    'phone_number': 'Phone #',
+    'socials_linkedin': 'LinkedIn',
+    'socials_twitter': 'Twitter', 
+    'socials_instagram': 'Instagram',
+    'relationship_type': 'Type',
+    'industry': 'Industry',
+    'company': 'Company',
+    'role': 'Role',
+    'last_contact_at': 'Last Contact',
+    'interactions_count': '# of Interactions',
+    'tags': 'Tags',
+    'actions': 'Actions'
+  };
+
+  return displayNameMap[column.id]
+};
+
 export default function DataTable({ columns, data }) {
   const [sorting, setSorting] = useState([]);
-  const [rowSelection, setRowSelection] = useState({})
+  const [rowSelection, setRowSelection] = useState({});
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
 
   const table = useReactTable({
     data,
@@ -31,14 +67,60 @@ export default function DataTable({ columns, data }) {
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
       rowSelection,
+      columnVisibility,
     },
   });
 
+  const filteredColumns = table
+    .getAllColumns()
+    .filter((column) => column.getCanHide())
+    .filter((column) =>
+      getColumnDisplayName(column).toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
   return (
     <div className="flex flex-col">
+      {/* Column Visibility Controls */}
+      <div className="flex items-center py-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto h-8 flex">
+              <Settings2 className="h-4 w-4" />
+              View
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[200px]">
+            <div className="p-2">
+              <Input
+                placeholder="Search columns..."
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                className="h-8"
+              />
+            </div>
+            <DropdownMenuSeparator />
+            {filteredColumns.map((column) => {
+              return (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  className="capitalize"
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) =>
+                    column.toggleVisibility(!!value)
+                  }
+                >
+                  {getColumnDisplayName(column)}
+                </DropdownMenuCheckboxItem>
+              )
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       <div className="flex items-center pt-5 pb-4 overflow-x-auto scrollbar-hide">
         <Table className="border mx-auto">
           <TableHeader>

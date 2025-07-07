@@ -77,6 +77,8 @@ export const columns = [
         aria-label="Select row"
       />
     ),
+    enableSorting: false,
+    enableHiding: false,
   },
   {
     accessorKey: "avatar_url",
@@ -305,6 +307,7 @@ export const columns = [
   },
   {
     id: "actions",
+    enableHiding: false,
     cell: ({ row }) => {
       const contact = row.original
       return <ContactActionsDropdown contact={contact} />
