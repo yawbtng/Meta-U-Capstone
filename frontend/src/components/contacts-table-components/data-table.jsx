@@ -93,8 +93,8 @@ const table = useReactTable({
       <div className="flex items-center py-4 mr-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto h-8 flex">
-              <Settings2 className="h-4 w-4" />
+            <Button variant="outline" className="ml-auto h-12 text-xl flex">
+              <Settings2 className="h-10 w-10" />
               View
             </Button>
           </DropdownMenuTrigger>
