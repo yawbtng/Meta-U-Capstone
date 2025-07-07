@@ -16,10 +16,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+
 import { DataTablePagination } from "./data-table-pagination";
 
 export default function DataTable({ columns, data }) {
   const [sorting, setSorting] = useState([]);
+  const [rowSelection, setRowSelection] = useState({})
 
   const table = useReactTable({
     data,
@@ -28,8 +30,10 @@ export default function DataTable({ columns, data }) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
+      rowSelection,
     },
   });
 
