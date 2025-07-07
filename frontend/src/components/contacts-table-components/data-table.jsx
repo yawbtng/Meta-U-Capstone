@@ -59,21 +59,26 @@ export default function DataTable({ columns, data }) {
   const [columnVisibility, setColumnVisibility] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
 
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
-    onRowSelectionChange: setRowSelection,
-    onColumnVisibilityChange: setColumnVisibility,
-    state: {
-      sorting,
-      rowSelection,
-      columnVisibility,
+const table = useReactTable({
+  data,
+  columns,
+  getCoreRowModel: getCoreRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  onSortingChange: setSorting,
+  onRowSelectionChange: setRowSelection,
+  onColumnVisibilityChange: setColumnVisibility,
+  state: {
+    sorting,
+    rowSelection,
+    columnVisibility,
+  },
+  initialState: {
+    pagination: {
+      pageSize: 20,
     },
-  });
+  },
+});
 
   const filteredColumns = table
     .getAllColumns()
@@ -85,7 +90,7 @@ export default function DataTable({ columns, data }) {
   return (
     <div className="flex flex-col">
       {/* Column Visibility Controls */}
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 mr-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto h-8 flex">

@@ -5,11 +5,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
+import AvatarDemo from "../avatar-01"
+
 
 export const Contact = z.object({
   id: z.string().uuid(),
@@ -61,7 +61,7 @@ export const columns = [
   {
     id: "select",
     header: ({ table }) => (
-      <Checkbox className="border-black"
+      <Checkbox
         checked={
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
@@ -72,7 +72,8 @@ export const columns = [
     ),
     cell: ({ row }) => (
       <Checkbox
-        checked={row.getIsSelected()}
+        className="outline-2"
+        checked={Boolean(row.getIsSelected())}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
       />
@@ -83,6 +84,24 @@ export const columns = [
   {
     accessorKey: "avatar_url",
     header: "Photo",
+    cell: ({row}) => {
+      const name = row.getValue("name")
+
+    function getInitials(fullName) {
+      const words = fullName.split(' ');
+      const firstName = words[0];
+      const lastName = words[words.length - 1];
+      const firstInitial = firstName.charAt(0).toUpperCase();
+      const lastInitial = lastName.charAt(0).toUpperCase();
+      return `${firstInitial}${lastInitial}`;
+    }
+
+      const initials = getInitials(name);
+
+      return <div className="text-left font-medium">
+        <AvatarDemo initials={initials} />
+        </div>
+    }
   },
   {
     accessorKey: "name",
