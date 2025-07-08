@@ -260,3 +260,27 @@ export const columns =  (onDeleteContact) => [
     },
   }
 ]
+
+
+export const getColumnDisplayName = (column) => {
+  const displayNameMap = {
+    'select': 'Select',
+    'avatar_url': 'Photo', 
+    'name': 'Name',
+    'email': 'Email',
+    'phone_number': 'Phone #',
+    'socials_linkedin': 'LinkedIn',
+    'socials_twitter': 'Twitter', 
+    'socials_instagram': 'Instagram',
+    'relationship_type': 'Type',
+    'industry': 'Industry',
+    'company': 'Company',
+    'role': 'Role',
+    'last_contact_at': 'Last Contact',
+    'interactions_count': '# of Interactions',
+    'tags': 'Tags',
+    'actions': 'Actions'
+  };
+
+  return displayNameMap[column.id]
+};
