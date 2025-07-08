@@ -16,48 +16,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Settings2 } from "lucide-react";
 
 import { DataTablePagination } from "./data-table-pagination";
+import { DataTableFilter } from "./data-table-filter";
+import { HideColumns } from "./hide-columns";
 
-const getColumnDisplayName = (column) => {
-  const displayNameMap = {
-    'select': 'Select',
-    'avatar_url': 'Photo', 
-    'name': 'Name',
-    'email': 'Email',
-    'phone_number': 'Phone #',
-    'socials_linkedin': 'LinkedIn',
-    'socials_twitter': 'Twitter', 
-    'socials_instagram': 'Instagram',
-    'relationship_type': 'Type',
-    'industry': 'Industry',
-    'company': 'Company',
-    'role': 'Role',
-    'last_contact_at': 'Last Contact',
-    'interactions_count': '# of Interactions',
-    'tags': 'Tags',
-    'actions': 'Actions'
-  };
-
-  return displayNameMap[column.id]
-};
 
 export default function DataTable({ columns, data }) {
   const [sorting, setSorting] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState({});
-  const [searchTerm, setSearchTerm] = useState("");
 
 const table = useReactTable({
   data,
@@ -83,50 +51,15 @@ const table = useReactTable({
   }
 });
 
-  const filteredColumns = table
-    .getAllColumns()
-    .filter((column) => column.getCanHide())
-    .filter((column) =>
-      getColumnDisplayName(column).toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
   return (
     <div className="flex flex-col">
-      {/* Column Visibility Controls */}
-      <div className="flex items-center py-4 mr-1">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto h-12 text-xl flex">
-              <Settings2 className="h-10 w-10" />
-              View
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[200px]">
-            <div className="p-2">
-              <Input
-                placeholder="Search columns..."
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                className="h-8"
-              />
-            </div>
-            <DropdownMenuSeparator />
-            {filteredColumns.map((column) => {
-              return (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  className="capitalize"
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) =>
-                    column.toggleVisibility(!!value)
-                  }
-                >
-                  {getColumnDisplayName(column)}
-                </DropdownMenuCheckboxItem>
-              )
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {/* Column Filtering and Visibility Controls */}
+      <div className="flex items-center justify-between py-4 mr-1">
+        {/* Filter Component */}
+        <DataTableFilter table={table} />
+        
+        {/* View/Hide Columns Component */}
+        <HideColumns table={table} />
       </div>
 
       <div className="flex items-center pt-5 pb-4 overflow-x-auto scrollbar-hide">
