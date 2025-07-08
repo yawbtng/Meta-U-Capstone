@@ -6,7 +6,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
+import { AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog"
 
 export const RowActions = ({ contact, onDeleteContact }) => {
 
@@ -27,10 +28,18 @@ export const RowActions = ({ contact, onDeleteContact }) => {
             <Edit className="h-5 w-5" />
             Edit Contact
           </DropdownMenuItem>
-          <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 text-red-600 cursor-pointer" onClick={() => onDeleteContact(contact.id)}>
-            <Trash className="h-5 w-5 text-red-600 hover:text-red-600" />
-            Delete Contact
-          </DropdownMenuItem>
+          <DeleteConfirmationDialog
+            description={`This action cannot be undone. This will permanently delete the contact "${contact.name}" and remove their data from your contacts.`}
+            onConfirm={() => onDeleteContact(contact.id)}
+            confirmText="Delete Contact"
+          >
+            <AlertDialogTrigger asChild>
+              <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 text-red-600 cursor-pointer" onSelect={(e) => e.preventDefault()}>
+                <Trash className="h-5 w-5 text-red-600" />
+                Delete Contact
+              </DropdownMenuItem>
+            </AlertDialogTrigger>
+          </DeleteConfirmationDialog>
         </DropdownMenuContent>
       </DropdownMenu>
     )
