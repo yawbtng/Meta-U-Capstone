@@ -31,7 +31,7 @@ function ProfileHeader({ profile, onAvatarSelect, uploading }) {
   };
 
   return (
-    <Card className="scale-125 mt-20">
+    <Card className="scale-100 mt-20">
       <CardContent className="p-5">
         <div className="flex flex-col md:flex-row gap-6 md:items-center">
           {/* Avatar */}
@@ -66,7 +66,7 @@ function ProfileHeader({ profile, onAvatarSelect, uploading }) {
               <Mail className="h-4 w-4" />
               <span>{email}</span>
             </div>
-            {/* Example location – replace with real field if you add it */}
+            {/* Example location for now, will be replaced with real field if added */}
             <div className="flex items-center gap-2 text-muted-foreground">
               <MapPin className="h-4 w-4" />
               <span>San Francisco, CA</span>
@@ -81,7 +81,7 @@ function ProfileHeader({ profile, onAvatarSelect, uploading }) {
 // AccountSettings – editable form (name, email, bio, password)
 function AccountSettings({ form, onChange, onSubmit, loading }) {
   return (
-    <Card className="my-35 scale-125">
+    <Card className="my-35 scale-100">
       <CardHeader>
         <CardTitle className="text-2xl">Account Settings</CardTitle>
         <CardDescription>Update your account information.</CardDescription>
@@ -274,7 +274,7 @@ export default function UserProfile() {
       </section>
 
       <div className="flex justify-center">
-        <Button className="text-lg font-bold py-2 px-4 rounded"
+        <Button className="text-lg font-bold py-2 px-4 rounded scale-125"
         onClick={() => navigate("/home")}>Return to Dashboard</Button>
       </div>
     </div>

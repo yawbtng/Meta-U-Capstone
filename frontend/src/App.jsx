@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import SignUp from './components/auth-components/SignUp';
 import SignIn from './components/auth-components/SignIn';
@@ -36,7 +35,7 @@ function App() {
       <Toaster richColors position="bottom-center" />
 
       <header>
-    <h1 className="text-center text-xl ">Lynk!</h1>
+        <h1 className="text-center text-xl font-bold ">Lynk!</h1>
       </header>
 
       <main>
