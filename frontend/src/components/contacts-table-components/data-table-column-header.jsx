@@ -46,6 +46,10 @@ export function DataTableColumnHeader({
             <ArrowDown className="mr-2 h-4 w-4" />
             Desc
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => column.clearSorting()}>
+            <ChevronsUpDown className="mr-2 h-4 w-4" />
+            Clear Sort
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
             <EyeOff className="mr-2 h-4 w-4" />
