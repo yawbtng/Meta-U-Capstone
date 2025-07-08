@@ -9,7 +9,7 @@ export const AuthContextProvider = ({children}) => {
     const [profile, setProfile] = useState(null)
 
 
-    // sign in
+    
     const signInUser = async (email, password) => {
         try {
             const {data, error} = await supabase.auth.signInWithPassword({
@@ -28,7 +28,7 @@ export const AuthContextProvider = ({children}) => {
         }
     }
 
-    // sign up a new user
+    
     const signUpNewUser = async (email, password, name) => {
         try {
             const {data, error} = await supabase.auth.signUp({
@@ -55,7 +55,7 @@ export const AuthContextProvider = ({children}) => {
     }
 
 
-    // sign out a user
+    
     const signOut = () => {
         const {error} = supabase.auth.signOut();
         if (error) {
@@ -106,7 +106,7 @@ export const AuthContextProvider = ({children}) => {
 
         useEffect(() => {
             const refresh = async (session) => {
-                setSession(session)              // <- new JWT w/ fresh display_name
+                setSession(session)             
                 if (session) fetchProfile(session.user.id)
             }
 

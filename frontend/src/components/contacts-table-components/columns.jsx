@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { MoreHorizontal, Eye, Edit, Trash, ArrowUpDown } from "lucide-react"
+import { MoreHorizontal, Eye, Edit, Trash, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,8 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
 import AvatarDemo from "../avatar-01"
-import { supabase } from "../../providers/supabaseClient"
-import { toast } from "sonner";
+
 
 export const Contact = z.object({
   id: z.string().uuid(),
@@ -31,25 +30,7 @@ export const Contact = z.object({
   tags: z.array(z.string()).default([]),
 });
 
-const ContactActionsDropdown = ({ contact }) => {
-
-  const onDeleteClicked = (e) => {
-    e.preventDefault();
-    console.log(contact.id)
-
-    const deleteContact = async (id) => {
-      const {data, error} = await supabase.from("connections").delete().eq("id", id)
-
-      if (error) {
-        toast.error("There was an error deleting this contact")
-      } else {
-        toast.success("Contact successfully deleted ✅")
-      }
-    }
-    
-    deleteContact(contact.id)
-  }
-
+const ContactActionsDropdown = ({ contact, onDeleteContact }) => {
 
   return (
     <DropdownMenu>
@@ -68,7 +49,7 @@ const ContactActionsDropdown = ({ contact }) => {
           <Edit className="h-5 w-5" />
           Edit Contact
         </DropdownMenuItem>
-        <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 text-red-600 cursor-pointer" onClick={onDeleteClicked}>
+        <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 text-red-600 cursor-pointer" onClick={() => onDeleteContact(contact.id)}>
           <Trash className="h-5 w-5 text-red-600 hover:text-red-600" />
           Delete Contact
         </DropdownMenuItem>
@@ -77,7 +58,7 @@ const ContactActionsDropdown = ({ contact }) => {
   )
 }
 
-export const columns = [
+export const columns =  (onDeleteContact) => [
   {
     id: "select",
     header: ({ table }) => (
@@ -349,7 +330,7 @@ export const columns = [
     enableHiding: false,
     cell: ({ row }) => {
       const contact = row.original
-      return <ContactActionsDropdown contact={contact} />
+      return <ContactActionsDropdown contact={contact} onDeleteContact={onDeleteContact}/>
     },
   }
 ]

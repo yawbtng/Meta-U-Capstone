@@ -78,6 +78,9 @@ const table = useReactTable({
       pageSize: 20,
     },
   },
+  meta: {
+    
+  }
 });
 
   const filteredColumns = table
