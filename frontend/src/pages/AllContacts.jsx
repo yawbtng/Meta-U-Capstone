@@ -2,8 +2,6 @@ import {useEffect, useState} from 'react';
 import ContactsTable from '../components//contacts-table-components/contacts-table';
 
 const AllContacts = () => {
-    const [contacts, setContacts] = useState([])
-
     return(
         <>
 
