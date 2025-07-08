@@ -15,11 +15,11 @@ export function DataTableColumnHeader({
   className,
 }) {
   if (!column.getCanSort()) {
-    return <div className={cn(className)}>{title}</div>
+    return <div className={cn("text-center", className)}>{title}</div>
   }
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center justify-center gap-2", className)}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

@@ -1,9 +1,9 @@
 import { z } from "zod"
-import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import AvatarDemo from "../avatar-01"
 import { RowActions } from "./row-actions"
+import { DataTableColumnHeader } from "./data-table-column-header"
 
 
 export const Contact = z.object({
@@ -74,17 +74,9 @@ export const columns =  (onDeleteContact) => [
   },
   {
     accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Name" />
+    ),
     cell: ({row}) => {
       const name = row.getValue("name")
       return <div className="text-left font-medium text-xl">{name}</div>
@@ -92,17 +84,9 @@ export const columns =  (onDeleteContact) => [
   },
   {
     accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Email" />
+    ),
     cell: ({row}) => {
       const email = row.getValue("email")
       return <div className="text-left text-lg font-medium">{email}</div>
@@ -140,7 +124,9 @@ export const columns =  (onDeleteContact) => [
   },
   {
     accessorKey: "socials.twitter",
-    header: () => <div className="text-center">Twitter</div>,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Twitter" />
+    ),
     cell: ({row}) => {
       const twitter = row.getValue("socials_twitter")
       return (
@@ -155,7 +141,9 @@ export const columns =  (onDeleteContact) => [
   },
   {
     accessorKey: "socials.instagram",
-    header: () => <div className="text-center">Instagram</div>,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Instagram" />
+    ),
     cell: ({row}) => {
       const instagram = row.getValue("socials_instagram")
       return (
@@ -191,17 +179,9 @@ export const columns =  (onDeleteContact) => [
   },
   {
     accessorKey: "industry",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Industry
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Industry" />
+    ),
     cell: ({row}) => {
       const industry = row.getValue("industry")
       return <div className="text-left text-lg font-medium">{industry}</div>
@@ -209,17 +189,9 @@ export const columns =  (onDeleteContact) => [
   },
   {
     accessorKey: "company",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Company
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Company" />
+    ),
     cell: ({row}) => {
       const company = row.getValue("company")
       return <div className="text-left text-lg font-medium">{company}</div>
@@ -227,17 +199,9 @@ export const columns =  (onDeleteContact) => [
   },
   {
     accessorKey: "role",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Role
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Role" />
+    ),
     cell: ({row}) => {
       const role = row.getValue("role")
       return <div className="text-left text-lg font-medium">{role}</div>
@@ -245,17 +209,9 @@ export const columns =  (onDeleteContact) => [
   },
   {
     accessorKey: "last_contact_at",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Last Contact
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Last Contact" />
+    ),
     cell: ({row}) => {
       const lastContact = row.getValue("last_contact_at")
       if (!lastContact) return <div className="text-center text-lg font-medium">-</div>
@@ -273,7 +229,9 @@ export const columns =  (onDeleteContact) => [
   },
   {
     accessorKey: "interactions_count",
-    header: () => <div className="text-center"># of Interactions</div>,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="# of Interactions" />
+    ),
     cell: ({row}) => {
       const amount = parseInt(row.getValue("interactions_count"))
       return <div className="text-center font-medium text-xl">{amount}</div>
