@@ -24,8 +24,8 @@ export function HideColumns({ table }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-12 text-xl flex">
-          <Settings2 className="h-10 w-10" />
+        <Button variant="outline" className="h-14 text-2xl flex px-6">
+          <Settings2 className="h-8 w-8 mr-2" />
           View
         </Button>
       </DropdownMenuTrigger>

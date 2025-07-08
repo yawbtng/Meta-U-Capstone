@@ -16,8 +16,8 @@ export function DataTableFilter({ table }) {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-12 text-xl">
-          <Filter className="h-5 w-5 mr-2" />
+      <Button variant="outline" className="h-14 text-2xl px-6">
+        <Filter className="h-6 w-6 mr-3" />
           Filter
         </Button>
       </DropdownMenuTrigger>

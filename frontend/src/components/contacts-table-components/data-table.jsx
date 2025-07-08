@@ -16,7 +16,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Button } from "@/components/ui/button";
 
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableFilter } from "./data-table-filter";
