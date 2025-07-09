@@ -1,9 +1,9 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export default function AvatarDemo({url, initials}) {
+export default function AvatarDemo({url, initials, className}) {
   return (
-    <Avatar>
+    <Avatar className={className}>
       <AvatarImage src={url} alt="profile picture" />
       <AvatarFallback>{initials}</AvatarFallback>
     </Avatar>
