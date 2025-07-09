@@ -39,6 +39,16 @@ export function HideColumns({ table }) {
           />
         </div>
         <DropdownMenuSeparator />
+
+        <DropdownMenuCheckboxItem
+          checked={filteredColumns.every(filteredColumn => filteredColumn.getIsVisible() === true)}
+          onCheckedChange={table.getToggleAllColumnsVisibilityHandler()}
+          disabled={filteredColumns.every(filteredColumn => filteredColumn.getIsVisible() === true)}
+        >
+          All
+        </DropdownMenuCheckboxItem>
+        
+        <DropdownMenuSeparator />
         {filteredColumns.map((column) => {
           return (
             <DropdownMenuCheckboxItem
