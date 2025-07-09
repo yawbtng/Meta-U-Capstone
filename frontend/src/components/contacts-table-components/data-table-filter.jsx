@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,15 +26,22 @@ const filterConditions = [
   { value: "is_not_empty", label: "is not empty" },
 ];
 
-export function DataTableFilter({ table }) {
+export function DataTableFilter({ table, onFiltersChange }) {
   const [filters, setFilters] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [searchFields, setSearchFields] = useState("");
 
+  useEffect(() => {
+    if (onFiltersChange) {
+        onFiltersChange(filters);
+    }
+  }, [filters, onFiltersChange]);
+
+
   const filterableColumns = table
     .getAllColumns()
     .filter((column) => column.getCanFilter && column.getCanFilter())
-    .filter((column) => column.id !== 'select' && column.id !== 'actions');
+    .filter((column) => column.id !== 'select' && column.id !== 'actions' && column.id !== 'avatar_url');
 
   const filteredColumns = filterableColumns.filter((column) =>
     getColumnDisplayName(column).toLowerCase().includes(searchFields.toLowerCase())
