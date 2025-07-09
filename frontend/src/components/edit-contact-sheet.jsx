@@ -35,7 +35,7 @@ export function EditContact({children}) {
   return (
     <Sheet>
         {children}
-      <SheetContent>
+      <SheetContent className="min-w-[600px] sm:min-w-[700px] overflow-y-scroll" size="xl">
         <SheetHeader>
           <SheetTitle>Edit Contact</SheetTitle>
           <SheetDescription>
@@ -45,15 +45,6 @@ export function EditContact({children}) {
 
         <AvatarDemo initials="YB" />
 
-        <div className="grid flex-1 auto-rows-min gap-6 px-4">
-          <div className="grid gap-3">
-            <Label htmlFor="sheet-demo-name">Name</Label>
-            <Input id="sheet-demo-name" defaultValue="Yaw Boateng" />
-          </div>
-          <div className="grid gap-3">
-            <Label htmlFor="sheet-demo-username">Username</Label>
-            <Input id="sheet-demo-username" defaultValue="@yawbtng_" />
-          </div>
 
           <div>
         
@@ -79,7 +70,6 @@ export function EditContact({children}) {
             </SectionBreakdown>
           </div>
 
-        </div>
         <SheetFooter>
           <Button type="submit">Save changes</Button>
           <SheetClose asChild>
