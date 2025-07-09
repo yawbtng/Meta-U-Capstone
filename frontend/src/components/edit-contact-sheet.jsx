@@ -78,7 +78,6 @@ export function EditContact({children, contactData}) {
 
 
         <div>
-        
             <SectionBreakdown title="Basic Information">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
@@ -115,17 +114,135 @@ export function EditContact({children, contactData}) {
             </SectionBreakdown>
 
             <SectionBreakdown title="Background & Context">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <Label htmlFor="school">School/University</Label>
+                        <Input
+                            id="school"
+                            value={formData.school}
+                            onChange={(e) => handleInputChange('school', e.target.value)}
+                            placeholder="Educational institution"
+                        />
+                    </div>
 
+                    <div>
+                        <Label htmlFor="last_contact">Last Contact Date</Label>
+                        <Calendar22
+                            selectedDate={formData.last_contact_at ? new Date(formData.last_contact_at) : undefined}
+                            onDateChange={(date) =>
+                            handleInputChange(
+                                'last_contact_at',
+                                date ? date.toISOString().split('T')[0] : ''
+                            )
+                            }
+                        />
+                    </div>
+
+                    <div className="md:col-span-2">
+                        <Label htmlFor="where_met">Where We Met</Label>
+                        <Input
+                            id="where_met"
+                            value={formData.where_met}
+                            onChange={(e) => handleInputChange('where_met', e.target.value)}
+                            placeholder="e.g., Conference, LinkedIn, Mutual friend"
+                        />
+                    </div>
+                </div>
             </SectionBreakdown>
+
 
             <SectionBreakdown title="Relationship & Categories">
+                <div className="space-y-4">
+                    <div>
+                    <Label className="text-base font-medium">Relationship Type</Label>
+                    <div className="flex flex-wrap gap-10 mt-3">
+                        {['professional', 'personal', 'social'].map((type) => (
+                        <div key={type} className="flex items-center space-x-2">
+                            <Checkbox
+                            id={`relationship-${type}`}
+                            checked={formData.relationship_type.includes(type)}
+                            onCheckedChange={(checked) => {
+                                if (checked) {
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    relationship_type: [...prev.relationship_type, type],
+                                }));
+                                } else {
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    relationship_type: prev.relationship_type.filter((t) => t !== type),
+                                }));
+                                }
+                            }}
+                            />
+                            <Label htmlFor={`relationship-${type}`} className="capitalize cursor-pointer">
+                            {type}
+                            </Label>
+                        </div>
+                        ))}
+                    </div>
+                    </div>
 
+                    <div>
+                    <Label htmlFor="tags">Tags</Label>
+                    <Input
+                        id="tags"
+                        value={formData.tags.join(', ')}
+                        onChange={(e) => handleInputChange('tags', e.target.value)}
+                        placeholder="e.g., mentor, client, friend (comma-separated)"
+                    />
+                    </div>
+                </div>
             </SectionBreakdown>
+
 
             <SectionBreakdown title="Social Media & Additional Notes">
+                <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <Label htmlFor="linkedin">LinkedIn</Label>
+                            <Input
+                            id="linkedin"
+                            value={formData.linkedin}
+                            onChange={(e) => handleInputChange('linkedin', e.target.value)}
+                            placeholder="LinkedIn profile URL"
+                            />
+                        </div>
 
+                        <div>
+                            <Label htmlFor="twitter">Twitter</Label>
+                            <Input
+                            id="twitter"
+                            value={formData.twitter}
+                            onChange={(e) => handleInputChange('twitter', e.target.value)}
+                            placeholder="@username"
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="instagram">Instagram</Label>
+                            <Input
+                            id="instagram"
+                            value={formData.instagram}
+                            onChange={(e) => handleInputChange('instagram', e.target.value)}
+                            placeholder="@username"
+                            />
+                        </div>
+
+                    </div>
+
+                    <div>
+                        <Label htmlFor="notes">Notes</Label>
+                        <Textarea
+                            id="notes"
+                            value={formData.notes}
+                            onChange={(e) => handleInputChange('notes', e.target.value)}
+                            placeholder="Any additional notes about this contact..."
+                            rows={4}
+                        />
+                    </div>
+                </div>
             </SectionBreakdown>
-
         </div>
 
         <SheetFooter>
