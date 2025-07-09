@@ -25,7 +25,13 @@ import { HideColumns } from "./hide-columns";
 export default function DataTable({ columns, data, onFiltersChange }) {
   const [sorting, setSorting] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
-  const [columnVisibility, setColumnVisibility] = useState({});
+  const [columnVisibility, setColumnVisibility] = useState({
+      "phone_number": false,
+      "socials_twitter": false,
+      "industry": false,
+      "interactions_count": false,
+      "tags": false
+  });
 
 const table = useReactTable({
   data,
@@ -46,9 +52,6 @@ const table = useReactTable({
       pageSize: 20,
     },
   },
-  meta: {
-    
-  }
 });
 
   return (

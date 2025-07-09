@@ -80,7 +80,8 @@ export const columns =  (onDeleteContact) => [
     cell: ({row}) => {
       const name = row.getValue("name")
       return <div className="text-left font-medium text-xl">{name}</div>
-    }
+    },
+    id: "name"
   },
   {
     accessorKey: "email",
@@ -90,7 +91,8 @@ export const columns =  (onDeleteContact) => [
     cell: ({row}) => {
       const email = row.getValue("email")
       return <div className="text-left text-lg font-medium">{email}</div>
-    }
+    },
+    id: "email"
   },
   {
     accessorKey: "phone_number",
@@ -104,8 +106,8 @@ export const columns =  (onDeleteContact) => [
         parsed = phone;
       }
       return <div className="text-center text-lg font-medium">{parsed}</div>
-    }
-
+    },
+    id: "phone_number"
   },
   {
     accessorKey: "socials.linkedin",
@@ -120,7 +122,8 @@ export const columns =  (onDeleteContact) => [
         </div>
         
       )
-    }
+    },
+    id: "socials_linkedin"
   },
   {
     accessorKey: "socials.twitter",
@@ -135,9 +138,9 @@ export const columns =  (onDeleteContact) => [
             {twitter}
           </a>
         </div>
-        
       )
-    }
+    },
+    id: "socials_twitter"
   },
   {
     accessorKey: "socials.instagram",
@@ -152,9 +155,9 @@ export const columns =  (onDeleteContact) => [
             {instagram}
           </a>
         </div>
-        
       )
-    }
+    },
+    id: "socials_instagram"
   },
   {
     accessorKey: "relationship_type",
@@ -177,7 +180,8 @@ export const columns =  (onDeleteContact) => [
           ))}
         </div>
       )
-    }
+    },
+    id: "relationship_type"
   },
   {
     accessorKey: "industry",
@@ -187,7 +191,8 @@ export const columns =  (onDeleteContact) => [
     cell: ({row}) => {
       const industry = row.getValue("industry")
       return <div className="text-left text-lg font-medium">{industry}</div>
-    }
+    },
+    id: "industry"
   },
   {
     accessorKey: "company",
@@ -197,7 +202,8 @@ export const columns =  (onDeleteContact) => [
     cell: ({row}) => {
       const company = row.getValue("company")
       return <div className="text-left text-lg font-medium">{company}</div>
-    }
+    },
+    id: "company"
   },
   {
     accessorKey: "role",
@@ -207,7 +213,8 @@ export const columns =  (onDeleteContact) => [
     cell: ({row}) => {
       const role = row.getValue("role")
       return <div className="text-left text-lg font-medium">{role}</div>
-    }
+    },
+    id: "role"
   },
   {
     accessorKey: "last_contact_at",
@@ -227,7 +234,8 @@ export const columns =  (onDeleteContact) => [
       })
       
       return <div className="text-center text-lg font-medium">{formatted}</div>
-    }
+    },
+    id: "last_contact_at"
   },
   {
     accessorKey: "interactions_count",
@@ -237,7 +245,7 @@ export const columns =  (onDeleteContact) => [
     cell: ({row}) => {
       const amount = parseInt(row.getValue("interactions_count"))
       return <div className="text-center font-medium text-xl">{amount}</div>
-    }
+  }
   },
   {
     accessorKey: "tags",
@@ -253,14 +261,15 @@ export const columns =  (onDeleteContact) => [
           ))}
         </div>
       )
-    }
+    },
+    id: "tags"
   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
       const contact = row.original
-      return <RowActions contact={contact} onDeleteContact={onDeleteContact}/>
+      return <RowActions contact={contact} onDeleteContact={onDeleteContact} />
     },
   }
 ]
