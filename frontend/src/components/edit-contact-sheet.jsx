@@ -31,7 +31,33 @@ const SectionBreakdown = ({children, title}) => {
     )
 }
 
-export function EditContact({children}) {
+export function EditContact({children, con}) {
+    const [formData, setFormData] = useState({
+        name: contactData.name || "",
+        email: contactData.email || "",
+        phone_number: contactData.phone_number || "",
+        company: contactData.company || "",
+        role: contactData.role || "",
+        industry: contactData.industry || "",
+        school: contactData.school || "",
+        where_met: contactData.where_met || "",
+        last_contact_at: contactData.last_contact_at || "",
+        relationship_type: contactData.relationship_type || [],
+        tags: contactData.tags || [],
+        linkedin: contactData.socials?.linkedin || "",
+        twitter: contactData.socials?.twitter || "",
+        instagram: contactData.socials?.instagram || "",
+        notes: contactData.notes || ""
+  });
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: field === 'tags'
+        ? value.split(',').map(tag => tag.trim()).filter(Boolean)
+        : value
+    }));
+  };
   return (
     <Sheet>
         {children}
