@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,15 +28,19 @@ const filterConditions = [
 
 export function DataTableFilter({ table, onFiltersChange }) {
   const [filters, setFilters] = useState([]);
+  const [appliedFilters, setAppliedFilters] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [searchFields, setSearchFields] = useState("");
 
-  useEffect(() => {
+  const applyFilters = () => {
+    setAppliedFilters(filters);
     if (onFiltersChange) {
-        onFiltersChange(filters);
+      onFiltersChange(filters);
     }
-  }, [filters, onFiltersChange]);
+    setIsOpen(false);
+  };
 
+  const hasUnappliedChanges = JSON.stringify(filters) !== JSON.stringify(appliedFilters);
 
   const filterableColumns = table
     .getAllColumns()
@@ -69,6 +73,10 @@ export function DataTableFilter({ table, onFiltersChange }) {
 
   const resetFilters = () => {
     setFilters([]);
+    setAppliedFilters([]);
+    if (onFiltersChange) {
+      onFiltersChange([]);
+    }
   };
 
   return (
@@ -77,10 +85,13 @@ export function DataTableFilter({ table, onFiltersChange }) {
               <Button variant="outline" className="h-14 text-2xl px-6">
           <Filter className="h-6 w-6 mr-3" />
           Filter
-          {filters.length > 0 && (
+          {appliedFilters.length > 0 && (
             <span className="ml-2 bg-primary text-primary-foreground rounded-full px-2 py-1 text-sm">
-              {filters.length}
+              {appliedFilters.length}
             </span>
+          )}
+          {hasUnappliedChanges && (
+            <span className="ml-1 w-2 h-2 bg-orange-500 rounded-full" title="Unapplied changes"></span>
           )}
         </Button>
       </DropdownMenuTrigger>
@@ -173,6 +184,16 @@ export function DataTableFilter({ table, onFiltersChange }) {
             >
               Add filter
             </Button>
+            
+            <Button 
+              variant="default" 
+              onClick={applyFilters}
+              className="bg-blue-600 text-white hover:bg-blue-700"
+              disabled={filters.length === 0}
+            >
+              Apply filters
+            </Button>
+            
             {filters.length > 0 && (
               <Button variant="ghost" onClick={resetFilters}>
                 Reset filters
