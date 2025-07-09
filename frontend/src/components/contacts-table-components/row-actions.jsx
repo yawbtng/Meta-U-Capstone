@@ -10,8 +10,10 @@ import { AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog"
 import { SheetTrigger } from "@/components/ui/sheet"
 import { EditContact } from "../edit-contact-sheet"
+import { useState } from "react"
 
 export const RowActions = ({ contact, onDeleteContact }) => {
+  const [openEditSheet, setOpenEditSheet] = useState(false)
 
     return (
       
@@ -31,7 +33,8 @@ export const RowActions = ({ contact, onDeleteContact }) => {
           </DropdownMenuItem>
 
           {/* Editing a Contact */}
-          <EditContact>
+          <EditContact onClick={() => setOpenEditSheet(true)}
+            open={openEditSheet} onOpenChange={setOpenEditSheet} contactData={contact}>
             <SheetTrigger asChild>
               <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 cursor-pointer" onSelect={(e) => e.preventDefault()}>
                 <Edit className="h-5 w-5" />

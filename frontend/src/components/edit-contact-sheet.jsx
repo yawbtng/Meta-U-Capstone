@@ -33,25 +33,35 @@ const SectionBreakdown = ({children, title, value}) => {
     )
 }
 
-export function EditContact({children, contactData={}}) {
+function initializeForm(c = {}) {
+  return {
+    name: c.name || "",
+    email: c.email || "",
+    phone_number: c.phone_number || "",
+    company: c.company || "",
+    role: c.role || "",
+    industry: c.industry || "",
+    school: c.school || "",
+    where_met: c.where_met || "",
+    last_contact_at: c.last_contact_at || "",
+    relationship_type: c.relationship_type || [],
+    tags: c.tags || [],
+    linkedin: c.socials?.linkedin || "",
+    twitter: c.socials?.twitter || "",
+    instagram: c.socials?.instagram || "",
+    notes: c.notes || "",
+  }
+}
+
+export function EditContact({children,  contactData={}, open, onOpenChange}) {
+    const [formData, setFormData] = useState(initializeForm(contactData))
+
+
+    useEffect(() => {
+        setFormData(initForm(contactData))
+    }, [contactData])
+
     
-    const [formData, setFormData] = useState({
-        name: contactData.name || "",
-        email: contactData.email || "",
-        phone_number: contactData.phone_number || "",
-        company: contactData.company || "",
-        role: contactData.role || "",
-        industry: contactData.industry || "",
-        school: contactData.school || "",
-        where_met: contactData.where_met || "",
-        last_contact_at: contactData.last_contact_at || "",
-        relationship_type: contactData.relationship_type || [],
-        tags: contactData.tags || [],
-        linkedin: contactData.socials?.linkedin || "",
-        twitter: contactData.socials?.twitter || "",
-        instagram: contactData.socials?.instagram || "",
-        notes: contactData.notes || ""
-  });
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -63,7 +73,7 @@ export function EditContact({children, contactData={}}) {
   };
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={onOpenChange}>
         {children}
       <SheetContent className="min-w-1/2 max-w-[1200px] px-12 py-8 overflow-y-scroll">
         <SheetHeader className="text-center mb-6">
