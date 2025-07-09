@@ -22,7 +22,7 @@ import { DataTableFilter } from "./data-table-filter";
 import { HideColumns } from "./hide-columns";
 
 
-export default function DataTable({ columns, data }) {
+export default function DataTable({ columns, data, onFiltersChange }) {
   const [sorting, setSorting] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState({});
@@ -56,7 +56,7 @@ const table = useReactTable({
       {/* Column Filtering and Visibility Controls */}
       <div className="flex items-center justify-between py-4 mr-1">
         {/* Filter Component */}
-        <DataTableFilter table={table} />
+        <DataTableFilter table={table} onFiltersChange={onFiltersChange} />
         
         {/* View/Hide Columns Component */}
         <HideColumns table={table} />

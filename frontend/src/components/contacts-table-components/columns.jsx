@@ -158,7 +158,9 @@ export const columns =  (onDeleteContact) => [
   },
   {
     accessorKey: "relationship_type",
-    header: () => <div className="text-center">Type</div>,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Type" />
+    ),
     cell: ({row}) => {
       const types = row.getValue("relationship_type")
       const colorMap = {
@@ -239,7 +241,9 @@ export const columns =  (onDeleteContact) => [
   },
   {
     accessorKey: "tags",
-    header: () => <div className="text-center">Tags</div>,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tags" />
+    ),
     cell: ({row}) => {
       const tags = row.getValue("tags")
       return (
@@ -283,4 +287,25 @@ export const getColumnDisplayName = (column) => {
   };
 
   return displayNameMap[column.id]
+};
+
+
+export const getDbColumnName = (columnId) => {
+  const dbColumnMap = {
+    'name': 'name',
+    'email': 'email',
+    'phone_number': 'phone_number',
+    'socials_linkedin': 'socials->>linkedin',
+    'socials_twitter': 'socials->>twitter',
+    'socials_instagram': 'socials->>instagram',
+    'relationship_type': 'relationship_type',
+    'industry': 'industry',
+    'company': 'company',
+    'role': 'role',
+    'last_contact_at': 'last_contact_at',
+    'interactions_count': 'interactions_count',
+    'tags': 'tags'
+  };
+
+  return dbColumnMap[columnId] || columnId;
 };
