@@ -2,6 +2,7 @@ class TrieNode {
     constructor () {
         this.children = {}
         this.isEndOfWord = false
+        this.contactData = []
     }
 }
 
@@ -10,60 +11,48 @@ class Trie {
         this.root = new TrieNode()
     }
 
-    insert(word) {
+    insert(contact) {
         let node = this.root;
-        for (let i = 0; i < word.length; i++) {
-            let char = word[i]
+        const name = contact.name.toLowerCase();
+        for (let char of name) {
             if (!node.children[char]) {
                 node.children[char] = new TrieNode();
             }
             node = node.children[char]
         }
         node.isEndOfWord = true
+        node.contactData.push(contact)
     }
 
-    search(word) {
+    searchPrefix(prefix) {
         let node = this.root;
+        const normalizedPrefix = prefix.toLowerCase();
 
-        for (let i = 0; i < word.length; i++) {
-            let char = word[i]
-
+        for (let char of normalizedPrefix) {
             if (!node.children[char]) {
-                return false;
+                return null
             }
             node = node.children[char]
         }
         return node.isEndOfWord
     }
 
-    searchPrefix(prefix) {
-        let node = this.root;
-        for (let i = 0; i < prefix.length; i++) {
-            let char = prefix[i]
-            if (!node.children[char]) {
-                return false;
-            }
-            node = node.children[char]
-        }
-        return true
-    }
-
-    findWordsWithPrefix(prefix) {
+    findContactsWithPrefix(prefix) {
         const results = []
         const node = this.searchPrefix(prefix)
 
         if (node) {
-            this._findAllWords(node, prefix, results);
+            this._findAllContacts(node, prefix, results);
         }
         return results
     }
 
-    _findAllWords(node, prefix, results) {
+    _findAllContacts(node, prefix, results) {
         if (node.isEndOfWord) {
             results.push(prefix)
         }
         for (let char in node.children) {
-            this._findAllWords(node.children[char], prefix + char, results)
+            this._findAllContacts(node.children[char], prefix + char, results)
         }
     }
 }
