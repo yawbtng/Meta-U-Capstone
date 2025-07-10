@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/accordion"
 import AvatarDemo from "./avatar-01"
 import { getInitials } from "./contacts-table-components/columns"
+import { supabase } from "../providers/supabaseClient"
+import { toast } from "sonner"
 
 const SectionBreakdown = ({children, title, value}) => {
     return (
@@ -56,6 +58,58 @@ function initializeForm(c = {}) {
 
 export function EditContact({children,  contactData, open, onOpenChange}) {
     const [formData, setFormData] = useState(initializeForm(contactData))
+    const [saving, setSaving]   = useState(false)
+    const [errors, setErrors]   = useState({})
+
+
+    // Validate form
+    const validateForm = () => {
+        const newErrors = {};
+
+        // Required field validation
+        if (!formData.name.trim()) {
+            newErrors.name = 'Name is required';
+        }
+
+        // Email validation (if provided)
+        if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = 'Please enter a valid email address';
+        }
+
+        // Phone validation (if provided) - matches the database constraint
+        if (formData.phone_number && !/^\+?[1-9]\d{1,14}$/.test(formData.phone_number)) {
+            newErrors.phone_number = 'Please enter a valid phone number (e.g., 1234567890)';
+        }
+
+        // Last contact date validation
+        if (formData.last_contact_at) {
+            const lastContactDate = new Date(formData.last_contact_at);
+            const currentDate = new Date();
+            if (lastContactDate > currentDate) {
+                newErrors.last_contact_at = 'Last contact date cannot be in the future';
+            }
+        }
+
+        // linkedIn URL validation
+        if (formData.linkedin) {
+            const linkedInPattern = /^https?:\/\/(www\.)?linkedin\.com\/.*$/i;
+            if (!linkedInPattern.test(formData.linkedin)) {
+                newErrors.linkedin = "Not a valid LinkedIn URL";
+            }
+        }
+
+        // Tags validation
+        if (formData.tags.length > 0) {
+            const invalidTags = formData.tags.filter(tag => tag.includes(' '));
+            if (invalidTags.length > 0) {
+                newErrors.tags = 'Tags must be comma-separated without spaces';
+            }
+        }
+
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
 
     useEffect(() => {
@@ -295,10 +349,13 @@ export function EditContact({children,  contactData, open, onOpenChange}) {
         </Accordion>
 
         <SheetFooter>
-          <Button type="submit">Save changes</Button>
-          <SheetClose asChild>
-            <Button variant="outline">Close</Button>
-          </SheetClose>
+            <Button type="button" onClick={handleSave} disabled={saving}>
+                {saving ? "Saving…" : "Save changes"}
+            </Button>
+            <SheetClose asChild>
+                <Button variant="outline">Close</Button>
+            </SheetClose>
+
         </SheetFooter>
       </SheetContent>
     </Sheet>
