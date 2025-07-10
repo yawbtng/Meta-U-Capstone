@@ -26,6 +26,15 @@ export const Contact = z.object({
 });
 
 
+export function getInitials(fullName) {
+    const words = fullName.split(' ');
+    const firstName = words[0];
+    const lastName = words[words.length - 1];
+    const firstInitial = firstName.charAt(0).toUpperCase();
+    const lastInitial = lastName.charAt(0).toUpperCase();
+    return `${firstInitial}${lastInitial}`;
+  }
+
 export const columns =  (onDeleteContact) => [
   {
     id: "select",
@@ -55,16 +64,6 @@ export const columns =  (onDeleteContact) => [
     header: "Photo",
     cell: ({row}) => {
       const name = row.getValue("name")
-
-    function getInitials(fullName) {
-      const words = fullName.split(' ');
-      const firstName = words[0];
-      const lastName = words[words.length - 1];
-      const firstInitial = firstName.charAt(0).toUpperCase();
-      const lastInitial = lastName.charAt(0).toUpperCase();
-      return `${firstInitial}${lastInitial}`;
-    }
-
       const initials = getInitials(name);
 
       return <div className="text-left font-medium">
