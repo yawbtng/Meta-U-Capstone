@@ -1,5 +1,4 @@
 import { z } from "zod"
-import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import AvatarDemo from "../avatar-01"
 import { RowActions } from "./row-actions"
@@ -26,7 +25,16 @@ export const Contact = z.object({
 });
 
 
-export const columns =  (onDeleteContact) => [
+export function getInitials(fullName) {
+    const words = fullName.split(' ');
+    const firstName = words[0];
+    const lastName = words[words.length - 1];
+    const firstInitial = firstName.charAt(0).toUpperCase();
+    const lastInitial = lastName.charAt(0).toUpperCase();
+    return `${firstInitial}${lastInitial}`;
+  }
+
+export const columns =  (onDeleteContact, onUpdateContact) => [
   {
     id: "select",
     header: ({ table }) => (
@@ -55,16 +63,6 @@ export const columns =  (onDeleteContact) => [
     header: "Photo",
     cell: ({row}) => {
       const name = row.getValue("name")
-
-    function getInitials(fullName) {
-      const words = fullName.split(' ');
-      const firstName = words[0];
-      const lastName = words[words.length - 1];
-      const firstInitial = firstName.charAt(0).toUpperCase();
-      const lastInitial = lastName.charAt(0).toUpperCase();
-      return `${firstInitial}${lastInitial}`;
-    }
-
       const initials = getInitials(name);
 
       return <div className="text-left font-medium">
@@ -269,7 +267,7 @@ export const columns =  (onDeleteContact) => [
     enableHiding: false,
     cell: ({ row }) => {
       const contact = row.original
-      return <RowActions contact={contact} onDeleteContact={onDeleteContact} />
+      return <RowActions contact={contact} onDeleteContact={onDeleteContact}  onUpdateContact={onUpdateContact}/>
     },
   }
 ]
