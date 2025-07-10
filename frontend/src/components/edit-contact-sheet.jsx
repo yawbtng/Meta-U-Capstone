@@ -77,7 +77,7 @@ export function EditContact({children,  contactData, open, onOpenChange, onConta
   };
 
       // Validate form
-    const validateForm = () => {
+    const validate = () => {
         const newErrors = {};
 
         // Required field validation
