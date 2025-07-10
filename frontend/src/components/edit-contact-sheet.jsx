@@ -56,13 +56,27 @@ function initializeForm(c = {}) {
   }
 }
 
-export function EditContact({children,  contactData, open, onOpenChange}) {
+export function EditContact({children,  contactData, open, onOpenChange, onContactUpdated}) {
     const [formData, setFormData] = useState(initializeForm(contactData))
     const [saving, setSaving]   = useState(false)
     const [errors, setErrors]   = useState({})
 
+    useEffect(() => {
+        setFormData(initializeForm(contactData))
+    }, [contactData])
 
-    // Validate form
+    
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: field === 'tags'
+        ? value.split(',').map(tag => tag.trim()).filter(Boolean)
+        : value
+    }));
+  };
+
+      // Validate form
     const validateForm = () => {
         const newErrors = {};
 
@@ -71,12 +85,12 @@ export function EditContact({children,  contactData, open, onOpenChange}) {
             newErrors.name = 'Name is required';
         }
 
-        // Email validation (if provided)
+        // Email validation
         if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = 'Please enter a valid email address';
         }
 
-        // Phone validation (if provided) - matches the database constraint
+        // Phone validation
         if (formData.phone_number && !/^\+?[1-9]\d{1,14}$/.test(formData.phone_number)) {
             newErrors.phone_number = 'Please enter a valid phone number (e.g., 1234567890)';
         }
@@ -111,21 +125,53 @@ export function EditContact({children,  contactData, open, onOpenChange}) {
         return Object.keys(newErrors).length === 0;
     };
 
+    const handleSave = async () => {
+        const v = validate(formData)
+        setErrors(v)
+        if (Object.keys(v).length > 0) return
 
-    useEffect(() => {
-        setFormData(initializeForm(contactData))
-    }, [contactData])
+        setSaving(true)
+        try {
+            const payload = {
+                name: formData.name,
+                email: formData.email,
+                phone_number: formData.phone_number,
+                company: formData.company,
+                role: formData.role,
+                industry: formData.industry,
+                school: formData.school,
+                where_met: formData.where_met,
+                last_contact_at: formData.last_contact_at,
+                relationship_type: formData.relationship_type,
+                tags: formData.tags,
+                socials: {
+                    linkedin: formData.linkedin || null,
+                    twitter : formData.twitter  || null,
+                    instagram: formData.instagram || null,
+                },
+                notes: formData.notes,
+                updated_at: new Date().toISOString(),
+            }
 
-    
+            
+            const { data, error } = await supabase
+            .from("connections")
+            .update(payload)
+            .eq("id", contactData.id)
+            .select().single()               
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: field === 'tags'
-        ? value.split(',').map(tag => tag.trim()).filter(Boolean)
-        : value
-    }));
-  };
+            if (error) throw error
+
+            onContactUpdated?.(data); 
+            toast.success("Contact updated ✅")
+            onOpenChange(false)       
+        } catch (err) {
+            console.error(err)
+            toast.error("Failed to update contact")
+        } finally {
+            setSaving(false)
+        }
+    }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

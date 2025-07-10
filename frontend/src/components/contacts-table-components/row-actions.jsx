@@ -12,7 +12,7 @@ import { SheetTrigger } from "@/components/ui/sheet"
 import { EditContact } from "../edit-contact-sheet"
 import { useState } from "react"
 
-export const RowActions = ({ contact, onDeleteContact }) => {
+export const RowActions = ({ contact, onDeleteContact, onUpdateContact }) => {
   const [openEditSheet, setOpenEditSheet] = useState(false)
 
     return (
@@ -34,7 +34,8 @@ export const RowActions = ({ contact, onDeleteContact }) => {
 
           {/* Editing a Contact */}
           <EditContact onClick={() => setOpenEditSheet(true)}
-            open={openEditSheet} onOpenChange={setOpenEditSheet} contactData={contact}>
+            open={openEditSheet} onOpenChange={setOpenEditSheet} contactData={contact}
+            onContactUpdated={onUpdateContact}>
             <SheetTrigger asChild>
               <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 cursor-pointer" onSelect={(e) => e.preventDefault()}>
                 <Edit className="h-5 w-5" />

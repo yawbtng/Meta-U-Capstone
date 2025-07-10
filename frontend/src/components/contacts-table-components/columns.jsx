@@ -34,7 +34,7 @@ export function getInitials(fullName) {
     return `${firstInitial}${lastInitial}`;
   }
 
-export const columns =  (onDeleteContact) => [
+export const columns =  (onDeleteContact, onUpdateContact) => [
   {
     id: "select",
     header: ({ table }) => (
@@ -267,7 +267,7 @@ export const columns =  (onDeleteContact) => [
     enableHiding: false,
     cell: ({ row }) => {
       const contact = row.original
-      return <RowActions contact={contact} onDeleteContact={onDeleteContact} />
+      return <RowActions contact={contact} onDeleteContact={onDeleteContact}  onUpdateContact={onUpdateContact}/>
     },
   }
 ]

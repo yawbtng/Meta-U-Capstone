@@ -11,6 +11,12 @@ const ContactsTable = () => {
   const [data, setData] = useState([]);
   const [filters, setFilters] = useState([]);
 
+  const handleContactUpdated = (updated) => {
+  setData((prev) =>
+    prev.map((c) => (c.id === updated.id ? updated : c))
+  )
+}
+
   const handleFiltersChange = useCallback((newFilters) => {
     console.log("Filters changed:", newFilters);
     setFilters(newFilters);
@@ -130,7 +136,7 @@ const ContactsTable = () => {
 
   return (
       <div className="mx-auto my-10 ">
-        <DataTable columns={columns(onDeleteContact)} 
+        <DataTable columns={columns(onDeleteContact, handleContactUpdated)} 
         data={data} onFiltersChange={handleFiltersChange}/>
       </div>
   );
