@@ -24,6 +24,10 @@ class Trie {
         node.contactData.push(contact)
     }
 
+    batchInsert(contacts) {
+        contacts.forEach(contact => this.insert(contact))
+    }
+
     searchPrefix(prefix) {
         let node = this.root;
         const normalizedPrefix = prefix.toLowerCase();
