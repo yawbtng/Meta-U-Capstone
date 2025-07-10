@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import SearchContacts from "../search-contacts";
 
 
 import { DataTablePagination } from "./data-table-pagination";
@@ -61,6 +62,9 @@ const table = useReactTable({
       <div className="flex items-center justify-between py-4 mr-1">
         {/* Filter Component */}
         <DataTableFilter table={table} onFiltersChange={onFiltersChange} />
+
+        {/* Search Compononet */}
+        <SearchContacts />
         
         {/* View/Hide Columns Component */}
         <HideColumns table={table} />
