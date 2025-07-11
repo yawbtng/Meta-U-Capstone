@@ -11,7 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function main() {
   try {
-    const { data, error } = await supabase.from("user_profiles").select('*');
+    const { data, error } = await supabase.from("connections").select('*');
     console.log(data);
   } catch (error) {
     console.error(error);
