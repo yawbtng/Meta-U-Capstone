@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@supabase/supabase-js": "^2.50.5",
+    "dotenv": "^17.2.0",
     "express": "^5.1.0"
   },
   "devDependencies": {
@@ -15,6 +17,7 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

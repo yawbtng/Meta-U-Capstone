@@ -6,7 +6,7 @@ class TrieNode {
     }
 }
 
-class Trie {
+export class Trie {
     constructor() {
         this.root = new TrieNode()
     }
@@ -60,5 +60,3 @@ class Trie {
         }
     }
 }
-
-module.exports = Trie
