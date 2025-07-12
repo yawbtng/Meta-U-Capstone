@@ -17,7 +17,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
-import { industries } from '../providers/industries';
+import { industries } from '../lib/industries';
 import { ComboboxDemo } from '../components/Combobox';
 
 export default function AddContact() {

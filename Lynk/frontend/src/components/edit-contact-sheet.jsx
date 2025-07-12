@@ -2,7 +2,7 @@ import {useState, useEffect} from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ComboboxDemo } from "./Combobox"
-import { industries } from "../providers/industries"
+import { industries } from "../lib/industries.js"
 import { Label } from "@/components/ui/label"
 import { Calendar22 } from "./ui/date-picker"
 import { Textarea } from '@/components/ui/textarea';
