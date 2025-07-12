@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/accordion"
 import AvatarDemo from "./avatar-01"
 import { getInitials } from "./contacts-table-components/columns"
-import { supabase } from "../providers/supabaseClient"
+import { updateContact } from "../../../backend/index.js"
 import { toast } from "sonner"
 
 const SectionBreakdown = ({children, title, value}) => {
@@ -154,15 +154,11 @@ export function EditContact({children,  contactData, open, onOpenChange, onConta
             }
 
             
-            const { data, error } = await supabase
-            .from("connections")
-            .update(payload)
-            .eq("id", contactData.id)
-            .select().single()               
+            const result = await updateContact(contactData.id, payload);
 
-            if (error) throw error
+            if (!result.success) throw new Error(result.error);
 
-            onContactUpdated?.(data); 
+            onContactUpdated?.(result.data); 
             toast.success("Contact updated ✅")
             onOpenChange(false)       
         } catch (err) {
