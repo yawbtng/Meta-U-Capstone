@@ -9,13 +9,16 @@ const supabaseKey = process.env.SUPABASE_SECRET_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 
-async function main() {
-  try {
-    const { data, error } = await supabase.from("connections").select('*');
-    console.log(data);
-  } catch (error) {
-    console.error(error);
+// typeahead search
+export async function fetchInitialContactsForSearch(firstChar) {
+  const { data, error } = await supabase
+    .from('connections')
+    .select("*")
+    .ilike('name', `${firstChar}%`);
+  if (error) {
+    console.error('Error fetching data:', error);
+    return [];
   }
+  return data;
 }
 
-main();
