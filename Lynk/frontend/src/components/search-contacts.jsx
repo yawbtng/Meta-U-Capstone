@@ -117,13 +117,18 @@ const SearchContacts = () => {
 
         {searchTerm && showDropdown && (
             <ul className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-sm shadow-md mt-4 z-10 ">
-            {results.length > 0 ? (
-                results.map((result, index) => (
-                <SearchResult key={index} index={index} contact={result}/>
-                ))
-            ) : (
-                <p className="p-3 text-gray-500">No results found.</p>
-            )}
+              {isLoading ? (
+                        <div className="p-3 text-gray-500 flex items-center">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                            Searching...
+                        </div>
+                    ) : results.length > 0 ? (
+                        results.map((result, index) => (
+                            <SearchResult key={index} index={index} contact={result}/>
+                        ))
+                    ) : (
+                        <p className="p-3 text-gray-500">No results found.</p>
+                    )}
             </ul>
         )}
     </div>
