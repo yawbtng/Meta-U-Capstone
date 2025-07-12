@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { supabase } from "../providers/supabaseClient";
+import { fetchUserProfile, uploadAvatar } from "../../../backend/index.js";
 import { UserAuth } from "../context/AuthContext";
 
 
@@ -182,19 +182,15 @@ export default function UserProfile() {
   useEffect(() => {
     if (!uid) return;
     const fetch = async () => {
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("name, email, bio, avatar_url")
-        .eq("id", uid)
-        .single();
+      const result = await fetchUserProfile(uid);
 
-      if (!error) {
-        setProfile(data);
+      if (result.success) {
+        setProfile(result.data);
         patch({
-          name: data.name ?? "",
-          email: data.email ?? "",
-          bio: data.bio ?? "",
-          avatarUrl: data.avatar_url ?? ""
+          name: result.data.name ?? "",
+          email: result.data.email ?? "",
+          bio: result.data.bio ?? "",
+          avatarUrl: result.data.avatar_url ?? ""
         });
       }
     };
@@ -206,19 +202,11 @@ export default function UserProfile() {
   const handleAvatarSelect = async (file) => {
     try {
       setUploading(true);
-      const filePath = `${uid}/${Date.now()}_${file.name}`;
-      const { error: uploadErr } = await supabase
-        .storage
-        .from("user-avatars")
-        .upload(filePath, file, { upsert: true });
-      if (uploadErr) throw uploadErr;
+      const result = await uploadAvatar(uid, file);
+      
+      if (!result.success) throw new Error(result.error);
 
-      const { data: { publicUrl } } = supabase
-        .storage
-        .from("user-avatars")
-        .getPublicUrl(filePath);
-
-      patch({ avatarUrl: publicUrl });
+      patch({ avatarUrl: result.publicUrl });
       toast.success("Avatar uploaded ✨");
     } catch (err) {
       toast.error(err.message);
