@@ -1,7 +1,22 @@
 import {useState, useEffect, useRef} from "react"
 import { Search } from "lucide-react";
-import { Trie } from "../../../backend/trie"
-import { fetchInitialContactsForSearch } from "../../../backend";
+import { Trie } from "../../../backend/trie.js"
+import { fetchInitialContactsForSearch } from "../../../backend/index.js";
+
+
+
+const SearchResult = ({contact, index}) => {
+
+    return (
+        <li key={index} className="py-2 text-xl hover:bg-gray-100 cursor-pointer">
+            <div>
+                {contact.name}
+            </div>        
+                    
+        </li>
+    )
+}
+
 
 const SearchContacts = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -10,6 +25,7 @@ const SearchContacts = () => {
     const [trie, setTrie] = useState(new Trie());
     const typeaheadRef = useRef(null)
     
+    console.log(trie)
 
     const handleChange = async (e) => {
         const input = e.target.value
@@ -28,13 +44,14 @@ const SearchContacts = () => {
             setTrie(newTrie)
             setResults(newTrie.findContactsWithPrefix(input))
             setShowDropdown(true)
+            console.log(results)
         } else {
+            console.log(trie.findContactsWithPrefix(input))
             setResults(trie.findContactsWithPrefix(input))
+            setShowDropdown(true)
+            
         }
-
     }
-
-
 
 
     useEffect(() => {
@@ -58,12 +75,10 @@ const SearchContacts = () => {
         <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-700" />
 
         {searchTerm && showDropdown && (
-            <ul className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-sm shadow-md mt-1 z-10 pl-10 pr-4">
+            <ul className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-sm shadow-md mt-1 z-10 ">
             {results.length > 0 ? (
                 results.map((result, index) => (
-                <li key={index} className="p-3 hover:bg-gray-100 cursor-pointer">
-                    {result}
-                </li>
+                <SearchResult key={index} index={index} contact={result}/>
                 ))
             ) : (
                 <p className="p-3 text-gray-500">No results found.</p>
