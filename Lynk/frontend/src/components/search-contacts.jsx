@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 import { Trie, fetchInitialContactsForSearch } from "../../../backend/index.js"
 import { getInitials } from "./contacts-table-components/columns.jsx";
 import AvatarDemo from "./avatar-01"
+import { useDebounce } from "../lib/useDebounce.js"
 
 
 const SearchResult = ({ contact, index }) => {
@@ -37,7 +38,7 @@ const SearchResult = ({ contact, index }) => {
         </div>
 
         <div className="flex items-center space-x-4 ml-2">
-          <AvatarDemo initials={getInitials(contact.name)} className="w-12 h-12 text-xl" />
+          <AvatarDemo initials={getInitials(contact.name)} className="w-12 h-12 text-xl ml-2" />
         </div>
       </div>
     </li>
@@ -50,34 +51,47 @@ const SearchContacts = () => {
     const [results, setResults] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const [trie, setTrie] = useState(new Trie());
+    const [isLoading, setIsLoading] = useState(false);
     const typeaheadRef = useRef(null)
+
+    const debouncedSearchTerm = useDebounce(searchTerm);
     
     console.log(trie)
 
-    const handleChange = async (e) => {
-        const input = e.target.value
-        setSearchTerm(input)
-
-        if (input.length === 0) {
-            setResults([])
-            setShowDropdown(false)
-            setTrie(new Trie())
+    useEffect(() => {
+      const performSearch = async () => {
+        if (debouncedSearchTerm.length === 0) {
+          setResults([])
+          setShowDropdown(false)
+          setTrie(new Trie())
+          return;
         }
 
-        if (input.length === 1) {
-            const contacts = await fetchInitialContactsForSearch(input)
+        setIsLoading(true)
+
+        try {
+          if (debouncedSearchTerm.length === 1) {
+            const contacts = await fetchInitialContactsForSearch(debouncedSearchTerm)
             const newTrie = new Trie();
             newTrie.batchInsert(contacts)
             setTrie(newTrie)
-            setResults(newTrie.findContactsWithPrefix(input))
+            setResults(newTrie.findContactsWithPrefix(debouncedSearchTerm))
             setShowDropdown(true)
-            console.log(results)
-        } else {
-            console.log(trie.findContactsWithPrefix(input))
-            setResults(trie.findContactsWithPrefix(input))
+          } else {
+            setResults(trie.findContactsWithPrefix(debouncedSearchTerm))
             setShowDropdown(true)
-            
+          }
+        } catch (error) {
+          console.error("Error performing search:", error)
+        } finally {
+          setIsLoading(false)
         }
+      }
+      performSearch();
+    }, [debouncedSearchTerm])
+
+    const handleChange = async (e) => {
+        setSearchTerm(e.target.value)
     }
 
 
