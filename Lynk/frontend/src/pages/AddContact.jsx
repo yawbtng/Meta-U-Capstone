@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar22 } from '../components/ui/date-picker';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { UserAuth } from '../context/AuthContext';
-import { supabase } from '../providers/supabaseClient';
+import { createContact } from '../../../backend/index.js';
 import { useNavigate } from 'react-router';
 import {
     DropdownMenu,
@@ -177,15 +177,15 @@ export default function AddContact() {
             delete submissionData.twitter;
             delete submissionData.instagram;
 
-            // TODO: Submit to Supabase
-            console.log('Submitting contact:', submissionData);
-            const {data, error} = await supabase.from("connections").insert(submissionData)
 
-            if (error) {
-                console.error('Error adding contact:', error);
+            console.log('Submitting contact:', submissionData);
+            const result = await createContact(submissionData);
+
+            if (!result.success) {
+                console.error('Error adding contact:', result.error);
                 alert('Failed to add contact. Please try again.');
             } else {
-                // Reset form on success
+
                 setFormData({
                     name: '', email: '', phone_number: '', company: '', role: '',
                     industry: '', school: '', where_met: '', last_contact_at: '',
@@ -193,7 +193,7 @@ export default function AddContact() {
                     instagram: '', notes: ''
                 });
 
-                // TODO: Show success message and redirect
+
                 alert('Contact added successfully!');
                 navigate("/all-contacts")
             }
