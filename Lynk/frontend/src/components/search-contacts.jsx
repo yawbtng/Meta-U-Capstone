@@ -1,7 +1,6 @@
 import {useState, useEffect, useRef} from "react"
 import { Search } from "lucide-react";
-import { Trie } from "../../../backend/trie.js"
-import { fetchInitialContactsForSearch } from "../../../backend/index.js";
+import { Trie, fetchInitialContactsForSearch } from "../../../backend/index.js"
 import { getInitials } from "./contacts-table-components/columns.jsx";
 import AvatarDemo from "./avatar-01"
 
