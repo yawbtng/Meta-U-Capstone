@@ -1,8 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { fetchContacts, deleteContact } from "../../../../backend/index.js";
 import { UserAuth } from "../../context/AuthContext";
-import { columns, Contact } from "./columns";
-import { getDbColumnName } from "./columns";
+import { columns } from "./columns";
 import DataTable from "./data-table";
 import { toast } from "sonner";
 
