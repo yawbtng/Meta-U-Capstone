@@ -5,26 +5,6 @@ import { RowActions } from "./row-actions"
 import { DataTableColumnHeader } from "./data-table-column-header"
 
 
-export const Contact = z.object({
-  id: z.string().uuid(),
-  user_id: z.string(),
-  name: z.string(),
-  email: z.string().email(),
-  phone_number: z.string().optional(),
-  linkedin: z.string().url().optional(),
-  twitter: z.string().optional(),
-  instagram: z.string().optional(),
-  relationship_type: z.enum(["personal", "professional", "social"]),
-  avatar_url: z.string().url().optional(),
-  industry: z.string().optional(),
-  company: z.string().optional(),
-  role: z.string().optional(),
-  last_contact_at: z.date().optional(),
-  interaction_count: z.number().int().optional(),
-  tags: z.array(z.string()).default([]),
-});
-
-
 export function getInitials(fullName) {
     const words = fullName.split(' ');
     const firstName = words[0];
@@ -111,12 +91,14 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
     accessorKey: "socials.linkedin",
     header: () => <div className="text-center">LinkedIn</div>,
     cell: ({row}) => {
-      const linkedin = row.getValue("socials_linkedin")
+      const linkedin = row.original.socials?.linkedin
       return (
         <div className="text-left underline text-lg">
-          <a href={`https://${linkedin}`} target="_blank" className="!text-gray-600">
-            {linkedin}
-          </a>
+          {linkedin ? (
+            <a href={`https://${linkedin}`} target="_blank" className="!text-gray-600">
+              {linkedin}
+            </a>
+          ) : null}
         </div>
         
       )
@@ -129,12 +111,14 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
       <DataTableColumnHeader column={column} title="Twitter" />
     ),
     cell: ({row}) => {
-      const twitter = row.getValue("socials_twitter")
+      const twitter = row.original.socials?.twitter
       return (
         <div className="text-left underline text-lg">
-          <a href={`https://twitter.com/${twitter}`} target="_blank" className="!text-gray-600">
-            {twitter}
-          </a>
+          {twitter ? (
+            <a href={`https://twitter.com/${twitter}`} target="_blank" className="!text-gray-600">
+              {twitter}
+            </a>
+          ) : null}
         </div>
       )
     },
@@ -146,12 +130,14 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
       <DataTableColumnHeader column={column} title="Instagram" />
     ),
     cell: ({row}) => {
-      const instagram = row.getValue("socials_instagram")
+      const instagram = row.original.socials?.instagram
       return (
         <div className="text-left underline text-lg">
-          <a href={`https://instagram.com/${instagram}`} target="_blank" className="!text-gray-600">
-            {instagram}
-          </a>
+          {instagram ? (
+            <a href={`https://instagram.com/${instagram}`} target="_blank" className="!text-gray-600">
+              {instagram}
+            </a>
+          ) : null}
         </div>
       )
     },

@@ -29,8 +29,6 @@ export default function AddContact() {
 
     // Form state
     const [formData, setFormData] = useState({
-        user_id: uid,
-
         // Required fields
         name: '',
 
@@ -177,7 +175,7 @@ export default function AddContact() {
             delete submissionData.instagram;
 
 
-            const result = await createContact(submissionData);
+            const result = await createContact(submissionData, uid);
 
             if (!result.success) {
                 console.error('Error adding contact:', result.error);

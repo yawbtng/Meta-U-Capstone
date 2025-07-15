@@ -1,6 +1,5 @@
 import { supabase } from '../browser-client.js';
 
-
 const getDbColumnName = (columnId) => {
   const dbColumnMap = {
     'name': 'name',
@@ -20,14 +19,21 @@ const getDbColumnName = (columnId) => {
   return dbColumnMap[columnId] || columnId;
 };
 
-
 export const fetchContacts = async (userId, filters = []) => {
   try {
-    let query = supabase
-      .from("connections")
-      .select("*")
-      .eq("user_id", userId);
+    const { data: userConnections, error } = await supabase
+      .from('user_to_connections')
+      .select('connection_id')
+      .eq('user_id', userId);
+    if (error) throw error;
 
+    const connectionIds = userConnections.map(row => row.connection_id);
+    if (connectionIds.length === 0) return { success: true, data: [] };
+
+    let query = supabase
+      .from('connections')
+      .select('*')
+      .in('id', connectionIds);
 
     filters.forEach(filter => {
       if (!filter.column || !filter.condition || 
@@ -37,7 +43,6 @@ export const fetchContacts = async (userId, filters = []) => {
 
       const { column, condition, value } = filter;
       const dbColumn = getDbColumnName(column);
-
       const arrayColumns = ['relationship_type', 'tags'];
       const isArrayColumn = arrayColumns.includes(column);
 
@@ -90,22 +95,27 @@ export const fetchContacts = async (userId, filters = []) => {
       }
     });
 
-    const { data, error } = await query;
-    if (error) throw error;
-    return { success: true, data };
+    const { data: contacts, error: contactsError } = await query;
+    if (contactsError) throw contactsError;
+    return { success: true, data: contacts };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
 
-export const createContact = async (contactData) => {
+export const createContact = async (contactData, userId) => {
   try {
-    const { data, error } = await supabase
-      .from("connections")
-      .insert(contactData);
-    
+    const { data: contact, error } = await supabase
+      .from('connections')
+      .insert(contactData)
+      .select()
+      .single();
     if (error) throw error;
-    return { success: true, data };
+    const { error: linkError } = await supabase
+      .from('user_to_connections')
+      .insert({ user_id: userId, connection_id: contact.id });
+    if (linkError) throw linkError;
+    return { success: true, data: contact };
   } catch (error) {
     return { success: false, error: error.message };
   }
@@ -114,12 +124,11 @@ export const createContact = async (contactData) => {
 export const updateContact = async (contactId, contactData) => {
   try {
     const { data, error } = await supabase
-      .from("connections")
+      .from('connections')
       .update(contactData)
-      .eq("id", contactId)
+      .eq('id', contactId)
       .select()
       .single();
-    
     if (error) throw error;
     return { success: true, data };
   } catch (error) {
@@ -127,29 +136,49 @@ export const updateContact = async (contactId, contactData) => {
   }
 };
 
-export const deleteContact = async (contactId) => {
+export const deleteContact = async (contactId, userId) => {
   try {
-    const { error } = await supabase
-      .from("connections")
+    const { error: unlinkError } = await supabase
+      .from('user_to_connections')
       .delete()
-      .eq("id", contactId);
-    
-    if (error) throw error;
+      .eq('user_id', userId)
+      .eq('connection_id', contactId);
+    if (unlinkError) throw unlinkError;
+    const { count, error: countError } = await supabase
+      .from('user_to_connections')
+      .select('*', { count: 'exact', head: true })
+      .eq('connection_id', contactId);
+    if (countError) throw countError;
+    if (count === 0) {
+      await supabase.from('connections').delete().eq('id', contactId);
+    }
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
 
-
-export const fetchInitialContactsForSearch = async (firstChar) => {
-  const { data, error } = await supabase
-    .from('connections')
-    .select("*")
-    .ilike('name', `${firstChar}%`);
+export const fetchInitialContactsForSearch = async (userId, firstChar) => {
+  const { data: userConnections, error } = await supabase
+    .from('user_to_connections')
+    .select('connection_id')
+    .eq('user_id', userId);
   if (error) {
     console.error('Error fetching data:', error);
     return [];
   }
-  return data;
+
+  const connectionIds = userConnections.map(row => row.connection_id);
+  if (connectionIds.length === 0) return [];
+
+  const { data: contacts, error: contactsError } = await supabase
+    .from('connections')
+    .select('*')
+    .in('id', connectionIds);
+  if (contactsError) {
+    console.error('Error fetching contacts:', contactsError);
+    return [];
+  }
+
+  return contacts.filter(c => c.name && c.name.toLowerCase().startsWith(firstChar.toLowerCase()));
 }; 
