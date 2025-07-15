@@ -24,7 +24,7 @@ const getDbColumnName = (columnId) => {
 export const fetchContacts = async (userId, filters = []) => {
   try {
     let query = supabase
-      .from('user_connections')
+      .from('user_to_connections')
       .select('connections:*')
       .eq('user_id', userId);
 
@@ -99,7 +99,7 @@ export const fetchContacts = async (userId, filters = []) => {
   }
 };
 
-// Create a contact and link it to the user in user_connections
+// Create a contact and link it to the user in user_to_connections
 export const createContact = async (contactData, userId) => {
   try {
     // Insert contact (without user_id)
@@ -109,9 +109,9 @@ export const createContact = async (contactData, userId) => {
       .select()
       .single();
     if (error) throw error;
-    // Link to user in user_connections
+    // Link to user in user_to_connections
     const { error: linkError } = await supabase
-      .from('user_connections')
+      .from('user_to_connections')
       .insert({ user_id: userId, connection_id: contact.id });
     if (linkError) throw linkError;
     return { success: true, data: contact };
@@ -135,19 +135,19 @@ export const updateContact = async (contactId, contactData) => {
   }
 };
 
-// Delete a contact for a user (removes from user_connections, and optionally deletes the contact if no owners remain)
+// Delete a contact for a user (removes from user_to_connections, and optionally deletes the contact if no owners remain)
 export const deleteContact = async (contactId, userId) => {
   try {
-    // Remove from user_connections
+    // Remove from user_to_connections
     const { error: unlinkError } = await supabase
-      .from('user_connections')
+      .from('user_to_connections')
       .delete()
       .eq('user_id', userId)
       .eq('connection_id', contactId);
     if (unlinkError) throw unlinkError;
     // Optionally, check if the contact has any other owners
     const { count, error: countError } = await supabase
-      .from('user_connections')
+      .from('user_to_connections')
       .select('*', { count: 'exact', head: true })
       .eq('connection_id', contactId);
     if (countError) throw countError;
@@ -164,7 +164,7 @@ export const deleteContact = async (contactId, userId) => {
 
 export const fetchInitialContactsForSearch = async (userId, firstChar) => {
   const { data, error } = await supabase
-    .from('user_connections')
+    .from('user_to_connections')
     .select('connections:*')
     .eq('user_id', userId);
   if (error) {

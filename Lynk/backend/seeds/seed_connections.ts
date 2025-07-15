@@ -48,15 +48,12 @@ const interestsPool = [ 'Reading','Cooking & Baking','Traveling','Gaming','Photo
 faker.seed(20250702);
 
 const factory = () => {
-
   const first = faker.person.firstName();
   const last  = faker.person.lastName();
   const full  = `${first} ${last}`;
   const handle = faker.internet.userName({ firstName: first, lastName: last });
   const slug   = faker.helpers.slugify(full).toLowerCase();
-
   return {
-    user_id: USER_ID,
     name: full,
     email: faker.internet.email({ firstName: first, lastName: last }),
     phone_number: `${faker.string.numeric({ length: 10, allowLeadingZeros: false })}`,
@@ -65,29 +62,22 @@ const factory = () => {
       linkedin: `linkedin.com/in/${slug}`,
       instagram: handle
     },
-
     where_met: faker.helpers.arrayElement(locations),
-
     relationship_type: faker.helpers.arrayElements(
       ['professional', 'personal', 'social'],
       { min: 1, max: 2 }
     ),
-
     notes: null,
     avatar_url: null,
-
     industry: faker.helpers.arrayElement(industries),
     company: faker.helpers.arrayElement(companies),
     role: faker.helpers.arrayElement(roles),
-
     school: faker.helpers.arrayElement(schools),
     last_contact_at: faker.date.recent({ days: 500 }),
     interactions_count: faker.number.int({ min: 1, max: 7 }),
-
     connection_score: null,
     tags: faker.helpers.arrayElements(tagPool, { min: 0, max: 3 }),
     interests: faker.helpers.arrayElements(interestsPool, { min: 1, max: 4 }),
-
     gender: faker.helpers.arrayElement(['male', 'female']),
     location: faker.helpers.arrayElement(locations)
   };
@@ -95,9 +85,17 @@ const factory = () => {
 
 (async () => {
   const seed = await createSeedClient();
-  await seed.connections(x => x(100, factory), {
-    connect: { user_profiles: [{ id: USER_ID }] }
-  });
 
+  const contactsToCreate = Array.from({ length: 100 }, factory);
+
+  const contacts = await seed['connections'].create(contactsToCreate);
+  if (contacts && Array.isArray(contacts)) {
+    const userConnections = contacts.map(contact => ({
+      user_id: USER_ID,
+      connection_id: contact.id,
+      added_at: new Date().toISOString()
+    }));
+    await seed['user_to_connections'].create(userConnections);
+  }
   process.exit(0);
 })();
