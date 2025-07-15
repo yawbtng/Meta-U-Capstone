@@ -98,6 +98,6 @@ const factory = () => {
   await seed.connections(x => x(100, factory), {
     connect: { user_profiles: [{ id: USER_ID }] }
   });
-  console.log('✅ 100 connections for', USER_ID);
+
   process.exit(0);
 })();
