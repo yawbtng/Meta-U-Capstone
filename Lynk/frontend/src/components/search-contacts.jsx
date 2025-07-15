@@ -75,7 +75,7 @@ const SearchContacts = () => {
                 
                 
                 if (firstChar !== currentFirstChar) {
-                    const contacts = await fetchInitialContactsForSearch(firstChar)
+                    const contacts = await fetchInitialContactsForSearch(session?.user?.id, firstChar)
                     const newTrie = new Trie();
                     newTrie.batchInsert(contacts)
                     setTrie(newTrie)
