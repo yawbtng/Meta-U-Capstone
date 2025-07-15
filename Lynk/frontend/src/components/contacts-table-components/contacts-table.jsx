@@ -18,7 +18,6 @@ const ContactsTable = () => {
 }
 
   const handleFiltersChange = useCallback((newFilters) => {
-    console.log("Filters changed:", newFilters);
     setFilters(newFilters);
   }, []);
 
@@ -39,7 +38,6 @@ const ContactsTable = () => {
         toast.error("There was an error fetching the contacts");
       } else {
         setData(result.data);
-        console.log(result.data);
       }
     };
 
@@ -47,7 +45,6 @@ const ContactsTable = () => {
   }, [session, filters])
 
   const onDeleteContact = async (id) => {
-    console.log(id)
 
     const result = await deleteContact(id);
 

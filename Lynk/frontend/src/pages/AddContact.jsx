@@ -150,7 +150,6 @@ export default function AddContact() {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(formData)
 
 
         if (!validateForm()) {
@@ -178,7 +177,6 @@ export default function AddContact() {
             delete submissionData.instagram;
 
 
-            console.log('Submitting contact:', submissionData);
             const result = await createContact(submissionData);
 
             if (!result.success) {

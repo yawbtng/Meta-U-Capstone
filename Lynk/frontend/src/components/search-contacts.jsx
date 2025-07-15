@@ -57,7 +57,6 @@ const SearchContacts = () => {
 
     const debouncedSearchTerm = useDebounce(searchTerm);
     
-    console.log(trie)
 
     useEffect(() => {
         const performSearch = async () => {
@@ -95,7 +94,7 @@ const SearchContacts = () => {
             }
         }
         performSearch();
-    }, [debouncedSearchTerm, currentFirstChar, trie])
+    }, [debouncedSearchTerm, currentFirstChar])
 
     const handleChange = async (e) => {
         setSearchTerm(e.target.value)
