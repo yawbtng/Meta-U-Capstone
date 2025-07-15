@@ -4,6 +4,7 @@ import { Trie, fetchInitialContactsForSearch } from "../../../backend/index.js"
 import { getInitials } from "./contacts-table-components/columns.jsx";
 import AvatarDemo from "./avatar-01"
 import { useDebounce } from "../lib/useDebounce.js"
+import { UserAuth } from "../context/AuthContext.jsx"
 
 
 const SearchResult = ({ contact, index }) => {
@@ -54,7 +55,7 @@ const SearchContacts = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [currentFirstChar, setCurrentFirstChar] = useState("");
     const typeaheadRef = useRef(null)
-
+    const { session } = UserAuth();
     const debouncedSearchTerm = useDebounce(searchTerm);
     
 

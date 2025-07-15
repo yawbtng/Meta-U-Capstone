@@ -91,12 +91,14 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
     accessorKey: "socials.linkedin",
     header: () => <div className="text-center">LinkedIn</div>,
     cell: ({row}) => {
-      const linkedin = row.getValue("socials_linkedin")
+      const linkedin = row.original.socials?.linkedin
       return (
         <div className="text-left underline text-lg">
-          <a href={`https://${linkedin}`} target="_blank" className="!text-gray-600">
-            {linkedin}
-          </a>
+          {linkedin ? (
+            <a href={`https://${linkedin}`} target="_blank" className="!text-gray-600">
+              {linkedin}
+            </a>
+          ) : null}
         </div>
         
       )
@@ -109,12 +111,14 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
       <DataTableColumnHeader column={column} title="Twitter" />
     ),
     cell: ({row}) => {
-      const twitter = row.getValue("socials_twitter")
+      const twitter = row.original.socials?.twitter
       return (
         <div className="text-left underline text-lg">
-          <a href={`https://twitter.com/${twitter}`} target="_blank" className="!text-gray-600">
-            {twitter}
-          </a>
+          {twitter ? (
+            <a href={`https://twitter.com/${twitter}`} target="_blank" className="!text-gray-600">
+              {twitter}
+            </a>
+          ) : null}
         </div>
       )
     },
@@ -126,12 +130,14 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
       <DataTableColumnHeader column={column} title="Instagram" />
     ),
     cell: ({row}) => {
-      const instagram = row.getValue("socials_instagram")
+      const instagram = row.original.socials?.instagram
       return (
         <div className="text-left underline text-lg">
-          <a href={`https://instagram.com/${instagram}`} target="_blank" className="!text-gray-600">
-            {instagram}
-          </a>
+          {instagram ? (
+            <a href={`https://instagram.com/${instagram}`} target="_blank" className="!text-gray-600">
+              {instagram}
+            </a>
+          ) : null}
         </div>
       )
     },
