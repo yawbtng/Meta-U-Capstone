@@ -168,3 +168,78 @@ export async function searchSimilarVectors(queryVector, limit = 10, filter = nul
   }
 
 
+// Find people similar to a user 
+export async function findSimilarPeople(userVector, userId, limit) {
+    try {
+      const filter = {
+        must: [
+          {
+            key: "profile_type",
+            match: { value: "user" }
+          }
+        ],
+        // Exclude the user themselves and people they already know
+        must_not: [
+          {
+            key: "user_id", 
+            match: { value: userId }
+          }
+        ]
+      };
+  
+      const results = await searchSimilarVectors(
+        userVector, 
+        limit, 
+        filter, 
+        0.6
+      );
+      
+      return results.map((result) => ({
+        id: result.id,
+        score: result.score,
+        payload: result.payload,
+        similarity: `${Math.round(result.score * 100)}%`
+      }));
+    } catch (error) {
+      console.error("Failed to find similar people:", error);
+      throw new Error(`Similar people search failed: ${error.message}`);
+    }
+}
+
+// Find connections similar to a user (connections belonging to OTHER users)
+export async function findSimilarConnections(userVector, userId, limit) {
+  try {
+    const filter = {
+      must: [
+        {
+          key: "profile_type",
+          match: { value: "connection" }
+        }
+      ],
+      must_not: [
+        {
+          key: "user_ids",
+          match: { value: userId }
+        }
+      ]
+    };
+
+    const results = await searchSimilarVectors(
+      userVector, 
+      limit, 
+      filter, 
+      0.6
+    );
+    
+    return results.map((result) => ({
+      id: result.id,
+      score: result.score,
+      payload: result.payload,
+      similarity: `${Math.round(result.score * 100)}%`
+    }));
+  } catch (error) {
+    console.error("Failed to find similar connections:", error);
+    throw new Error(`Similar connections search failed: ${error.message}`);
+  }
+}
+
