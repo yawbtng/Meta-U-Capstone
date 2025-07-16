@@ -136,3 +136,35 @@ export async function deleteVectors(ids) {
       throw new Error(`Vector deletion failed: ${error.message}`);
     }
 }
+
+// Search for similar vectors using cosine similarity
+export async function searchSimilarVectors(queryVector, limit = 10, filter = null, scoreThreshold = 0.7) {
+    try {
+      if (!Array.isArray(queryVector) || queryVector.length !== VECTOR_DIMENSIONS) {
+        throw new Error(`Query vector must be an array of ${VECTOR_DIMENSIONS} dimensions`);
+      }
+  
+      const searchParams = {
+        vector: queryVector,
+        limit: limit,
+        score_threshold: scoreThreshold,
+        with_payload: true,
+        with_vector: false
+      };
+  
+      if (filter) {
+        searchParams.filter = filter;
+      }
+  
+      const results = await qdrantClient.search(COLLECTION_NAME, searchParams);
+  
+      console.info(`Found ${results.length} similar vectors with score >= ${scoreThreshold}`);
+      
+      return results;
+    } catch (error) {
+      console.error("Failed to search similar vectors:", error);
+      throw new Error(`Vector search failed: ${error.message}`);
+    }
+  }
+
+
