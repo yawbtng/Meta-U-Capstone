@@ -5,7 +5,7 @@ function composeProfileText(profile) {
     // Extract relevant profile information from object
     const {role = '', company = '', location = '', interests = []} = profile;
 
-    // Conger interests array into space-separated string
+    // Convert interests array into space-separated string
     const interestText = Array.isArray(interests) ? interests.join(' ') : '';
 
     // Input text in order of importance for similar matching
@@ -279,7 +279,97 @@ export async function generateConnectionEmbeddingsBatch(connectionProfiles, mode
     }
 }
 
+// Prepare metadata for user profile vector storage
+export function prepareUserMetadata(userProfile) {
+    const { id, name, email } = userProfile;
+    
+    if (!id) {
+      throw new Error('User ID is required for metadata preparation');
+    }
+    
+    return {
+      id: id,
+      name: name || 'Unknown User',
+      email: email || '',
+      type: 'user',
+      created_at: new Date().toISOString()
+    };
+}
 
+// Prepare metadata for connection profile vector storage
+export function prepareConnectionMetadata(connectionProfile, userIds) {
+    const { id, name, email } = connectionProfile;
+    
+    if (!id) {
+      throw new Error('Connection ID is required for metadata preparation');
+    }
+    
+    if (!userIds) {
+      throw new Error('User ID(s) are required for connection metadata preparation');
+    }
+    
+    const userIdArray = Array.isArray(userIds) ? userIds : [userIds];
+    
+    if (userIdArray.length === 0) {
+      throw new Error('At least one user ID is required for connection metadata preparation');
+    }
+    
+    return {
+      id: id,
+      name: name || 'Unknown Connection',
+      email: email || '',
+      type: 'connection',
+      user_ids: userIdArray, // Array of user IDs for many-to-many relationships
+      created_at: new Date().toISOString()
+    };
+}
+
+// Setting up vector point for storage
+export function createVectorPoint(embedding, metadata) {
+    if (!Array.isArray(embedding) || embedding.length === 0) {
+      throw new Error('Valid embedding array is required');
+    }
+    
+    // Add dimension validation for e5-mistral-7b-instruct (1536 dimensions)
+    if (embedding.length !== 1536) {
+      throw new Error(`Expected embedding dimension 1536, got ${embedding.length}`);
+    }
+    
+    if (!metadata || !metadata.id) {
+      throw new Error('Valid metadata with ID is required');
+    }
+    
+    return {
+      id: metadata.id,
+      vector: embedding,
+      payload: metadata
+    };
+}
+
+// Validate vector point for storage
+export function validateVectorPoint(vectorPoint) {
+    if (!vectorPoint) {
+      return { success: false, error: 'Vector point is required' };
+    }
+    
+    if (!vectorPoint.id) {
+      return { success: false, error: 'Vector point must have an ID' };
+    }
+    
+    if (!Array.isArray(vectorPoint.vector) || vectorPoint.vector.length === 0) {
+      return { success: false, error: 'Vector point must have a valid embedding array' };
+    }
+    
+    if (!vectorPoint.payload) {
+      return { success: false, error: 'Vector point must have payload metadata' };
+    }
+    
+    if (!vectorPoint.payload.type || !['user', 'connection'].includes(vectorPoint.payload.type)) {
+      return { success: false, error: 'Vector point payload must have valid type (user or connection)' };
+    }
+    
+    return { success: true };
+}
 
 
 export { composeProfileText, validateProfileForEmbedding };
