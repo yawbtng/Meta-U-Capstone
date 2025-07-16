@@ -296,20 +296,6 @@
           "maxLength": null
         },
         {
-          "id": "public.connections.user_id",
-          "name": "user_id",
-          "columnName": "user_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
           "id": "public.connections.name",
           "name": "name",
           "columnName": "name",
@@ -604,18 +590,14 @@
           "maxLength": null
         },
         {
-          "name": "user_profiles",
-          "type": "user_profiles",
-          "isRequired": true,
+          "name": "user_to_connections",
+          "type": "user_to_connections",
+          "isRequired": false,
           "kind": "object",
-          "relationName": "connectionsTouser_profiles",
-          "relationFromFields": [
-            "user_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
+          "relationName": "user_to_connectionsToconnections",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
           "isId": false,
           "isGenerated": false,
           "sequence": false,
@@ -627,14 +609,6 @@
           "name": "connections_pkey",
           "fields": [
             "id"
-          ],
-          "nullNotDistinct": false
-        },
-        {
-          "name": "unique_contact_email_per_user",
-          "fields": [
-            "email",
-            "user_id"
           ],
           "nullNotDistinct": false
         }
@@ -3717,6 +3691,62 @@
           "maxLength": null
         },
         {
+          "id": "public.user_profiles.linkedin_url",
+          "name": "linkedin_url",
+          "columnName": "linkedin_url",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_profiles.role",
+          "name": "role",
+          "columnName": "role",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_profiles.company",
+          "name": "company",
+          "columnName": "company",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_profiles.interests",
+          "name": "interests",
+          "columnName": "interests",
+          "type": "text[]",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "name": "users",
           "type": "users",
           "isRequired": true,
@@ -3735,11 +3765,11 @@
           "hasDefaultValue": false
         },
         {
-          "name": "connections",
-          "type": "connections",
+          "name": "user_to_connections",
+          "type": "user_to_connections",
           "isRequired": false,
           "kind": "object",
-          "relationName": "connectionsTouser_profiles",
+          "relationName": "user_to_connectionsTouser_profiles",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -3761,6 +3791,221 @@
           "name": "user_profiles_pkey",
           "fields": [
             "id"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "user_to_connections": {
+      "id": "public.user_to_connections",
+      "schemaName": "public",
+      "tableName": "user_to_connections",
+      "fields": [
+        {
+          "id": "public.user_to_connections.user_id",
+          "name": "user_id",
+          "columnName": "user_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_to_connections.connection_id",
+          "name": "connection_id",
+          "columnName": "connection_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_to_connections.added_at",
+          "name": "added_at",
+          "columnName": "added_at",
+          "type": "timestamptz",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_to_connections.where_met",
+          "name": "where_met",
+          "columnName": "where_met",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_to_connections.notes",
+          "name": "notes",
+          "columnName": "notes",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_to_connections.last_contact_at",
+          "name": "last_contact_at",
+          "columnName": "last_contact_at",
+          "type": "date",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_to_connections.interactions_count",
+          "name": "interactions_count",
+          "columnName": "interactions_count",
+          "type": "int4",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_to_connections.relationship_type",
+          "name": "relationship_type",
+          "columnName": "relationship_type",
+          "type": "text[]",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_to_connections.connection_score",
+          "name": "connection_score",
+          "columnName": "connection_score",
+          "type": "numeric",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_to_connections.updated_at",
+          "name": "updated_at",
+          "columnName": "updated_at",
+          "type": "timestamptz",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.user_to_connections.tags",
+          "name": "tags",
+          "columnName": "tags",
+          "type": "text[]",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "connections",
+          "type": "connections",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "user_to_connectionsToconnections",
+          "relationFromFields": [
+            "connection_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "user_profiles",
+          "type": "user_profiles",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "user_to_connectionsTouser_profiles",
+          "relationFromFields": [
+            "user_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "uc_email_per_user",
+          "fields": [
+            "connection_id",
+            "user_id"
+          ],
+          "nullNotDistinct": false
+        },
+        {
+          "name": "user_connections_pkey",
+          "fields": [
+            "connection_id",
+            "user_id"
           ],
           "nullNotDistinct": false
         }
