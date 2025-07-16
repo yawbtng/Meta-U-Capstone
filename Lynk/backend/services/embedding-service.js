@@ -101,7 +101,145 @@ export async function generateConnectionEmbedding(connectionProfile, model = 'to
   }
 
 
+  // Generate embeddings for a batch of user profiles
+export async function generateUserEmbeddingsBatch(userProfiles, model = 'togethercomputer/e5-mistral-7b-instruct') {
+    try {
+      if (!Array.isArray(userProfiles) || userProfiles.length === 0) {
+        return { success: false, error: 'User profiles array is required and cannot be empty' };
+      }
+  
+      // Filter and validate profiles
+      const validProfiles = [];
+      const invalidProfiles = [];
+      
+      for (let i = 0; i < userProfiles.length; i++) {
+        const profile = userProfiles[i];
+        const validation = validateProfileForEmbedding(profile, 'user');
+        
+        if (validation.success) {
+          validProfiles.push({ profile, index: i });
+        } else {
+          invalidProfiles.push({ profile, index: i, error: validation.error });
+        }
+      }
+  
+      if (validProfiles.length === 0) {
+        return { 
+          success: false, 
+          error: 'No valid user profiles found for embedding generation',
+          invalidProfiles 
+        };
+      }
+  
+      // Compose texts for valid profiles
+      const profileTexts = validProfiles.map(({ profile }) => composeProfileText(profile));
+      
+      // Generate embeddings in batch
+      const embeddings = await generateEmbeddingsBatch(profileTexts, model);
+      
+      // Map results back to original indices
+      const results = new Array(userProfiles.length);
+      validProfiles.forEach(({ index }, batchIndex) => {
+        results[index] = {
+          success: true,
+          embedding: embeddings[batchIndex],
+          profileText: profileTexts[batchIndex]
+        };
+      });
+      
+      invalidProfiles.forEach(({ index, error }) => {
+        results[index] = {
+          success: false,
+          error: `Invalid profile: ${error}`
+        };
+      });
+  
+      return { 
+        success: true, 
+        results,
+        summary: {
+          total: userProfiles.length,
+          successful: validProfiles.length,
+          failed: invalidProfiles.length
+        }
+      };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: `Failed to generate user embeddings batch: ${error.message}` 
+      };
+    }
+  }
 
+// Generate embeddings for multiple connection profiles
+export async function generateConnectionEmbeddingsBatch(connectionProfiles, model = 'togethercomputer/e5-mistral-7b-instruct') {
+    try {
+      if (!Array.isArray(connectionProfiles) || connectionProfiles.length === 0) {
+        return { success: false, error: 'Connection profiles array is required and cannot be empty' };
+      }
+  
+      // Filter and validate profiles
+      const validProfiles = [];
+      const invalidProfiles = [];
+      
+      for (let i = 0; i < connectionProfiles.length; i++) {
+        const profile = connectionProfiles[i];
+        const validation = validateProfileForEmbedding(profile, 'connection');
+        
+        if (validation.success) {
+          validProfiles.push({ profile, index: i });
+        } else {
+          invalidProfiles.push({ profile, index: i, error: validation.error });
+        }
+      }
+  
+      if (validProfiles.length === 0) {
+        return { 
+          success: false, 
+          error: 'No valid connection profiles found for embedding generation',
+          invalidProfiles 
+        };
+      }
+  
+      // Compose texts for valid profiles
+      const profileTexts = validProfiles.map(({ profile }) => composeProfileText(profile));
+      
+      // Generate embeddings in batch
+      const embeddings = await generateEmbeddingsBatch(profileTexts, model);
+      
+      // Map results back to original indices
+      const results = new Array(connectionProfiles.length);
+      validProfiles.forEach(({ index }, batchIndex) => {
+        results[index] = {
+          success: true,
+          embedding: embeddings[batchIndex],
+          profileText: profileTexts[batchIndex]
+        };
+      });
+      
+      invalidProfiles.forEach(({ index, error }) => {
+        results[index] = {
+          success: false,
+          error: `Invalid profile: ${error}`
+        };
+      });
+  
+      return { 
+        success: true, 
+        results,
+        summary: {
+          total: connectionProfiles.length,
+          successful: validProfiles.length,
+          failed: invalidProfiles.length
+        }
+      };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: `Failed to generate connection embeddings batch: ${error.message}` 
+      };
+    }
+}
 
 
 
