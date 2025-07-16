@@ -72,6 +72,34 @@ export async function generateUserEmbedding(userProfile, model = 'togethercomput
   }
 
 
+// Generate embeddings for a connection's profile
+export async function generateConnectionEmbedding(connectionProfile, model = 'togethercomputer/e5-mistral-7b-instruct') {
+    try {
+      // Validate connection profile
+      const validation = validateProfileForEmbedding(connectionProfile, 'connection');
+      if (!validation.success) {
+        return { success: false, error: validation.error };
+      }
+  
+      // Compose text for embedding
+      const profileText = composeProfileText(connectionProfile);
+      
+      // Generate embedding
+      const embedding = await generateEmbedding(profileText, model);
+      
+      return { 
+        success: true, 
+        embedding,
+        profileText // Return for debugging/logging
+      };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: `Failed to generate connection embedding: ${error.message}` 
+      };
+    }
+  }
+
 
 
 
