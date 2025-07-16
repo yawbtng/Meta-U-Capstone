@@ -23,11 +23,50 @@ function composeProfileText(profile) {
 // Validate profile for embedding generation
 function validateProfileForEmbedding(profile, profileType) {
     if (!profile) {
-        return { success: false, error: `${profileType} profile is required`};
+      return { success: false, error: `${profileType} profile is required` };
     }
-
-    const { role, company, location, interests } = profile;
   
+    if (typeof profile !== 'object') {
+      return { success: false, error: `${profileType} profile must be an object` };
+    }
+  
+    const { role, company, location, interests } = profile;
+    
+    // Validate individual fields
+    const fieldValidations = [];
+    
+    if (role !== undefined && role !== null && typeof role !== 'string') {
+      fieldValidations.push('role must be a string');
+    }
+    
+    if (company !== undefined && company !== null && typeof company !== 'string') {
+      fieldValidations.push('company must be a string');
+    }
+    
+    if (location !== undefined && location !== null && typeof location !== 'string') {
+      fieldValidations.push('location must be a string');
+    }
+    
+    if (interests !== undefined && interests !== null && !Array.isArray(interests)) {
+      fieldValidations.push('interests must be an array');
+    }
+    
+    if (interests && Array.isArray(interests)) {
+      const invalidInterests = interests.filter(interest => 
+        typeof interest !== 'string' || interest.trim().length === 0
+      );
+      if (invalidInterests.length > 0) {
+        fieldValidations.push('interests array must contain non-empty strings');
+      }
+    }
+    
+    if (fieldValidations.length > 0) {
+      return { 
+        success: false, 
+        error: `${profileType} profile validation failed: ${fieldValidations.join(', ')}` 
+      };
+    }
+    
     // Check if we have at least some meaningful data to embed
     const hasRole = role && role.trim().length > 0;
     const hasCompany = company && company.trim().length > 0;
@@ -35,13 +74,13 @@ function validateProfileForEmbedding(profile, profileType) {
     const hasInterests = interests && Array.isArray(interests) && interests.length > 0;
     
     if (!hasRole && !hasCompany && !hasLocation && !hasInterests) {
-        return { 
+      return { 
         success: false, 
         error: `${profileType} profile must have at least one of: role, company, location, or interests` 
-        };
+      };
     }
-  
-  return { success: true };
+    
+    return { success: true };
 }
 
 // Generate embeddings for a user's profile
@@ -52,7 +91,6 @@ export async function generateUserEmbedding(userProfile, model = 'togethercomput
       if (!validation.success) {
         return { success: false, error: validation.error };
       }
-  
 
       const profileText = composeProfileText(userProfile);
 
@@ -101,7 +139,7 @@ export async function generateConnectionEmbedding(connectionProfile, model = 'to
   }
 
 
-  // Generate embeddings for a batch of user profiles
+// Generate embeddings for a batch of user profiles
 export async function generateUserEmbeddingsBatch(userProfiles, model = 'togethercomputer/e5-mistral-7b-instruct') {
     try {
       if (!Array.isArray(userProfiles) || userProfiles.length === 0) {
