@@ -6,7 +6,7 @@ const qdrantClient = new QdrantClient({
 });
 
 // Collection configuration
-const COLLECTION_NAME = 'lynk-profiles';
+const COLLECTION_NAME = import.meta.env.VITE_QDRANT_COLLECTION_NAME;
 const VECTOR_DIMENSIONS = 768; // For BAAI/bge-base-en-v1.5
 
 // initializing the qdrant collection for storing people embeddings
