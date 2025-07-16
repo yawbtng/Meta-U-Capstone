@@ -1,4 +1,5 @@
-import { generateEmbedding, generateEmbeddingsBatch } from "./together-ai-client.js";
+import { generateEmbedding, generateEmbeddingsBatch, MODEL, embeddings } from "./together-ai-client.js";
+import { Document } from "@langchain/core/documents";
 
 // Setting up profile text for embedding
 function composeProfileText(profile) {
@@ -18,7 +19,6 @@ function composeProfileText(profile) {
 
     return textParts.join(' ').trim();
 }
-
 
 // Validate profile for embedding generation
 function validateProfileForEmbedding(profile, profileType) {
@@ -84,16 +84,14 @@ function validateProfileForEmbedding(profile, profileType) {
 }
 
 // Generate embeddings for a user's profile
-export async function generateUserEmbedding(userProfile, model = 'togethercomputer/e5-mistral-7b-instruct') {
+export async function generateUserEmbedding(userProfile, model = MODEL) {
     try {
-
       const validation = validateProfileForEmbedding(userProfile, 'user');
       if (!validation.success) {
         return { success: false, error: validation.error };
       }
 
       const profileText = composeProfileText(userProfile);
-
       const embedding = await generateEmbedding(profileText, model);
       
       return { 
@@ -107,11 +105,10 @@ export async function generateUserEmbedding(userProfile, model = 'togethercomput
         error: `Failed to generate user embedding: ${error.message}` 
       };
     }
-  }
-
+}
 
 // Generate embeddings for a connection's profile
-export async function generateConnectionEmbedding(connectionProfile, model = 'togethercomputer/e5-mistral-7b-instruct') {
+export async function generateConnectionEmbedding(connectionProfile, model = MODEL) {
     try {
       // Validate connection profile
       const validation = validateProfileForEmbedding(connectionProfile, 'connection');
@@ -136,11 +133,10 @@ export async function generateConnectionEmbedding(connectionProfile, model = 'to
         error: `Failed to generate connection embedding: ${error.message}` 
       };
     }
-  }
-
+}
 
 // Generate embeddings for a batch of user profiles
-export async function generateUserEmbeddingsBatch(userProfiles, model = 'togethercomputer/e5-mistral-7b-instruct') {
+export async function generateUserEmbeddingsBatch(userProfiles, model = MODEL) {
     try {
       if (!Array.isArray(userProfiles) || userProfiles.length === 0) {
         return { success: false, error: 'User profiles array is required and cannot be empty' };
@@ -173,14 +169,14 @@ export async function generateUserEmbeddingsBatch(userProfiles, model = 'togethe
       const profileTexts = validProfiles.map(({ profile }) => composeProfileText(profile));
       
       // Generate embeddings in batch
-      const embeddings = await generateEmbeddingsBatch(profileTexts, model);
+      const embeddingsArray = await generateEmbeddingsBatch(profileTexts, model);
       
       // Map results back to original indices
       const results = new Array(userProfiles.length);
       validProfiles.forEach(({ index }, batchIndex) => {
         results[index] = {
           success: true,
-          embedding: embeddings[batchIndex],
+          embedding: embeddingsArray[batchIndex],
           profileText: profileTexts[batchIndex]
         };
       });
@@ -207,10 +203,10 @@ export async function generateUserEmbeddingsBatch(userProfiles, model = 'togethe
         error: `Failed to generate user embeddings batch: ${error.message}` 
       };
     }
-  }
+}
 
 // Generate embeddings for multiple connection profiles
-export async function generateConnectionEmbeddingsBatch(connectionProfiles, model = 'togethercomputer/e5-mistral-7b-instruct') {
+export async function generateConnectionEmbeddingsBatch(connectionProfiles, model = MODEL) {
     try {
       if (!Array.isArray(connectionProfiles) || connectionProfiles.length === 0) {
         return { success: false, error: 'Connection profiles array is required and cannot be empty' };
@@ -243,14 +239,14 @@ export async function generateConnectionEmbeddingsBatch(connectionProfiles, mode
       const profileTexts = validProfiles.map(({ profile }) => composeProfileText(profile));
       
       // Generate embeddings in batch
-      const embeddings = await generateEmbeddingsBatch(profileTexts, model);
+      const embeddingsArray = await generateEmbeddingsBatch(profileTexts, model);
       
       // Map results back to original indices
       const results = new Array(connectionProfiles.length);
       validProfiles.forEach(({ index }, batchIndex) => {
         results[index] = {
           success: true,
-          embedding: embeddings[batchIndex],
+          embedding: embeddingsArray[batchIndex],
           profileText: profileTexts[batchIndex]
         };
       });
@@ -324,15 +320,24 @@ export function prepareConnectionMetadata(connectionProfile, userIds) {
     };
 }
 
-// Setting up vector point for storage
+// Create LangChain Document for vector storage
+export function createLangChainDocument(profile, metadata) {
+    const text = composeProfileText(profile);
+    return new Document({
+      pageContent: text,
+      metadata: metadata
+    });
+}
+
+// Setting up vector point for storage (for direct Qdrant operations)
 export function createVectorPoint(embedding, metadata) {
     if (!Array.isArray(embedding) || embedding.length === 0) {
       throw new Error('Valid embedding array is required');
     }
     
-    // Add dimension validation for e5-mistral-7b-instruct (1536 dimensions)
-    if (embedding.length !== 1536) {
-      throw new Error(`Expected embedding dimension 1536, got ${embedding.length}`);
+    // Update dimension validation for BAAI/bge-base-en-v1.5 (768 dimensions)
+    if (embedding.length !== 768) {
+      throw new Error(`Vector must have exactly 768 dimensions, got ${embedding.length}`);
     }
     
     if (!metadata || !metadata.id) {
@@ -371,5 +376,4 @@ export function validateVectorPoint(vectorPoint) {
     return { success: true };
 }
 
-
-export { composeProfileText, validateProfileForEmbedding };
+export { composeProfileText, validateProfileForEmbedding, embeddings };
