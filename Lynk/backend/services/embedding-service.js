@@ -44,4 +44,38 @@ function validateProfileForEmbedding(profile, profileType) {
   return { success: true };
 }
 
+// Generate embeddings for a user's profile
+export async function generateUserEmbedding(userProfile, model = 'togethercomputer/e5-mistral-7b-instruct') {
+    try {
+
+      const validation = validateProfileForEmbedding(userProfile, 'user');
+      if (!validation.success) {
+        return { success: false, error: validation.error };
+      }
+  
+
+      const profileText = composeProfileText(userProfile);
+
+      const embedding = await generateEmbedding(profileText, model);
+      
+      return { 
+        success: true, 
+        embedding,
+        profileText // Return for debugging/logging
+      };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: `Failed to generate user embedding: ${error.message}` 
+      };
+    }
+  }
+
+
+
+
+
+
+
+
 export { composeProfileText, validateProfileForEmbedding };
