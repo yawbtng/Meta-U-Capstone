@@ -243,3 +243,116 @@ export async function findSimilarConnections(userVector, userId, limit) {
   }
 }
 
+
+export async function findPeopleWithCriteria(userVector, criteria, limit = 10) {
+    try {
+      const filter = {
+        must: [
+          { key: "profile_type", match: { value: "user" } }
+        ]
+      };
+  
+      if (criteria.location) {
+        filter.must.push({
+          key: "location",
+          match: { value: criteria.location }
+        });
+      }
+  
+      if (criteria.role) {
+        filter.must.push({
+          key: "role",
+          match: { value: criteria.role }
+        });
+      }
+  
+      if (criteria.company) {
+        filter.must.push({
+          key: "company",
+          match: { value: criteria.company }
+        });
+      }
+  
+      filter.must_not = [
+        { key: "user_id", match: { value: criteria.userId } }
+      ];
+  
+      const results = await searchSimilarVectors(
+        userVector,
+        limit,
+        filter,
+        criteria.minScore || 0.5
+      );
+  
+      return results.map(result => ({
+        id: result.id,
+        score: result.score,
+        payload: result.payload,
+        matchReason: generateMatchReason(result.score, criteria)
+      }));
+    } catch (error) {
+      console.error("Failed to find people with criteria:", error);
+      throw new Error(`Criteria search failed: ${error.message}`);
+    }
+}
+
+export async function findConnectionsByCriteria(userVector, criteria, limit = 10) {
+  try {
+    const filter = {
+      must: [
+        { key: "profile_type", match: { value: "connection" } }
+      ]
+    };
+
+    if (criteria.location) {
+      filter.must.push({
+        key: "location",
+        match: { value: criteria.location }
+      });
+    }
+
+    if (criteria.role) {
+      filter.must.push({
+        key: "role",
+        match: { value: criteria.role }
+      });
+    }
+
+    if (criteria.company) {
+      filter.must.push({
+        key: "company",
+        match: { value: criteria.company }
+      });
+    }
+
+    // Exclude connections that belong to the current user
+    filter.must_not = [
+      { key: "user_ids", match: { value: criteria.userId } }
+    ];
+
+    const results = await searchSimilarVectors(
+      userVector,
+      limit,
+      filter,
+      criteria.minScore || 0.5
+    );
+
+    return results.map(result => ({
+      id: result.id,
+      score: result.score,
+      payload: result.payload,
+      matchReason: generateMatchReason(result.score, criteria)
+    }));
+  } catch (error) {
+    console.error("Failed to find connections by criteria:", error);
+    throw new Error(`Connection criteria search failed: ${error.message}`);
+  }
+}
+
+
+function generateMatchReason(score, criteria) {
+    if (score >= 0.8) return "Very similar profile and interests";
+    if (score >= 0.6) return "Similar background and industry";
+    if (score >= 0.4) return "Some shared interests and experience";
+    return "Matches your search criteria";
+}
