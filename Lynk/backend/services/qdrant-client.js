@@ -138,7 +138,7 @@ export async function deleteVectors(ids) {
 }
 
 // Search for similar vectors using cosine similarity
-export async function searchSimilarVectors(queryVector, limit = 10, filter = null, scoreThreshold = 0.7) {
+export async function searchSimilarVectors(queryVector, limit = 20, filter = null, scoreThreshold = 0.7) {
     try {
       if (!Array.isArray(queryVector) || queryVector.length !== VECTOR_DIMENSIONS) {
         throw new Error(`Query vector must be an array of ${VECTOR_DIMENSIONS} dimensions`);
@@ -168,184 +168,192 @@ export async function searchSimilarVectors(queryVector, limit = 10, filter = nul
   }
 
 
-// Find people similar to a user 
-export async function findSimilarPeople(userVector, userId, limit) {
-    try {
-      const filter = {
-        must: [
-          {
-            key: "profile_type",
-            match: { value: "user" }
-          }
-        ],
-        // Exclude the user themselves and people they already know
-        must_not: [
-          {
-            key: "user_id", 
-            match: { value: userId }
-          }
-        ]
-      };
-  
-      const results = await searchSimilarVectors(
-        userVector, 
-        limit, 
-        filter, 
-        0.6
-      );
-      
-      return results.map((result) => ({
-        id: result.id,
-        score: result.score,
-        payload: result.payload,
-        similarity: `${Math.round(result.score * 100)}%`
-      }));
-    } catch (error) {
-      console.error("Failed to find similar people:", error);
-      throw new Error(`Similar people search failed: ${error.message}`);
-    }
-}
-
-// Find connections similar to a user (connections belonging to OTHER users)
-export async function findSimilarConnections(userVector, userId, limit) {
+// Generic recommendation finder - single source of truth
+export async function findRecommendations({
+  userVector,
+  filter,
+  limit = 20,
+  offset = 0
+}) {
   try {
-    const filter = {
-      must: [
-        {
-          key: "profile_type",
-          match: { value: "connection" }
-        }
-      ],
-      must_not: [
-        {
-          key: "user_ids",
-          match: { value: userId }
-        }
-      ]
+    if (!Array.isArray(userVector) || userVector.length !== VECTOR_DIMENSIONS) {
+      throw new Error(`User vector must be an array of ${VECTOR_DIMENSIONS} dimensions`);
+    }
+
+    // Let Qdrant handle pagination efficiently
+    const searchParams = {
+      vector: userVector,
+      filter: filter,
+      limit: limit,
+      offset: offset,
+      score_threshold: 0.6,
+      with_payload: true,
+      with_vector: false
     };
 
-    const results = await searchSimilarVectors(
-      userVector, 
-      limit, 
-      filter, 
-      0.6
-    );
-    
-    return results.map((result) => ({
-      id: result.id,
-      score: result.score,
-      payload: result.payload,
-      similarity: `${Math.round(result.score * 100)}%`
+    const results = await qdrantClient.search(COLLECTION_NAME, searchParams);
+
+    const recommendations = results.map(hit => ({
+      id: hit.id,
+      score: hit.score,
+      payload: hit.payload,
+      similarity: `${Math.round(hit.score * 100)}%`
     }));
+
+    // Get total count for pagination metadata
+    const totalCount = await estimateTotalCount(filter);
+
+    return {
+      recommendations: recommendations,
+      pagination: {
+        currentPage: Math.floor(offset / limit) + 1,
+        totalResults: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        hasMore: results.length === limit && (offset + limit) < totalCount,
+        currentCount: results.length
+      }
+    };
   } catch (error) {
-    console.error("Failed to find similar connections:", error);
-    throw new Error(`Similar connections search failed: ${error.message}`);
+    console.error("Recommendation search failed:", error);
+    throw new Error(`Recommendation search failed: ${error.message}`);
   }
 }
 
-
-export async function findPeopleWithCriteria(userVector, criteria, limit = 10) {
-    try {
-      const filter = {
-        must: [
-          { key: "profile_type", match: { value: "user" } }
-        ]
-      };
-  
-      if (criteria.location) {
-        filter.must.push({
-          key: "location",
-          match: { value: criteria.location }
-        });
-      }
-  
-      if (criteria.role) {
-        filter.must.push({
-          key: "role",
-          match: { value: criteria.role }
-        });
-      }
-  
-      if (criteria.company) {
-        filter.must.push({
-          key: "company",
-          match: { value: criteria.company }
-        });
-      }
-  
-      filter.must_not = [
-        { key: "user_id", match: { value: criteria.userId } }
-      ];
-  
-      const results = await searchSimilarVectors(
-        userVector,
-        limit,
-        filter,
-        criteria.minScore || 0.5
-      );
-  
-      return results.map(result => ({
-        id: result.id,
-        score: result.score,
-        payload: result.payload,
-        matchReason: generateMatchReason(result.score, criteria)
-      }));
-    } catch (error) {
-      console.error("Failed to find people with criteria:", error);
-      throw new Error(`Criteria search failed: ${error.message}`);
-    }
+// Helper to get total count for a given filter
+async function estimateTotalCount(filter) {
+  try {
+    const stats = await qdrantClient.count(COLLECTION_NAME, {
+      filter: filter
+    });
+    return stats.count;
+  } catch (error) {
+    console.error("Failed to get total count:", error);
+    // Fallback: return a reasonable estimate
+    return 1000;
+  }
 }
 
-export async function findConnectionsByCriteria(userVector, criteria, limit = 10) {
-  try {
-    const filter = {
+// Convenience functions that use the generic finder
+export async function findSimilarPeople(userVector, userId, limit = 20, offset = 0) {
+  return findRecommendations({
+    userVector,
+    filter: {
+      must: [
+        { key: "profile_type", match: { value: "user" } }
+      ],
+      must_not: [
+        { key: "user_id", match: { value: userId } }
+      ]
+    },
+    limit,
+    offset
+  });
+}
+
+export async function findSimilarConnections(userVector, userId, limit = 20, offset = 0) {
+  return findRecommendations({
+    userVector,
+    filter: {
       must: [
         { key: "profile_type", match: { value: "connection" } }
+      ],
+      must_not: [
+        { key: "user_ids", match: { value: userId } }
       ]
+    },
+    limit,
+    offset
+  });
+}
+
+export async function findConnectionsByCriteria(userVector, criteria, limit = 20, offset = 0) {
+  const filter = {
+    must: [
+      { key: "profile_type", match: { value: "connection" } }
+    ]
+  };
+
+  // Build dynamic filter based on criteria
+  if (criteria.location) {
+    filter.must.push({
+      key: "location",
+      match: { value: criteria.location }
+    });
+  }
+
+  if (criteria.role) {
+    filter.must.push({
+      key: "role",
+      match: { value: criteria.role }
+    });
+  }
+
+  if (criteria.company) {
+    filter.must.push({
+      key: "company",
+      match: { value: criteria.company }
+    });
+  }
+
+  filter.must_not = [
+    { key: "user_ids", match: { value: criteria.userId } }
+  ];
+
+  return findRecommendations({
+    userVector,
+    filter,
+    limit,
+    offset
+  });
+}
+
+// Unified API function for all recommendation types
+export async function getRecommendationsAPI({
+  userVector,
+  userId,
+  type = 'people',
+  limit = 20,
+  offset = 0,
+  criteria = {}
+}) {
+  try {
+    let result;
+
+    switch (type) {
+      case 'people':
+        result = await findSimilarPeople(userVector, userId, limit, offset);
+        break;
+      case 'connections':
+        result = await findSimilarConnections(userVector, userId, limit, offset);
+        break;
+      case 'criteria':
+        result = await findConnectionsByCriteria(userVector, { ...criteria, userId }, limit, offset);
+        break;
+      default:
+        throw new Error(`Unknown recommendation type: ${type}`);
+    }
+
+    return {
+      success: true,
+      data: result.recommendations,
+      pagination: result.pagination,
+      type: type,
+      timestamp: new Date().toISOString()
     };
-
-    if (criteria.location) {
-      filter.must.push({
-        key: "location",
-        match: { value: criteria.location }
-      });
-    }
-
-    if (criteria.role) {
-      filter.must.push({
-        key: "role",
-        match: { value: criteria.role }
-      });
-    }
-
-    if (criteria.company) {
-      filter.must.push({
-        key: "company",
-        match: { value: criteria.company }
-      });
-    }
-
-    // Exclude connections that belong to the current user
-    filter.must_not = [
-      { key: "user_ids", match: { value: criteria.userId } }
-    ];
-
-    const results = await searchSimilarVectors(
-      userVector,
-      limit,
-      filter,
-      criteria.minScore || 0.5
-    );
-
-    return results.map(result => ({
-      id: result.id,
-      score: result.score,
-      payload: result.payload,
-      matchReason: generateMatchReason(result.score, criteria)
-    }));
   } catch (error) {
-    console.error("Failed to find connections by criteria:", error);
-    throw new Error(`Connection criteria search failed: ${error.message}`);
+    console.error("Failed to get recommendations:", error);
+    return {
+      success: false,
+      error: error.message,
+      data: [],
+      pagination: {
+        currentPage: 1,
+        totalPages: 0,
+        hasMore: false,
+        totalResults: 0,
+        currentCount: 0
+      }
+    };
   }
 }
 
