@@ -35,5 +35,4 @@ export async function generateEmbeddingsBatch(texts, model = MODEL) {
     throw new Error(`Together AI error: ${err.message}`);
   }
 }
-
 export { embeddings };

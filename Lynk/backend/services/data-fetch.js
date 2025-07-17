@@ -32,7 +32,6 @@ export async function fetchAllConnections() {
     return connections; // Return connections without user_ids
   }
 
-  // Map connection.id => [user_id, ...]
   const connectionToUsers = {};
   for (const row of userToConnections) {
     if (!connectionToUsers[row.connection_id]) {
