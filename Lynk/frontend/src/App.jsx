@@ -7,6 +7,7 @@ import { Outlet } from 'react-router-dom'
 import UserProfile from './pages/Settings';
 import AddContact from './pages/AddContact';
 import AllContacts from './pages/AllContacts';
+import TestPipeline from './pages/TestPipeline';
 import { Toaster } from "sonner";
 
 export const router = createBrowserRouter([
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
     children: [
       { path: 'signup', element: <SignUp /> },
       { path: 'signin', element: <SignIn /> },
+      { path: 'test-pipeline', element: <TestPipeline /> },
       { path: 'home', element: <PrivateRoute><Dashboard /></PrivateRoute> },
       { path: 'settings', element: <PrivateRoute><UserProfile /></PrivateRoute> },
       { path: 'add-contact', element: <PrivateRoute><AddContact /></PrivateRoute> },
