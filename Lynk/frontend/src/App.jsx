@@ -21,11 +21,11 @@ export const router = createBrowserRouter([
     children: [
       { path: 'signup', element: <SignUp /> },
       { path: 'signin', element: <SignIn /> },
-      { path: 'test-pipeline', element: <TestPipeline /> },
       { path: 'home', element: <PrivateRoute><Dashboard /></PrivateRoute> },
       { path: 'settings', element: <PrivateRoute><UserProfile /></PrivateRoute> },
       { path: 'add-contact', element: <PrivateRoute><AddContact /></PrivateRoute> },
       { path: 'all-contacts', element: <PrivateRoute><AllContacts /></PrivateRoute> },
+      { path: 'test-pipeline', element: <PrivateRoute><TestPipeline /></PrivateRoute> },
     ],
   },
 ]);
