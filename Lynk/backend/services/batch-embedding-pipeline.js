@@ -1,5 +1,5 @@
-import { fetchAllUsers } from "./data-fetch.js";
-import { generateUserEmbeddingsBatch, prepareUserMetadata, createVectorPoint, validateVectorPoint } from "./embedding-service.js";
+import { fetchAllUsers, fetchAllConnections } from "./data-fetch.js";
+import { generateUserEmbeddingsBatch, generateConnectionEmbeddingsBatch, prepareUserMetadata, prepareConnectionMetadata, createVectorPoint, validateVectorPoint } from "./embedding-service.js";
 import { upsertVectorsBatch } from "./qdrant-client.js";
 
 export async function processAllUserEmbeddings() {

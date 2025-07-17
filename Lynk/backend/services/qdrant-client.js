@@ -1,9 +1,27 @@
-import { QdrantClient } from "@qdrant/js-client-rest";
+// Use fetch-based client for browser compatibility
+const QDRANT_URL = import.meta.env.VITE_QDRANT_URL;
+const QDRANT_API_KEY = import.meta.env.VITE_QDRANT_API_KEY;
 
-const qdrantClient = new QdrantClient({
-    url: import.meta.env.VITE_QDRANT_URL,
-    apiKey: import.meta.env.VITE_QDRANT_API_KEY,
-});
+// Helper function for authenticated requests
+async function qdrantRequest(endpoint, options = {}) {
+  const url = `${QDRANT_URL}${endpoint}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    'api-key': QDRANT_API_KEY,
+    ...options.headers
+  };
+
+  const response = await fetch(url, {
+    ...options,
+    headers
+  });
+
+  if (!response.ok) {
+    throw new Error(`Qdrant API error: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json();
+}
 
 // Collection configuration
 const COLLECTION_NAME = import.meta.env.VITE_QDRANT_COLLECTION_NAME;
@@ -13,7 +31,7 @@ const VECTOR_DIMENSIONS = 768; // For BAAI/bge-base-en-v1.5
 export async function initializeCollection() {
     try {
       // Check if collection exists
-      const collections = await qdrantClient.getCollections();
+      const collections = await qdrantRequest('/collections');
       const collectionExists = collections.collections.some(
         (col) => col.name === COLLECTION_NAME
       );
@@ -21,22 +39,31 @@ export async function initializeCollection() {
       if (!collectionExists) {
         console.log(`Creating collection: ${COLLECTION_NAME}`);
         
-        await qdrantClient.createCollection(COLLECTION_NAME, {
-          vectors: {
-            size: VECTOR_SIZE,
-            distance: "Cosine",
-          },
+        await qdrantRequest(`/collections/${COLLECTION_NAME}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            vectors: {
+              size: VECTOR_DIMENSIONS,
+              distance: "Cosine",
+            },
+          })
         });
   
         // Create payload indexes for efficient filtering
-        await qdrantClient.createPayloadIndex(COLLECTION_NAME, {
-          field_name: "user_id",
-          field_schema: "keyword",
+        await qdrantRequest(`/collections/${COLLECTION_NAME}/index`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            field_name: "user_id",
+            field_schema: "keyword",
+          })
         });
   
-        await qdrantClient.createPayloadIndex(COLLECTION_NAME, {
-          field_name: "profile_type",
-          field_schema: "keyword",
+        await qdrantRequest(`/collections/${COLLECTION_NAME}/index`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            field_name: "profile_type",
+            field_schema: "keyword",
+          })
         });
   
         console.log(`Collection ${COLLECTION_NAME} created successfully`);
@@ -53,7 +80,7 @@ export async function initializeCollection() {
 
 export async function getCollectionInfo() {
     try {
-      const info = await qdrantClient.getCollection(COLLECTION_NAME);
+      const info = await qdrantRequest(`/collections/${COLLECTION_NAME}`);
       return info;
     } catch (error) {
       console.error(" Failed to get collection info:", error);
@@ -69,18 +96,21 @@ export async function upsertVector(id, vector, payload) {
         throw new Error("Missing required parameters: id, vector, or payload");
       }
   
-      if (!Array.isArray(vector) || vector.length !== VECTOR_SIZE) {
-        throw new Error(`Vector must be an array of ${VECTOR_SIZE} dimensions`);
+      if (!Array.isArray(vector) || vector.length !== VECTOR_DIMENSIONS) {
+        throw new Error(`Vector must be an array of ${VECTOR_DIMENSIONS} dimensions`);
       }
   
-      await qdrantClient.upsert(COLLECTION_NAME, {
-        points: [
-          {
-            id: id,
-            vector: vector,
-            payload: payload,
-          },
-        ],
+      await qdrantRequest(`/collections/${COLLECTION_NAME}/points`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          points: [
+            {
+              id: id,
+              vector: vector,
+              payload: payload,
+            },
+          ],
+        })
       });
   
       console.log(`Upserted vector with ID: ${id}`);
@@ -102,13 +132,16 @@ export async function upsertVectorsBatch(points) {
         if (!point.id || !point.vector || !point.payload) {
           throw new Error("Each point must have id, vector, and payload");
         }
-        if (!Array.isArray(point.vector) || point.vector.length !== VECTOR_SIZE) {
-          throw new Error(`All vectors must be ${VECTOR_SIZE} dimensions`);
+        if (!Array.isArray(point.vector) || point.vector.length !== VECTOR_DIMENSIONS) {
+          throw new Error(`All vectors must be ${VECTOR_DIMENSIONS} dimensions`);
         }
       }
   
-      await qdrantClient.upsert(COLLECTION_NAME, {
-        points: points,
+      await qdrantRequest(`/collections/${COLLECTION_NAME}/points`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          points: points,
+        })
       });
   
       console.log(`Upserted ${points.length} vectors successfully`);
@@ -125,8 +158,11 @@ export async function deleteVectors(ids) {
         throw new Error("IDs must be a non-empty array");
       }
   
-      await qdrantClient.delete(COLLECTION_NAME, {
-        points: ids,
+      await qdrantRequest(`/collections/${COLLECTION_NAME}/points/delete`, {
+        method: 'POST',
+        body: JSON.stringify({
+          points: ids,
+        })
       });
   
       console.log(`Deleted ${ids.length} vectors successfully`);
@@ -156,7 +192,10 @@ export async function searchSimilarVectors(queryVector, limit = 20, filter = nul
         searchParams.filter = filter;
       }
   
-      const results = await qdrantClient.search(COLLECTION_NAME, searchParams);
+      const results = await qdrantRequest(`/collections/${COLLECTION_NAME}/points/search`, {
+        method: 'POST',
+        body: JSON.stringify(searchParams)
+      });
   
       console.info(`Found ${results.length} similar vectors with score >= ${scoreThreshold}`);
       
@@ -222,8 +261,11 @@ export async function findRecommendations({
 // Helper to get total count for a given filter
 async function estimateTotalCount(filter) {
   try {
-    const stats = await qdrantClient.count(COLLECTION_NAME, {
-      filter: filter
+    const stats = await qdrantRequest(`/collections/${COLLECTION_NAME}/points/count`, {
+      method: 'POST',
+      body: JSON.stringify({
+        filter: filter
+      })
     });
     return stats.count;
   } catch (error) {

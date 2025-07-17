@@ -2,7 +2,8 @@ import { TogetherAIEmbeddings } from "@langchain/community/embeddings/togetherai
 
 // Initialize LangChain Together AI embeddings
 const embeddings = new TogetherAIEmbeddings({
-  model: "BAAI/bge-base-en-v1.5", // 768 dimensions
+  apiKey: import.meta.env.VITE_TOGETHER_AI_API_KEY,
+  model: "BAAI/bge-base-en-v1.5",
 });
 
 export const MODEL = 'BAAI/bge-base-en-v1.5';

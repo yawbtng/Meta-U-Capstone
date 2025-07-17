@@ -42,6 +42,11 @@ const Dashboard = () => {
                 className="bg-black text-white mx-2">
                     Settings
                 </Button>
+
+                <Button onClick={() => navigate("/test-pipeline")}
+                className="bg-blue-600 text-white mx-2">
+                    Test Pipeline
+                </Button>
             </nav>
 
             <h1 className="bg-blue-500">Dashboard</h1>
