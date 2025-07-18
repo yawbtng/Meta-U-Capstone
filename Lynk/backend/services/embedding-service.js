@@ -275,50 +275,51 @@ export async function generateConnectionEmbeddingsBatch(connectionProfiles, mode
     }
 }
 
-// Prepare metadata for user profile vector storage
-export function prepareUserMetadata(userProfile) {
-    const { id, name, email } = userProfile;
-    
-    if (!id) {
-      throw new Error('User ID is required for metadata preparation');
-    }
-    
-    return {
-      id: id,
-      name: name || 'Unknown User',
-      email: email || '',
-      type: 'user',
-      created_at: new Date().toISOString()
-    };
+export function prepareUserMetadata(userProfile, profileText = '') {
+  const { id, name, email } = userProfile;
+  
+  if (!id) {
+    throw new Error('User ID is required for metadata preparation');
+  }
+  
+  return {
+    id: id,
+    name: name || 'Unknown User',
+    email: email || '',
+    type: 'user',
+    profile_text: profileText,
+    created_at: new Date().toISOString()
+  };
 }
 
-// Prepare metadata for connection profile vector storage
-export function prepareConnectionMetadata(connectionProfile, userIds) {
-    const { id, name, email } = connectionProfile;
-    
-    if (!id) {
-      throw new Error('Connection ID is required for metadata preparation');
-    }
-    
-    if (!userIds) {
-      throw new Error('User ID(s) are required for connection metadata preparation');
-    }
-    
-    const userIdArray = Array.isArray(userIds) ? userIds : [userIds];
-    
-    if (userIdArray.length === 0) {
-      throw new Error('At least one user ID is required for connection metadata preparation');
-    }
-    
-    return {
-      id: id,
-      name: name || 'Unknown Connection',
-      email: email || '',
-      type: 'connection',
-      user_ids: userIdArray, // Array of user IDs for many-to-many relationships
-      created_at: new Date().toISOString()
-    };
+export function prepareConnectionMetadata(connectionProfile, userIds, profileText = '') {
+  const { id, name, email } = connectionProfile;
+  
+  if (!id) {
+    throw new Error('Connection ID is required for metadata preparation');
+  }
+  
+  if (!userIds) {
+    throw new Error('User ID(s) are required for connection metadata preparation');
+  }
+  
+  const userIdArray = Array.isArray(userIds) ? userIds : [userIds];
+  
+  if (userIdArray.length === 0) {
+    throw new Error('At least one user ID is required for connection metadata preparation');
+  }
+  
+  return {
+    id: id,
+    name: name || 'Unknown Connection',
+    email: email || '',
+    type: 'connection',
+    user_ids: userIdArray,
+    profile_text: profileText,
+    created_at: new Date().toISOString()
+  };
 }
+
 
 // Create LangChain Document for vector storage
 export function createLangChainDocument(profile, metadata) {

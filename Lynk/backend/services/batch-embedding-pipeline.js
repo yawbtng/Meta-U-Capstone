@@ -1,8 +1,10 @@
 import { fetchAllUsers, fetchAllConnections } from "./data-fetch.js";
 import { generateUserEmbeddingsBatch, generateConnectionEmbeddingsBatch, prepareUserMetadata, prepareConnectionMetadata, createVectorPoint, validateVectorPoint } from "./embedding-service.js";
-import { upsertVectorsBatch } from "./qdrant-client.js";
+// CHANGE: Import from new Supabase client instead of Qdrant
+import { upsertVectorsBatch } from "./supabase-vector.js";
 
 export async function processAllUserEmbeddings() {
+  console.log('Starting user embeddings processing with Supabase...');
   const users = await fetchAllUsers();
   if (!users.length) {
     console.log("No users found.");
@@ -19,7 +21,8 @@ export async function processAllUserEmbeddings() {
   batchResult.results.forEach((result, idx) => {
     if (result.success) {
       try {
-        const metadata = prepareUserMetadata(users[idx]);
+        // CHANGE: Pass profile text to metadata preparation
+        const metadata = prepareUserMetadata(users[idx], result.profileText);
         const point = createVectorPoint(result.embedding, metadata);
         const valid = validateVectorPoint(point);
         if (valid.success) {
@@ -40,11 +43,13 @@ export async function processAllUserEmbeddings() {
     return;
   }
 
+  // CHANGE: Now uses Supabase LangChain instead of Qdrant
   await upsertVectorsBatch(vectorPoints);
-  console.log(`Upserted ${vectorPoints.length} user vectors to Qdrant.`);
+  console.log(`Upserted ${vectorPoints.length} user vectors to Supabase.`);
 }
 
 export async function processAllConnectionEmbeddings() {
+  console.log('Starting connection embeddings processing with Supabase...');
   const connections = await fetchAllConnections();
   if (!connections.length) {
     console.log("No connections found.");
@@ -61,7 +66,12 @@ export async function processAllConnectionEmbeddings() {
   batchResult.results.forEach((result, idx) => {
     if (result.success) {
       try {
-        const metadata = prepareConnectionMetadata(connections[idx], connections[idx].user_ids);
+        // CHANGE: Pass profile text to metadata preparation
+        const metadata = prepareConnectionMetadata(
+          connections[idx], 
+          connections[idx].user_ids,
+          result.profileText
+        );
         const point = createVectorPoint(result.embedding, metadata);
         const valid = validateVectorPoint(point);
         if (valid.success) {
@@ -82,6 +92,7 @@ export async function processAllConnectionEmbeddings() {
     return;
   }
 
+  // CHANGE: Now uses Supabase LangChain instead of Qdrant
   await upsertVectorsBatch(vectorPoints);
-  console.log(`Upserted ${vectorPoints.length} connection vectors to Qdrant.`);
+  console.log(`Upserted ${vectorPoints.length} connection vectors to Supabase.`);
 }
