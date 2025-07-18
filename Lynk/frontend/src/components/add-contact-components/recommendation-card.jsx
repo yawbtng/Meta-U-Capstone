@@ -14,8 +14,24 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
         "bg-orange-100 text-orange-800"
     ];
 
+    // Get similarity color based on score
+    const getSimilarityColor = (score) => {
+        if (score >= 70) return "bg-green-100 text-green-800";
+        if (score >= 30) return "bg-yellow-100 text-yellow-800";
+        return "bg-red-100 text-red-800";
+    };
+
     return (
         <Card className="hover:shadow-md transition-shadow relative">
+            {/* Similarity score in top left */}
+            {similarity && (
+                <div className="absolute top-2 left-2">
+                    <Badge className={`text-xs ${getSimilarityColor(similarity)}`}>
+                        {similarity}%
+                    </Badge>
+                </div>
+            )}
+
             {/* Dismiss button (X) in top right */}
             <button 
                 onClick={(e) => {
