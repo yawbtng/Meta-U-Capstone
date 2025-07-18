@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, X, Linkedin } from "lucide-react";
+import { UserPlus, X } from "lucide-react";
 import AvatarDemo from "../avatar-01";
 import { getInitials } from "../contacts-table-components/columns";
 
@@ -22,11 +22,11 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
     };
 
     return (
-        <Card className="hover:shadow-md transition-shadow relative">
+        <Card className="hover:shadow-md transition-shadow relative h-[320px]">
             {/* Similarity score in top left */}
             {similarity && (
-                <div className="absolute top-2 left-2">
-                    <Badge className={`text-xs ${getSimilarityColor(similarity)}`}>
+                <div className="absolute top-3 left-3">
+                    <Badge className={`text-sm ${getSimilarityColor(similarity)}`}>
                         {similarity}%
                     </Badge>
                 </div>
@@ -38,24 +38,24 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
                     e.stopPropagation();
                     onDismiss?.(contact);
                 }}
-                className="absolute top-2 right-2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+                className="absolute top-3 right-3 p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
-                <X className="w-4 h-4 text-gray-500" />
+                <X className="w-5 h-5 text-gray-500" />
             </button>
 
-            <CardHeader className="pb-3 pt-6">
-                <div className="flex flex-col items-center text-center space-y-3">
+            <CardHeader className="pb-0 pt-8 ">
+                <div className="flex flex-col items-center text-center space-y-2">
                     {/* Avatar */}
                     <AvatarDemo 
                         initials={getInitials(contact.name)} 
-                        className="w-16 h-16 text-xl"
+                        className="w-20 h-20 text-2xl"
                     />
                     
                     {/* Name */}
-                    <h3 className="font-semibold text-lg">{contact.name}</h3>
+                    <h3 className="font-semibold text-xl">{contact.name}</h3>
                     
                     {/* Title/Company */}
-                    <p className="text-sm text-muted-foreground text-center">
+                    <p className="text-base text-muted-foreground text-center">
                         {contact.role && contact.company ? 
                             `${contact.role} at ${contact.company}` : 
                             contact.role || contact.company || 'No company info'
@@ -63,11 +63,11 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
                     </p>
                     
                     {/* Interest badges */}
-                    <div className="flex flex-wrap gap-1 justify-center">
+                    <div className="flex flex-wrap gap-1 justify-center max-w-full">
                         {contact.interests?.slice(0, 3).map((interest, index) => (
                             <Badge 
                                 key={index} 
-                                className={`text-xs ${badgeColors[index % badgeColors.length]}`}
+                                className={`text-xs px-2 ${badgeColors[index % badgeColors.length]}`}
                             >
                                 {interest}
                             </Badge>
@@ -76,16 +76,16 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
                 </div>
             </CardHeader>
             
-            <CardContent className="pt-0 pb-4">
+            <CardContent className=" bottom-0 left-0 right-0 px-6">
                 {/* Connect button */}
                 <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-base"
                     onClick={(e) => {
                         e.stopPropagation();
                         onQuickAdd(contact);
                     }}
                 >
-                    <UserPlus className="w-4 h-4 mr-2" />
+                    <UserPlus className="w-5 h-5 mr-2 " />
                     Connect
                 </Button>
             </CardContent>
