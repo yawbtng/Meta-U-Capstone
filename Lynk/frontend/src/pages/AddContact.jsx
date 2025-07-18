@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AddContactManual from '../components/add-contact-components/AddContactManual';
+import RecommendationCard from '../components/add-contact-components/recommendation-card';
 
 export default function AddContact() {
     return (
@@ -30,9 +31,18 @@ export default function AddContact() {
                 </TabsContent>
                 
                 <TabsContent value="recommendations" className="mt-6">
-                    <div className="text-center py-12 text-muted-foreground">
-                        <p>Recommendations coming soon...</p>
-                        <p className="text-sm mt-2">AI-powered recommendations based on your profile and network.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <RecommendationCard contact={{
+                            name: "John Doe",
+                            role: "Software Engineer",
+                            company: "Google"
+                        }} />
+                        <RecommendationCard contact={{
+                            name: "Jane Smith",
+                            role: "Product Manager",
+                            company: "Apple"
+                        }} />
+                        
                     </div>
                 </TabsContent>
             </Tabs>
