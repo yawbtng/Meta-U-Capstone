@@ -43,7 +43,7 @@ export default function AddContactRecommendation() {
         setCurrentOffset(0);
         
         try {
-            const result = await fetchUserRecommendations(user.id, 20, 0);
+            const result = await fetchUserRecommendations(user.id, 16, 0);
             
             if (result.success) {
                 setRecommendations(result.data);
@@ -65,6 +65,8 @@ export default function AddContactRecommendation() {
         const nextOffset = currentOffset + 20;
         
         try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
             const result = await fetchUserRecommendations(user.id, 20, nextOffset);
             
             if (result.success) {
@@ -215,12 +217,17 @@ export default function AddContactRecommendation() {
                 })}
             </div>
 
-            {/* Loading indicator for more recommendations */}
+            {/* Enhanced loading indicator for more recommendations */}
             {loadingMore && (
                 <div className="flex justify-center items-center py-8">
-                    <div className="flex items-center space-x-2 text-muted-foreground">
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Loading more recommendations...</span>
+                    <div className="flex flex-col items-center space-y-3">
+                        <div className="flex items-center space-x-2 text-muted-foreground">
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                            <span>Finding more people you may know...</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                            This may take a moment
+                        </div>
                     </div>
                 </div>
             )}
