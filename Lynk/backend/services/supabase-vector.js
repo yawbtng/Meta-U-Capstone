@@ -197,25 +197,6 @@ export async function searchSimilarVectors(queryVector, limit = 20, filter = nul
     };
 }
 
-export async function findSimilarConnections(userVector, userId, limit = 20, offset = 0) {
-  const filter = {
-    must: [{ key: "type", match: { value: "connection" } }]
-  };
-
-  const results = await searchSimilarVectors(userVector, limit, filter, 0.6);
-  
-  return {
-    recommendations: results,
-    pagination: {
-      currentPage: Math.floor(offset / limit) + 1,
-      totalResults: results.length * 10,
-      totalPages: Math.ceil((results.length * 10) / limit),
-      hasMore: results.length === limit,
-      currentCount: results.length
-    }
-  };
-}
-
 export async function getRecommendationsAPI({
   userVector,
   userId,
