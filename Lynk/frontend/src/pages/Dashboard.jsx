@@ -3,13 +3,9 @@ import { UserAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
 import { Button } from "../components/ui/button"
 
-
-
 const Dashboard = () => {
     const {session, signOut} = UserAuth();
     const navigate = useNavigate();
-
-
 
 
     const handleSignOut = async (e) => {
@@ -43,10 +39,10 @@ const Dashboard = () => {
                     Settings
                 </Button>
 
-                <Button onClick={() => navigate("/test-pipeline")}
+                {/* <Button onClick={() => navigate("/test-pipeline")}
                 className="bg-blue-600 text-white mx-2">
                     Test Pipeline
-                </Button>
+                </Button> */}
             </nav>
 
             <h1 className="bg-blue-500">Dashboard</h1>
