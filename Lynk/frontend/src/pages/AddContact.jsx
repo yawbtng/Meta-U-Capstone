@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AddContactManual from '../components/add-contact-components/AddContactManual';
+import RecommendationCard from '../components/add-contact-components/recommendation-card';
 
 export default function AddContact() {
     return (
@@ -30,9 +31,51 @@ export default function AddContact() {
                 </TabsContent>
                 
                 <TabsContent value="recommendations" className="mt-6">
-                    <div className="text-center py-12 text-muted-foreground">
-                        <p>Recommendations coming soon...</p>
-                        <p className="text-sm mt-2">AI-powered recommendations based on your profile and network.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <RecommendationCard 
+                            contact={{
+                                name: "John Doe",
+                                role: "Software Engineer",
+                                company: "Google",
+                                interests: ["AI", "Machine Learning", "Python"]
+                            }}
+                            similarity={85}
+                            onQuickAdd={(contact) => console.log('Adding contact:', contact)}
+                            onDismiss={(contact) => console.log('Dismissing contact:', contact)}
+                        />
+                        <RecommendationCard 
+                            contact={{
+                                name: "Jane Smith",
+                                role: "Product Manager",
+                                company: "Apple",
+                                interests: ["Product Strategy", "UX Design", "Mobile Apps"]
+                            }}
+                            similarity={72}
+                            onQuickAdd={(contact) => console.log('Adding contact:', contact)}
+                            onDismiss={(contact) => console.log('Dismissing contact:', contact)}
+                        />
+                        <RecommendationCard 
+                            contact={{
+                                name: "Mike Johnson",
+                                role: "Data Scientist",
+                                company: "Microsoft",
+                                interests: ["Data Analysis", "Statistics", "R"]
+                            }}
+                            similarity={45}
+                            onQuickAdd={(contact) => console.log('Adding contact:', contact)}
+                            onDismiss={(contact) => console.log('Dismissing contact:', contact)}
+                        />
+                        <RecommendationCard 
+                            contact={{
+                                name: "Sarah Wilson",
+                                role: "UX Designer",
+                                company: "Netflix",
+                                interests: ["User Research", "Prototyping", "Design Systems"]
+                            }}
+                            similarity={23}
+                            onQuickAdd={(contact) => console.log('Adding contact:', contact)}
+                            onDismiss={(contact) => console.log('Dismissing contact:', contact)}
+                        />
                     </div>
                 </TabsContent>
             </Tabs>
