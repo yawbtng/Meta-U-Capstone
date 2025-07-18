@@ -16,8 +16,15 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
 
     // Get similarity color based on score
     const getSimilarityColor = (score) => {
-        if (score >= 70) return "bg-green-100 text-green-800";
-        if (score >= 30) return "bg-yellow-100 text-yellow-800";
+        let numericScore;
+        if (typeof score === 'string') {
+            numericScore = parseFloat(score.replace('%', ''));
+        } else {
+            numericScore = score;
+        }
+        
+        if (numericScore >= 70) return "bg-green-100 text-green-800";
+        if (numericScore >= 30) return "bg-yellow-100 text-yellow-800";
         return "bg-red-100 text-red-800";
     };
 
@@ -27,7 +34,7 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
             {similarity && (
                 <div className="absolute top-3 left-3">
                     <Badge className={`text-sm ${getSimilarityColor(similarity)}`}>
-                        {similarity}%
+                        {similarity}
                     </Badge>
                 </div>
             )}

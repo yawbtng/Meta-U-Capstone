@@ -49,24 +49,15 @@ export default function AddContactRecommendation() {
             const result = await quickAddContact(contact, user.id);
             
             if (result.success) {
-                // Remove the contact from recommendations
                 setRecommendations(prev => 
                     prev.filter(rec => rec.id !== contact.id)
                 );
-                
-                // Show success message
                 setSuccessMessage(result.message || 'Contact added successfully!');
-                
-                // Clear success message after 3 seconds
                 setTimeout(() => {
                     setSuccessMessage(null);
                 }, 3000);
-                
             } else {
-                // Show error message
                 setError(result.error);
-                
-                // Clear error after 5 seconds
                 setTimeout(() => {
                     setError(null);
                 }, 5000);
@@ -74,8 +65,6 @@ export default function AddContactRecommendation() {
         } catch (error) {
             console.error('Error adding contact:', error);
             setError('Failed to add contact. Please try again.');
-            
-            // Clear error after 5 seconds
             setTimeout(() => {
                 setError(null);
             }, 5000);
@@ -131,7 +120,6 @@ export default function AddContactRecommendation() {
 
     return (
         <div className="space-y-6">
-            {/* Success Message */}
             {successMessage && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <div className="flex items-center space-x-2">
@@ -141,7 +129,6 @@ export default function AddContactRecommendation() {
                 </div>
             )}
 
-            {/* Error Message */}
             {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                     <div className="flex items-center space-x-2">
@@ -158,7 +145,7 @@ export default function AddContactRecommendation() {
                 </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {recommendations.map((contact, index) => (
                     <RecommendationCard
                         key={contact.id || index}
