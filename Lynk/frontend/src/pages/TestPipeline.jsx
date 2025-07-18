@@ -14,19 +14,17 @@ export default function TestPipeline() {
         setResults(null);
 
         try {
-            console.log('Starting embedding pipeline...');
+            console.log('Starting Supabase embedding pipeline...');
             
-            // Process user embeddings
             console.log('Processing user embeddings...');
             await processAllUserEmbeddings();
             
-            // Process connection embeddings
             console.log('Processing connection embeddings...');
             await processAllConnectionEmbeddings();
             
             setResults({
                 success: true,
-                message: 'Pipeline completed successfully! Check console for details.',
+                message: 'Supabase LangChain pipeline completed successfully! Check console for details.',
                 timestamp: new Date().toISOString()
             });
             
@@ -41,10 +39,10 @@ export default function TestPipeline() {
     return (
         <div className="container mx-auto p-6 max-w-2xl">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">Test Embedding Pipeline</h1>
+                <h1 className="text-3xl font-bold mb-2">Test Supabase Embedding Pipeline</h1>
                 <p className="text-muted-foreground">
                     This page tests the embedding pipeline that processes existing Supabase data 
-                    and stores vector embeddings in Qdrant using Together AI.
+                    and stores vector embeddings using LangChain's SupabaseVectorStore with Together AI.
                 </p>
             </div>
 
@@ -58,7 +56,7 @@ export default function TestPipeline() {
                         disabled={isProcessing}
                         className="w-full"
                     >
-                        {isProcessing ? 'Processing...' : 'Run Embedding Pipeline'}
+                        {isProcessing ? 'Processing...' : 'Run Supabase Pipeline'}
                     </Button>
                     
                     {isProcessing && (
@@ -104,7 +102,7 @@ export default function TestPipeline() {
                 <CardContent className="space-y-2 text-sm">
                     <p>1. Fetches all users and connections from Supabase</p>
                     <p>2. Generates embeddings using Together AI (BAAI/bge-base-en-v1.5)</p>
-                    <p>3. Stores vectors in Qdrant with metadata</p>
+                    <p>3. Stores vectors in Supabase using LangChain's SupabaseVectorStore</p>
                     <p>4. Enables similarity search for recommendations</p>
                 </CardContent>
             </Card>
