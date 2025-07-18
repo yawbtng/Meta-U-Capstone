@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { UserAuth } from '../../context/AuthContext';
 import RecommendationCard from './recommendation-card';
 import { fetchUserRecommendations, quickAddContact } from '../../lib/recommendations';
@@ -9,9 +9,24 @@ export default function AddContactRecommendation() {
     const { session } = UserAuth();
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState(null);
     const [addingContact, setAddingContact] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
+    const [hasMore, setHasMore] = useState(true);
+    const [currentOffset, setCurrentOffset] = useState(0);
+    
+    const observer = useRef();
+    const lastRecommendationRef = useCallback(node => {
+        if (loading || loadingMore) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                loadMoreRecommendations();
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, loadingMore, hasMore]);
 
     const user = session?.user;
 
@@ -25,12 +40,14 @@ export default function AddContactRecommendation() {
         setLoading(true);
         setError(null);
         setSuccessMessage(null);
+        setCurrentOffset(0);
         
         try {
-            const result = await fetchUserRecommendations(user.id);
+            const result = await fetchUserRecommendations(user.id, 20, 0);
             
             if (result.success) {
                 setRecommendations(result.data);
+                setHasMore(result.pagination.hasMore);
             } else {
                 setError(result.error);
             }
@@ -38,6 +55,29 @@ export default function AddContactRecommendation() {
             setError('Failed to load recommendations. Please try again.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadMoreRecommendations = async () => {
+        if (loadingMore || !hasMore) return;
+        
+        setLoadingMore(true);
+        const nextOffset = currentOffset + 20;
+        
+        try {
+            const result = await fetchUserRecommendations(user.id, 20, nextOffset);
+            
+            if (result.success) {
+                setRecommendations(prev => [...prev, ...result.data]);
+                setHasMore(result.pagination.hasMore);
+                setCurrentOffset(nextOffset);
+            } else {
+                setError(result.error);
+            }
+        } catch (err) {
+            setError('Failed to load more recommendations.');
+        } finally {
+            setLoadingMore(false);
         }
     };
 
@@ -146,17 +186,51 @@ export default function AddContactRecommendation() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {recommendations.map((contact, index) => (
-                    <RecommendationCard
-                        key={contact.id || index}
-                        contact={contact.payload || contact}
-                        similarity={contact.similarity}
-                        onQuickAdd={handleQuickAdd}
-                        onDismiss={handleDismiss}
-                        isAdding={addingContact === (contact.id || index)}
-                    />
-                ))}
+                {recommendations.map((contact, index) => {
+                    // Add ref to the last element for intersection observer
+                    if (recommendations.length === index + 1) {
+                        return (
+                            <div key={contact.id || index} ref={lastRecommendationRef}>
+                                <RecommendationCard
+                                    contact={contact.payload || contact}
+                                    similarity={contact.similarity}
+                                    onQuickAdd={handleQuickAdd}
+                                    onDismiss={handleDismiss}
+                                    isAdding={addingContact === (contact.id || index)}
+                                />
+                            </div>
+                        );
+                    } else {
+                        return (
+                            <RecommendationCard
+                                key={contact.id || index}
+                                contact={contact.payload || contact}
+                                similarity={contact.similarity}
+                                onQuickAdd={handleQuickAdd}
+                                onDismiss={handleDismiss}
+                                isAdding={addingContact === (contact.id || index)}
+                            />
+                        );
+                    }
+                })}
             </div>
+
+            {/* Loading indicator for more recommendations */}
+            {loadingMore && (
+                <div className="flex justify-center items-center py-8">
+                    <div className="flex items-center space-x-2 text-muted-foreground">
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Loading more recommendations...</span>
+                    </div>
+                </div>
+            )}
+
+            {/* End of recommendations message */}
+            {!hasMore && recommendations.length > 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                    <p className="text-sm">You've seen all available recommendations</p>
+                </div>
+            )}
         </div>
     );
 }

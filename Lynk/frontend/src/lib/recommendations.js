@@ -1,7 +1,7 @@
 import { supabase } from '../../../backend/browser-client.js';
 import { getRecommendationsAPI } from '../../../backend/services/supabase-vector.js';
 
-export async function fetchUserRecommendations(userId, limit = 120) {
+export async function fetchUserRecommendations(userId, limit = 20, offset = 0) {
     try {
         // First, get the user's existing embedding from the database
         const { data: userEmbedding, error: embeddingError } = await supabase
@@ -15,12 +15,13 @@ export async function fetchUserRecommendations(userId, limit = 120) {
             throw new Error('User embedding not found. Please run the embedding pipeline first.');
         }
 
-        // Get recommendations using the existing user embedding
+        // Get recommendations using the existing user embedding with pagination
         const recommendations = await getRecommendationsAPI({
             userVector: userEmbedding.embedding,
             userId: userId,
             type: 'connections',
-            limit: limit
+            limit: limit,
+            offset: offset
         });
 
         if (!recommendations.success) {
