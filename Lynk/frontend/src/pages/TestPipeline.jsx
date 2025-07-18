@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { processAllUserEmbeddings, processAllConnectionEmbeddings } from '../../../backend/services/batch-embedding-pipeline.js';
-import { searchSimilarVectors, getRecommendationsAPI } from '../../../backend/services/supabase-vector.js';
+import { getRecommendationsAPI } from '../../../backend/services/supabase-vector.js';
 import { generateUserEmbedding } from '../../../backend/services/embedding-service.js';
 import { fetchAllUsers } from '../../../backend/services/data-fetch.js';
 
@@ -62,27 +62,18 @@ export default function TestPipeline() {
                 throw new Error(`Failed to generate test embedding: ${embeddingResult.error}`);
             }
 
-            console.log('Generated test query vector, searching for similar people...');
-            const peopleResults = await getRecommendationsAPI({
-                userVector: embeddingResult.embedding,
-                userId: testUser.id,
-                type: 'people',
-                limit: 5
-            });
-
-            console.log('Searching for similar connections...');
+            console.log('Generated test query vector, searching for similar connections...');
             const connectionResults = await getRecommendationsAPI({
                 userVector: embeddingResult.embedding,
                 userId: testUser.id,
                 type: 'connections',
-                limit: 5
+                limit: 60
             });
 
             setSearchResults({
                 success: true,
                 testUser: testUser,
                 profileText: embeddingResult.profileText,
-                people: peopleResults,
                 connections: connectionResults,
                 timestamp: new Date().toISOString()
             });
@@ -102,7 +93,7 @@ export default function TestPipeline() {
             <div className="mb-8">
                 <h1 className="text-3xl font-bold mb-2">Test Supabase Embedding Pipeline</h1>
                 <p className="text-muted-foreground">
-                    This page tests the embedding pipeline and vector similarity search using 
+                    This page tests the embedding pipeline and connection recommendation system using 
                     LangChain's SupabaseVectorStore with Together AI.
                 </p>
             </div>
@@ -133,7 +124,7 @@ export default function TestPipeline() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>2. Vector Search</CardTitle>
+                        <CardTitle>2. Connection Recommendations</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Button 
@@ -142,13 +133,13 @@ export default function TestPipeline() {
                             className="w-full"
                             variant="outline"
                         >
-                            {isSearching ? 'Searching...' : 'Test Vector Search'}
+                            {isSearching ? 'Finding Recommendations...' : 'Test Connection Recommendations'}
                         </Button>
                         
                         {isSearching && (
                             <div className="mt-4 p-4 bg-green-50 rounded-lg">
                                 <p className="text-green-800 text-sm">
-                                    Testing similarity search... Check console for details.
+                                    Finding similar connections... Check console for details.
                                 </p>
                             </div>
                         )}
@@ -173,45 +164,43 @@ export default function TestPipeline() {
             {searchResults && (
                 <Card className="mb-6 border-blue-200 bg-blue-50">
                     <CardHeader>
-                        <CardTitle className="text-blue-800">Search Test Results</CardTitle>
+                        <CardTitle className="text-blue-800">Connection Recommendations</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
                             <div>
-                                <p className="font-medium">Test Query User: {searchResults.testUser.name}</p>
+                                <p className="font-medium">For User: {searchResults.testUser.name}</p>
                                 <p className="text-sm text-blue-600">Profile: {searchResults.profileText}</p>
                             </div>
                             
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <h4 className="font-medium text-blue-800">Similar People ({searchResults.people.data?.length || 0})</h4>
-                                    {searchResults.people.success ? (
-                                        <ul className="text-sm space-y-1">
-                                            {searchResults.people.data.slice(0, 3).map((person, idx) => (
-                                                <li key={idx} className="text-blue-700">
-                                                    {person.payload.name} - {person.similarity}
+                            <div>
+                                <h4 className="font-medium text-blue-800 mb-3">
+                                    Recommended Connections ({searchResults.connections.data?.length || 0} found)
+                                </h4>
+                                {searchResults.connections.success ? (
+                                    <div className="max-h-80 overflow-y-auto bg-white rounded p-4 border">
+                                        <ul className="text-sm space-y-3">
+                                            {searchResults.connections.data.slice(0, 20).map((conn, idx) => (
+                                                <li key={idx} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                                                    <div>
+                                                        <span className="font-medium text-blue-700">{conn.payload.name}</span>
+                                                        {conn.payload.role && (
+                                                            <p className="text-xs text-gray-600">{conn.payload.role}</p>
+                                                        )}
+                                                    </div>
+                                                    <span className="font-medium text-blue-800">{conn.similarity}</span>
                                                 </li>
                                             ))}
-                                        </ul>
-                                    ) : (
-                                        <p className="text-sm text-red-600">No results</p>
-                                    )}
-                                </div>
-                                
-                                <div>
-                                    <h4 className="font-medium text-blue-800">Similar Connections ({searchResults.connections.data?.length || 0})</h4>
-                                    {searchResults.connections.success ? (
-                                        <ul className="text-sm space-y-1">
-                                            {searchResults.connections.data.slice(0, 3).map((conn, idx) => (
-                                                <li key={idx} className="text-blue-700">
-                                                    {conn.payload.name} - {conn.similarity}
+                                            {searchResults.connections.data.length > 20 && (
+                                                <li className="text-blue-500 italic text-center py-2">
+                                                    ...and {searchResults.connections.data.length - 20} more connections
                                                 </li>
-                                            ))}
+                                            )}
                                         </ul>
-                                    ) : (
-                                        <p className="text-sm text-red-600">No results</p>
-                                    )}
-                                </div>
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-red-600">No connections found</p>
+                                )}
                             </div>
                         </div>
                     </CardContent>
@@ -231,13 +220,13 @@ export default function TestPipeline() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>How It Works</CardTitle>
+                    <CardTitle>How Connection Recommendations Work</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
-                    <p><strong>1. Data Processing:</strong> Fetches users & connections → Generates embeddings → Stores in Supabase</p>
-                    <p><strong>2. Vector Search:</strong> Takes a user profile → Generates query vector → Finds similar people & connections</p>
-                    <p><strong>3. Recommendations:</strong> Uses cosine similarity to rank matches by relevance</p>
-                    <p><strong>4. Results:</strong> Returns top matches with similarity percentages</p>
+                    <p><strong>1. Profile Analysis:</strong> Analyzes user's role, company, location, and interests</p>
+                    <p><strong>2. Vector Generation:</strong> Creates 768-dimensional embedding using Together AI</p>
+                    <p><strong>3. Similarity Search:</strong> Finds connections with similar profiles using cosine similarity</p>
+                    <p><strong>4. Ranking:</strong> Orders results by relevance (60%+ similarity shown)</p>
                 </CardContent>
             </Card>
         </div>
