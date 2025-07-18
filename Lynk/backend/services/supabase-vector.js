@@ -122,79 +122,79 @@ export async function deleteVectors(ids) {
   }
 }
 
-export async function searchSimilarVectors(queryVector, limit = 20, filter = null, scoreThreshold = 0.7) {
-  try {
-    let supabaseFilter = {};
-    if (filter?.must) {
-      for (const condition of filter.must) {
-        if (condition.key === 'profile_type' || condition.key === 'type') {
-          supabaseFilter.type = condition.match.value;
+export async function searchSimilarVectors(queryVector, limit = 20, filter = null, scoreThreshold = 0.3) {
+    try {
+      let supabaseFilter = {};
+      if (filter?.must) {
+        for (const condition of filter.must) {
+          if (condition.key === 'profile_type' || condition.key === 'type') {
+            supabaseFilter.type = condition.match.value;
+          }
         }
       }
+  
+      const { data, error } = await supabase.rpc('match_documents', {
+        query_embedding: queryVector,
+        match_count: limit,
+        filter: supabaseFilter
+      });
+  
+      if (error) throw error;
+  
+      const results = data
+        .filter(row => row.similarity >= scoreThreshold)
+        .map(row => ({
+          id: row.id,
+          score: row.similarity,
+          payload: row.metadata,
+          similarity: `${Math.round(row.similarity * 100)}%`
+        }));
+  
+      console.log(`Found ${results.length} similar vectors`);
+      return results;
+    } catch (error) {
+      console.error("Failed to search similar vectors:", error);
+      throw new Error(`Vector search failed: ${error.message}`);
     }
-
-    const { data, error } = await supabase.rpc('match_documents', {
-      query_embedding: queryVector,
-      match_count: limit,
-      filter: supabaseFilter
-    });
-
-    if (error) throw error;
-
-    const results = data
-      .filter(row => row.similarity >= scoreThreshold)
-      .map(row => ({
-        id: row.id,
-        score: row.similarity,
-        payload: row.metadata,
-        similarity: `${Math.round(row.similarity * 100)}%`
-      }));
-
-    console.log(`Found ${results.length} similar vectors`);
-    return results;
-  } catch (error) {
-    console.error("Failed to search similar vectors:", error);
-    throw new Error(`Vector search failed: ${error.message}`);
   }
-}
-
-export async function findSimilarPeople(userVector, userId, limit = 20, offset = 0) {
-  const filter = {
-    must: [{ key: "type", match: { value: "user" } }],
-    must_not: [{ key: "user_id", match: { value: userId } }]
-  };
-
-  const results = await searchSimilarVectors(userVector, limit, filter, 0.6);
   
-  return {
-    recommendations: results,
-    pagination: {
-      currentPage: Math.floor(offset / limit) + 1,
-      totalResults: results.length * 10,
-      totalPages: Math.ceil((results.length * 10) / limit),
-      hasMore: results.length === limit,
-      currentCount: results.length
-    }
-  };
-}
-
-export async function findSimilarConnections(userVector, userId, limit = 20, offset = 0) {
-  const filter = {
-    must: [{ key: "type", match: { value: "connection" } }]
-  };
-
-  const results = await searchSimilarVectors(userVector, limit, filter, 0.6);
+  export async function findSimilarPeople(userVector, userId, limit = 20, offset = 0) {
+    const filter = {
+      must: [{ key: "type", match: { value: "user" } }],
+      must_not: [{ key: "user_id", match: { value: userId } }]
+    };
   
-  return {
-    recommendations: results,
-    pagination: {
-      currentPage: Math.floor(offset / limit) + 1,
-      totalResults: results.length * 10,
-      totalPages: Math.ceil((results.length * 10) / limit),
-      hasMore: results.length === limit,
-      currentCount: results.length
-    }
-  };
+    const results = await searchSimilarVectors(userVector, limit, filter, 0.1);
+    
+    return {
+      recommendations: results,
+      pagination: {
+        currentPage: Math.floor(offset / limit) + 1,
+        totalResults: results.length * 10,
+        totalPages: Math.ceil((results.length * 10) / limit),
+        hasMore: results.length === limit,
+        currentCount: results.length
+      }
+    };
+  }
+  
+  export async function findSimilarConnections(userVector, userId, limit = 20, offset = 0) {
+    const filter = {
+      must: [{ key: "type", match: { value: "connection" } }]
+    };
+  
+    const results = await searchSimilarVectors(userVector, limit, filter, 0.1);
+    
+    return {
+      recommendations: results,
+      pagination: {
+        currentPage: Math.floor(offset / limit) + 1,
+        totalResults: results.length * 10,
+        totalPages: Math.ceil((results.length * 10) / limit),
+        hasMore: results.length === limit,
+        currentCount: results.length
+      }
+    };
 }
 
 export async function getRecommendationsAPI({
