@@ -1,224 +1,55 @@
-import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
-import { createClient } from "@supabase/supabase-js";
-import { Document } from "@langchain/core/documents";
 import { embeddings } from "./together-ai-client.js";
 import { supabase } from "../browser-client.js";
-
-const vectorStore = new SupabaseVectorStore(embeddings, {
-  client: supabase,
-  tableName: "embeddings",
-  queryName: "match_documents",
-});
 
 export async function initializeCollection() {
   try {
     const { count, error } = await supabase
       .from('embeddings')
       .select('*', { count: 'exact', head: true });
-    
     if (error) throw error;
-    
-    console.log('LangChain Supabase vector store ready');
     return true;
   } catch (error) {
-    console.error("Failed to initialize LangChain vector store:", error);
-    throw new Error(`LangChain vector initialization failed: ${error.message}`);
-  }
-}
-
-export async function getCollectionInfo() {
-  try {
-    const { count, error } = await supabase
-      .from('embeddings')
-      .select('*', { count: 'exact', head: true });
-    
-    if (error) throw error;
-    
-    return {
-      status: 'green',
-      vectors_count: count,
-      indexed_vectors_count: count,
-      points_count: count,
-      config: {
-        params: {
-          vectors: { size: 768, distance: 'Cosine' }
-        }
-      }
-    };
-  } catch (error) {
-    console.error("Failed to get collection info:", error);
-    throw error;
+    throw new Error(`Vector initialization failed: ${error.message}`);
   }
 }
 
 export async function upsertVectorsBatch(points) {
   try {
-    if (!Array.isArray(points) || points.length === 0) {
-      throw new Error("Points must be a non-empty array");
-    }
-
-    const records = points.map(point => ({
-      embedding: point.vector,
+    const embeddingRows = points.map(point => ({
+      id: point.id,
       content: point.payload.profile_text || point.payload.name || '',
+      embedding: point.vector,
       metadata: point.payload,
       profile_type: point.payload.type,
       user_id: point.payload.type === 'user' ? point.id : null,
-      connection_id: point.payload.type === 'connection' ? point.id : null
+      connection_id: point.payload.type === 'connection' ? point.id : null,
     }));
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('embeddings')
-      .upsert(records, { ignoreDuplicates: false });
+      .upsert(embeddingRows);
 
     if (error) throw error;
-
-    console.log(`Upserted ${points.length} vectors using Supabase`);
     return true;
   } catch (error) {
-    console.error("Failed to upsert vectors batch:", error);
     throw new Error(`Batch upsert failed: ${error.message}`);
   }
 }
 
-export async function upsertVector(id, vector, payload) {
-  try {
-    const record = {
-      embedding: vector,
-      content: payload.profile_text || payload.name || '',
-      metadata: payload,
-      profile_type: payload.type,
-      user_id: payload.type === 'user' ? id : null,
-      connection_id: payload.type === 'connection' ? id : null
-    };
-    
-    const { data, error } = await supabase
-      .from('embeddings')
-      .upsert(record);
-
-    if (error) throw error;
-    
-    console.log(`Upserted ${payload.type} vector with ID: ${id}`);
-    return true;
-  } catch (error) {
-    console.error(`Failed to upsert vector ${id}:`, error);
-    throw new Error(`Vector upsert failed: ${error.message}`);
-  }
-}
-
-export async function deleteVectors(ids) {
-  try {
-    const { error } = await supabase
-      .from('embeddings')
-      .delete()
-      .in('id', ids);
-
-    if (error) throw error;
-
-    console.log(`Deleted ${ids.length} vectors successfully`);
-    return true;
-  } catch (error) {
-    console.error("Failed to delete vectors:", error);
-    throw new Error(`Vector deletion failed: ${error.message}`);
-  }
-}
-
-export async function searchSimilarVectors(queryVector, limit = 20, filter = null, scoreThreshold = 0.3) {
-    try {
-      let supabaseFilter = {};
-      if (filter?.must) {
-        for (const condition of filter.must) {
-          if (condition.key === 'profile_type' || condition.key === 'type') {
-            supabaseFilter.type = condition.match.value;
-          }
-        }
-      }
-  
-      const { data, error } = await supabase.rpc('match_documents', {
-        query_embedding: queryVector,
-        match_count: limit,
-        filter: supabaseFilter
-      });
-  
-      if (error) throw error;
-  
-      const results = data
-        .filter(row => row.similarity >= scoreThreshold)
-        .map(row => ({
-          id: row.id,
-          score: row.similarity,
-          payload: row.metadata,
-          similarity: `${Math.round(row.similarity * 100)}%`
-        }));
-  
-      console.log(`Found ${results.length} similar vectors`);
-      return results;
-    } catch (error) {
-      console.error("Failed to search similar vectors:", error);
-      throw new Error(`Vector search failed: ${error.message}`);
-    }
-  }
-  
-  export async function findSimilarPeople(userVector, userId, limit = 20, offset = 0) {
-    const filter = {
-      must: [{ key: "type", match: { value: "user" } }],
-      must_not: [{ key: "user_id", match: { value: userId } }]
-    };
-  
-    const results = await searchSimilarVectors(userVector, limit, filter, 0.1);
-    
-    return {
-      recommendations: results,
-      pagination: {
-        currentPage: Math.floor(offset / limit) + 1,
-        totalResults: results.length * 10,
-        totalPages: Math.ceil((results.length * 10) / limit),
-        hasMore: results.length === limit,
-        currentCount: results.length
-      }
-    };
-  }
-  
-  export async function findSimilarConnections(userVector, userId, limit = 20, offset = 0) {
-    const filter = {
-      must: [{ key: "type", match: { value: "connection" } }]
-    };
-  
-    const results = await searchSimilarVectors(userVector, limit, filter, 0.1);
-    
-    return {
-      recommendations: results,
-      pagination: {
-        currentPage: Math.floor(offset / limit) + 1,
-        totalResults: results.length * 10,
-        totalPages: Math.ceil((results.length * 10) / limit),
-        hasMore: results.length === limit,
-        currentCount: results.length
-      }
-    };
-}
-
-export async function getRecommendationsAPI({
-  userVector,
-  userId,
-  type = 'people',
-  limit = 20,
-  offset = 0,
-  criteria = {}
-}) {
+export async function getRecommendationsAPI({userVector, userId, type = 'connections', limit = 16, offset = 0, criteria = {}}) {
   try {
     let result;
-
     switch (type) {
-      case 'people':
-        result = await findSimilarPeople(userVector, userId, limit, offset);
-        break;
       case 'connections':
         result = await findSimilarConnections(userVector, userId, limit, offset);
+        break;
+      case 'people':
+        result = await findSimilarPeople(userVector, userId, limit, offset);
         break;
       default:
         throw new Error(`Unknown recommendation type: ${type}`);
     }
-
+    
     return {
       success: true,
       data: result.recommendations,
@@ -227,13 +58,12 @@ export async function getRecommendationsAPI({
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error("Failed to get recommendations:", error);
     return {
       success: false,
       error: error.message,
       data: [],
       pagination: {
-        currentPage: 1,
+        currentPage: Math.floor(offset / limit) + 1,
         totalPages: 0,
         hasMore: false,
         totalResults: 0,
@@ -243,4 +73,242 @@ export async function getRecommendationsAPI({
   }
 }
 
-export { vectorStore };
+async function findSimilarConnections(userVector, userId, limit = 16, offset = 0) {
+  try {
+    // Parse the user vector if it's a string
+    let parsedUserVector = userVector;
+    if (typeof userVector === 'string') {
+      try {
+        parsedUserVector = JSON.parse(userVector);
+      } catch (parseError) {
+        throw new Error('Invalid user vector format');
+      }
+    }
+    
+    // Get existing connections for this user and total counts in parallel
+    const [existingConnectionsResult, totalConnectionsResult] = await Promise.all([
+      supabase
+        .from('user_to_connections')
+        .select('connection_id')
+        .eq('user_id', userId),
+      
+      supabase
+        .from('connections')
+        .select('*', { count: 'exact', head: true })
+    ]);
+
+    if (existingConnectionsResult.error) {
+      throw existingConnectionsResult.error;
+    }
+
+    if (totalConnectionsResult.error) {
+      throw totalConnectionsResult.error;
+    }
+
+    const existingConnectionIds = existingConnectionsResult.data?.map(conn => conn.connection_id) || [];
+    const totalConnections = totalConnectionsResult.count || 0;
+    const availableConnections = totalConnections - existingConnectionIds.length;
+
+    // Get ALL similarity-based recommendations
+    const { data: similarEmbeddings, error: searchError } = await supabase.rpc('match_documents', {
+      query_embedding: parsedUserVector,
+      match_count: 1000, // Large enough to get all embeddings
+      filter: {}
+    });
+
+    let embeddingBasedResults = [];
+    
+    if (!searchError && similarEmbeddings) {
+      // Filter for connections and exclude user's existing connections
+      const connectionEmbeddings = similarEmbeddings
+        .filter(emb => emb.metadata?.type === 'connection')
+        .filter(emb => {
+          const connectionId = emb.metadata?.id || emb.id;
+          return connectionId && !existingConnectionIds.includes(connectionId);
+        });
+
+      // Batch fetch all connection details in one query
+      if (connectionEmbeddings.length > 0) {
+        const connectionIds = connectionEmbeddings.map(emb => emb.metadata?.id || emb.id);
+        
+        const { data: connectionsData, error: connectionsError } = await supabase
+          .from('connections')
+          .select('*')
+          .in('id', connectionIds);
+
+        if (!connectionsError && connectionsData) {
+          // Create a map for O(1) lookups
+          const connectionsMap = connectionsData.reduce((map, conn) => {
+            map[conn.id] = conn;
+            return map;
+          }, {});
+
+          // Build results with connection data
+          embeddingBasedResults = connectionEmbeddings
+            .map(embedding => {
+              const connectionId = embedding.metadata?.id || embedding.id;
+              const connectionData = connectionsMap[connectionId];
+              
+              if (!connectionData) return null;
+              
+              return {
+                id: connectionId,
+                score: embedding.similarity,
+                similarity: `${Math.round(embedding.similarity * 100)}%`,
+                payload: {
+                  id: connectionId,
+                  name: connectionData.name,
+                  email: connectionData.email,
+                  role: connectionData.role,
+                  company: connectionData.company,
+                  location: connectionData.location,
+                  interests: connectionData.interests,
+                  type: 'connection'
+                },
+                source: 'embedding'
+              };
+            })
+            .filter(Boolean); // Remove null results
+        }
+      }
+    }
+
+    // Get ALL remaining connections that don't have embeddings
+    let additionalResults = [];
+    const embeddingConnectionIds = embeddingBasedResults.map(r => r.id);
+    const allExcludedIds = [...existingConnectionIds, ...embeddingConnectionIds];
+    
+    // Get all remaining connections (no artificial limit)
+    if (allExcludedIds.length > 0) {
+      const { data: additionalConnections, error: additionalError } = await supabase
+        .from('connections')
+        .select('*')
+        .not('id', 'in', `(${allExcludedIds.map(id => `"${id}"`).join(',')})`)
+        .limit(1000); // Large limit to get all remaining connections
+
+      if (!additionalError && additionalConnections) {
+        additionalResults = additionalConnections.map(conn => ({
+          id: conn.id,
+          score: 0, // Set to 0 for connections without embeddings (lowest similarity)
+          similarity: '0%', 
+          payload: {
+            id: conn.id,
+            name: conn.name,
+            email: conn.email,
+            role: conn.role,
+            company: conn.company,
+            location: conn.location,
+            interests: conn.interests,
+            type: 'connection'
+          },
+          source: 'database'
+        }));
+      }
+    } else {
+      // If no excluded IDs, get all connections
+      const { data: additionalConnections, error: additionalError } = await supabase
+        .from('connections')
+        .select('*')
+        .limit(1000); // Get all connections
+
+      if (!additionalError && additionalConnections) {
+        additionalResults = additionalConnections.map(conn => ({
+          id: conn.id,
+          score: 0,
+          similarity: '0%',
+          payload: {
+            id: conn.id,
+            name: conn.name,
+            email: conn.email,
+            role: conn.role,
+            company: conn.company,
+            location: conn.location,
+            interests: conn.interests,
+            type: 'connection'
+          },
+          source: 'database'
+        }));
+      }
+    }
+
+    // Combine and sort ALL results by similarity score (highest first)
+    const allResults = [...embeddingBasedResults, ...additionalResults];
+    allResults.sort((a, b) => b.score - a.score);
+    
+    // Apply pagination to the complete sorted dataset
+    const paginatedResults = allResults.slice(offset, offset + limit);
+    const hasMore = allResults.length > offset + limit;
+
+    return {
+      recommendations: paginatedResults,
+      pagination: {
+        currentPage: Math.floor(offset / limit) + 1,
+        totalResults: allResults.length,
+        totalPages: Math.ceil(allResults.length / limit),
+        hasMore: hasMore,
+        currentCount: paginatedResults.length
+      }
+    };
+
+  } catch (error) {
+    throw new Error(`Connection search failed: ${error.message}`);
+  }
+}
+
+async function findSimilarPeople(userVector, userId, limit = 16, offset = 0) {
+  try {
+    // Parse the user vector if it's a string
+    let parsedUserVector = userVector;
+    if (typeof userVector === 'string') {
+      try {
+        parsedUserVector = JSON.parse(userVector);
+      } catch (parseError) {
+        throw new Error('Invalid user vector format');
+      }
+    }
+
+    const { data: similarEmbeddings, error: searchError } = await supabase.rpc('match_documents', {
+      query_embedding: parsedUserVector,
+      match_count: limit + offset + 10,
+      filter: { profile_type: 'user' }
+    });
+
+    if (searchError) throw searchError;
+
+    if (!similarEmbeddings || similarEmbeddings.length === 0) {
+      return {
+        recommendations: [],
+        pagination: {
+          currentPage: Math.floor(offset / limit) + 1,
+          totalResults: 0,
+          totalPages: 0,
+          hasMore: false,
+          currentCount: 0
+        }
+      };
+    }
+
+    const filteredResults = similarEmbeddings
+      .filter(embedding => embedding.user_id !== userId)
+      .slice(offset, offset + limit)
+      .map(embedding => ({
+        id: embedding.user_id,
+        score: embedding.similarity,
+        similarity: `${Math.round(embedding.similarity * 100)}%`,
+        payload: embedding.metadata || {}
+      }));
+
+    return {
+      recommendations: filteredResults,
+      pagination: {
+        currentPage: Math.floor(offset / limit) + 1,
+        totalResults: filteredResults.length * 2,
+        totalPages: Math.ceil((filteredResults.length * 2) / limit),
+        hasMore: filteredResults.length === limit,
+        currentCount: filteredResults.length
+      }
+    };
+  } catch (error) {
+    throw new Error(`People search failed: ${error.message}`);
+  }
+}
