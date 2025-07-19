@@ -29,7 +29,7 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
     };
 
     return (
-        <Card className="hover:shadow-md transition-shadow relative h-[340px]">
+        <Card className="hover:shadow-lg hover:scale-105 hover:border-sky-800 hover:border-2 transition-all duration-200 relative h-[340px] cursor-pointer my-2">
             {/* Similarity score in top left */}
             {similarity && (
                 <div className="absolute top-3 left-3">
