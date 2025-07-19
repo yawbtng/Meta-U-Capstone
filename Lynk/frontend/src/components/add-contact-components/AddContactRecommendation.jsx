@@ -84,7 +84,8 @@ export default function AddContactRecommendation() {
     };
 
     const handleQuickAdd = async (contact) => {
-        setAddingContact(contact.id);
+        const contactId = contact.id || contact.payload?.id;
+        setAddingContact(contactId);
         setSuccessMessage(null);
         
         try {
@@ -92,7 +93,7 @@ export default function AddContactRecommendation() {
             
             if (result.success) {
                 setRecommendations(prev => 
-                    prev.filter(rec => rec.id !== contact.id)
+                    prev.filter(rec => rec.id !== contactId)
                 );
                 setSuccessMessage(result.message || 'Contact added successfully!');
                 setTimeout(() => {
@@ -116,8 +117,10 @@ export default function AddContactRecommendation() {
     };
 
     const handleDismiss = (contact) => {
+       
+        const contactId = contact.id || contact.payload?.id;
         setRecommendations(prev => 
-            prev.filter(rec => rec.id !== contact.id)
+            prev.filter(rec => rec.id !== contactId)
         );
     };
 
@@ -189,28 +192,29 @@ export default function AddContactRecommendation() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {recommendations.map((contact, index) => {
-                    // Add ref to the last element for intersection observer
+                    const stableKey = `${contact.id}-${index}`;
+                    
                     if (recommendations.length === index + 1) {
                         return (
-                            <div key={contact.id || index} ref={lastRecommendationRef}>
+                            <div key={stableKey} ref={lastRecommendationRef}>
                                 <RecommendationCard
                                     contact={contact.payload || contact}
                                     similarity={contact.similarity}
                                     onQuickAdd={handleQuickAdd}
-                                    onDismiss={handleDismiss}
-                                    isAdding={addingContact === (contact.id || index)}
+                                    onDismiss={() => handleDismiss(contact)} // Pass the full recommendation object
+                                    isAdding={addingContact === contact.id}
                                 />
                             </div>
                         );
                     } else {
                         return (
                             <RecommendationCard
-                                key={contact.id || index}
+                                key={stableKey}
                                 contact={contact.payload || contact}
                                 similarity={contact.similarity}
                                 onQuickAdd={handleQuickAdd}
-                                onDismiss={handleDismiss}
-                                isAdding={addingContact === (contact.id || index)}
+                                onDismiss={() => handleDismiss(contact)} 
+                                isAdding={addingContact === contact.id}
                             />
                         );
                     }
