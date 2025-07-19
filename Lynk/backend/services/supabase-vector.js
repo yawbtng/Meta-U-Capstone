@@ -163,6 +163,7 @@ async function findSimilarConnections(userVector, userId, limit = 16, offset = 0
                   company: connectionData.company,
                   location: connectionData.location,
                   interests: connectionData.interests,
+                  avatar_url: connectionData.avatar_url,
                   type: 'connection'
                 },
                 source: 'embedding'
@@ -199,6 +200,7 @@ async function findSimilarConnections(userVector, userId, limit = 16, offset = 0
             company: conn.company,
             location: conn.location,
             interests: conn.interests,
+            avatar_url: conn.avatar_url,
             type: 'connection'
           },
           source: 'database'
@@ -224,6 +226,7 @@ async function findSimilarConnections(userVector, userId, limit = 16, offset = 0
             company: conn.company,
             location: conn.location,
             interests: conn.interests,
+            avatar_url: conn.avatar_url,
             type: 'connection'
           },
           source: 'database'

@@ -29,7 +29,7 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
     };
 
     return (
-        <Card className="hover:shadow-md transition-shadow relative h-[340px]">
+        <Card className="hover:shadow-lg hover:scale-105 hover:border-sky-800 hover:border-2 transition-all duration-200 relative h-[360px] cursor-pointer my-2">
             {/* Similarity score in top left */}
             {similarity && (
                 <div className="absolute top-3 left-3">
@@ -54,8 +54,9 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
                 <div className="flex flex-col items-center text-center space-y-2">
                     {/* Avatar */}
                     <AvatarDemo 
+                        url={contact.avatar_url}
                         initials={getInitials(contact.name)} 
-                        className="w-20 h-20 text-2xl"
+                        className="w-32 h-32 text-2xl"
                     />
                     
                     {/* Name */}
@@ -83,7 +84,7 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
                 </div>
             </CardHeader>
             
-            <CardContent className="bottom-6 left-0 right-0 px-6 absolute">
+            <CardContent className="bottom-1 left-0 right-0 px-6 absolute">
                 {/* Connect button */}
                 <Button 
                      className="w-full bg-blue-600 hover:bg-blue-700 text-white text-base"
