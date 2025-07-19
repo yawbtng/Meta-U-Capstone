@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { UserAuth } from '../../context/AuthContext';
 import RecommendationCard from './recommendation-card';
 import { fetchUserRecommendations, quickAddContact } from '../../lib/recommendations';
@@ -17,6 +17,9 @@ export default function AddContactRecommendation() {
     const [currentOffset, setCurrentOffset] = useState(0);
     
     const observer = useRef();
+    const user = session?.user;
+
+    // Memoize the intersection observer callback to prevent unnecessary re-rendering
     const lastRecommendationRef = useCallback(node => {
         if (loading || loadingMore) return;
         if (observer.current) observer.current.disconnect();
@@ -24,19 +27,16 @@ export default function AddContactRecommendation() {
             if (entries[0].isIntersecting && hasMore) {
                 loadMoreRecommendations();
             }
+        }, {
+            threshold: 0.1, // Trigger slightly before fully visible
+            rootMargin: '50px' // Load 50px before reaching the element
         });
         if (node) observer.current.observe(node);
     }, [loading, loadingMore, hasMore]);
 
-    const user = session?.user;
-
-    useEffect(() => {
-        if (user?.id) {
-            loadRecommendations();
-        }
-    }, [user?.id]);
-
-    const loadRecommendations = async () => {
+    const loadRecommendations = useCallback(async () => {
+        if (!user?.id) return;
+        
         setLoading(true);
         setError(null);
         setSuccessMessage(null);
@@ -48,6 +48,7 @@ export default function AddContactRecommendation() {
             if (result.success) {
                 setRecommendations(result.data);
                 setHasMore(result.pagination.hasMore);
+                setCurrentOffset(16);
             } else {
                 setError(result.error);
             }
@@ -56,23 +57,23 @@ export default function AddContactRecommendation() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user?.id]);
 
-    const loadMoreRecommendations = async () => {
-        if (loadingMore || !hasMore) return;
+    const loadMoreRecommendations = useCallback(async () => {
+        if (loadingMore || !hasMore || !user?.id) return;
         
         setLoadingMore(true);
-        const nextOffset = currentOffset + 20;
         
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            const result = await fetchUserRecommendations(user.id, 20, nextOffset);
+            const result = await fetchUserRecommendations(user.id, 16, currentOffset);
             
             if (result.success) {
-                setRecommendations(prev => [...prev, ...result.data]);
+                // Only update if we actually got new data
+                if (result.data.length > 0) {
+                    setRecommendations(prev => [...prev, ...result.data]);
+                    setCurrentOffset(prev => prev + result.data.length);
+                }
                 setHasMore(result.pagination.hasMore);
-                setCurrentOffset(nextOffset);
             } else {
                 setError(result.error);
             }
@@ -81,61 +82,87 @@ export default function AddContactRecommendation() {
         } finally {
             setLoadingMore(false);
         }
-    };
+    }, [loadingMore, hasMore, user?.id, currentOffset]);
 
-    const handleQuickAdd = async (contact) => {
-        const contactId = contact.id || contact.payload?.id;
+    const handleQuickAdd = useCallback(async (contact) => {
+        const contactId = contact.id;
         setAddingContact(contactId);
         setSuccessMessage(null);
+        setError(null);
         
         try {
             const result = await quickAddContact(contact, user.id);
             
             if (result.success) {
-                setRecommendations(prev => 
-                    prev.filter(rec => rec.id !== contactId)
-                );
+                // Remove only the specific contact
+                setRecommendations(prev => prev.filter(rec => rec.id !== contactId));
                 setSuccessMessage(result.message || 'Contact added successfully!');
-                setTimeout(() => {
-                    setSuccessMessage(null);
-                }, 3000);
+                
+                // Auto-clear success message
+                setTimeout(() => setSuccessMessage(null), 4000);
             } else {
                 setError(result.error);
-                setTimeout(() => {
-                    setError(null);
-                }, 5000);
+                setTimeout(() => setError(null), 5000);
             }
         } catch (error) {
-            console.error('Error adding contact:', error);
             setError('Failed to add contact. Please try again.');
-            setTimeout(() => {
-                setError(null);
-            }, 5000);
+            setTimeout(() => setError(null), 5000);
         } finally {
             setAddingContact(null);
         }
-    };
+    }, [user?.id]);
 
-    const handleDismiss = (contact) => {
-       
+    const handleDismiss = useCallback((contact) => {
         const contactId = contact.id || contact.payload?.id;
-        setRecommendations(prev => 
-            prev.filter(rec => rec.id !== contactId)
-        );
-    };
+        setRecommendations(prev => prev.filter(rec => rec.id !== contactId));
+    }, []);
+
+    useEffect(() => {
+        if (user?.id) {
+            loadRecommendations();
+        }
+    }, [user?.id, loadRecommendations]);
+
+    // Memoize the recommendation grid to prevent unnecessary re-renders
+    const recommendationGrid = useMemo(() => {
+        return recommendations.map((contact, index) => {
+            const stableKey = `${contact.id}-${index}`;
+            const isLast = recommendations.length === index + 1;
+            
+            const cardElement = (
+                <RecommendationCard
+                    contact={contact.payload || contact}
+                    similarity={contact.similarity}
+                    onQuickAdd={handleQuickAdd}
+                    onDismiss={() => handleDismiss(contact)}
+                    isAdding={addingContact === contact.id}
+                />
+            );
+
+            if (isLast) {
+                return (
+                    <div key={stableKey} ref={lastRecommendationRef}>
+                        {cardElement}
+                    </div>
+                );
+            }
+            
+            return <div key={stableKey}>{cardElement}</div>;
+        });
+    }, [recommendations, addingContact, handleQuickAdd, handleDismiss, lastRecommendationRef]);
 
     if (loading) {
         return (
             <div className="flex justify-center items-center py-12">
                 <div className="flex items-center space-x-2 text-muted-foreground">
                     <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Loading recommendations...</span>
+                    <span>Finding people you may know...</span>
                 </div>
             </div>
         );
     }
 
-    if (error) {
+    if (error && recommendations.length === 0) {
         return (
             <div className="text-center py-12">
                 <div className="flex justify-center mb-4">
@@ -157,8 +184,8 @@ export default function AddContactRecommendation() {
     if (recommendations.length === 0) {
         return (
             <div className="text-center py-12 text-muted-foreground">
-                <p>No recommendations available at the moment.</p>
-                <p className="text-sm mt-2">Check back later for personalized suggestions.</p>
+                <p>No new connections available at the moment.</p>
+                <p className="text-sm mt-2">You've connected with everyone in your network!</p>
             </div>
         );
     }
@@ -186,51 +213,24 @@ export default function AddContactRecommendation() {
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">People You May Know</h2>
                 <p className="text-sm text-muted-foreground">
-                    Based on your network and interests
+                    {recommendations.length} connections found • Sorted by similarity
                 </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {recommendations.map((contact, index) => {
-                    const stableKey = `${contact.id}-${index}`;
-                    
-                    if (recommendations.length === index + 1) {
-                        return (
-                            <div key={stableKey} ref={lastRecommendationRef}>
-                                <RecommendationCard
-                                    contact={contact.payload || contact}
-                                    similarity={contact.similarity}
-                                    onQuickAdd={handleQuickAdd}
-                                    onDismiss={() => handleDismiss(contact)} // Pass the full recommendation object
-                                    isAdding={addingContact === contact.id}
-                                />
-                            </div>
-                        );
-                    } else {
-                        return (
-                            <RecommendationCard
-                                key={stableKey}
-                                contact={contact.payload || contact}
-                                similarity={contact.similarity}
-                                onQuickAdd={handleQuickAdd}
-                                onDismiss={() => handleDismiss(contact)} 
-                                isAdding={addingContact === contact.id}
-                            />
-                        );
-                    }
-                })}
+                {recommendationGrid}
             </div>
 
-            {/* Enhanced loading indicator for more recommendations */}
+            {/* Loading indicator for more recommendations */}
             {loadingMore && (
                 <div className="flex justify-center items-center py-8">
                     <div className="flex flex-col items-center space-y-3">
                         <div className="flex items-center space-x-2 text-muted-foreground">
                             <RefreshCw className="w-5 h-5 animate-spin" />
-                            <span>Finding more people you may know...</span>
+                            <span>Loading more recommendations...</span>
                         </div>
                         <div className="text-xs text-muted-foreground">
-                            This may take a moment
+                            Finding people based on similarity
                         </div>
                     </div>
                 </div>
@@ -240,6 +240,7 @@ export default function AddContactRecommendation() {
             {!hasMore && recommendations.length > 0 && (
                 <div className="text-center py-8 text-muted-foreground">
                     <p className="text-sm">You've seen all available recommendations</p>
+                    <p className="text-xs mt-1">Connect with more people to get better suggestions</p>
                 </div>
             )}
         </div>
