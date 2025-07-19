@@ -28,9 +28,39 @@ export async function fetchUserRecommendations(userId, limit = 20, offset = 0) {
             throw new Error(`Failed to get recommendations: ${recommendations.error}`);
         }
 
+        // Fetch full contact details from connections table
+        const connectionIds = recommendations.data.map(rec => rec.payload.id);
+        
+        const { data: connectionDetails, error: connectionError } = await supabase
+            .from('connections')
+            .select('id, name, email, role, company, location, interests')
+            .in('id', connectionIds);
+
+        if (connectionError) {
+            console.error('Error fetching connection details:', connectionError);
+            // Fallback to using payload data if connection fetch fails
+            return {
+                success: true,
+                data: recommendations.data,
+                pagination: recommendations.pagination
+            };
+        }
+
+        // Merge connection details with recommendation data
+        const enrichedRecommendations = recommendations.data.map(rec => {
+            const connectionDetail = connectionDetails.find(conn => conn.id === rec.payload.id);
+            return {
+                ...rec,
+                payload: {
+                    ...rec.payload,
+                    ...connectionDetail 
+                }
+            };
+        });
+
         return {
             success: true,
-            data: recommendations.data,
+            data: enrichedRecommendations,
             pagination: recommendations.pagination
         };
 

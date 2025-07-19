@@ -29,7 +29,7 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
     };
 
     return (
-        <Card className="hover:shadow-md transition-shadow relative h-[320px]">
+        <Card className="hover:shadow-md transition-shadow relative h-[340px]">
             {/* Similarity score in top left */}
             {similarity && (
                 <div className="absolute top-3 left-3">
@@ -83,10 +83,10 @@ export function RecommendationCard({ contact, onQuickAdd, onDismiss, similarity 
                 </div>
             </CardHeader>
             
-            <CardContent className=" bottom-0 left-0 right-0 px-6">
+            <CardContent className="bottom-6 left-0 right-0 px-6 absolute">
                 {/* Connect button */}
                 <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-base"
+                     className="w-full bg-blue-600 hover:bg-blue-700 text-white text-base"
                     onClick={(e) => {
                         e.stopPropagation();
                         onQuickAdd(contact);
