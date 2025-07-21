@@ -19,84 +19,88 @@ const getDbColumnName = (columnId) => {
   return dbColumnMap[columnId] || columnId;
 };
 
-export const fetchContacts = async (userId, filters = []) => {
+export const fetchContacts = async (userId) => {
   try {
-    const { data: userConnections, error } = await supabase
+    // First get all user's connections with relationship data
+    const { data: userConnections, error: userError } = await supabase
       .from('user_to_connections')
-      .select('connection_id')
+      .select(`
+        where_met,
+        notes,
+        last_contact_at,
+        interactions_count,
+        relationship_type,
+        tags,
+        connection_score,
+        added_at,
+        updated_at,
+        connection_id
+      `)
       .eq('user_id', userId);
-    if (error) throw error;
 
+    if (userError) throw userError;
+    if (userConnections.length === 0) return { success: true, data: [] };
+
+    // Get all connection IDs
     const connectionIds = userConnections.map(row => row.connection_id);
-    if (connectionIds.length === 0) return { success: true, data: [] };
 
-    let query = supabase
+    // Get connection details
+    const { data: connections, error: connectionsError } = await supabase
       .from('connections')
-      .select('*')
+      .select(`
+        id,
+        name,
+        email,
+        phone_number,
+        socials,
+        company,
+        role,
+        industry,
+        school,
+        avatar_url,
+        gender,
+        location,
+        interests,
+        created_at
+      `)
       .in('id', connectionIds);
 
-    filters.forEach(filter => {
-      if (!filter.column || !filter.condition || 
-          (filter.condition !== 'is_empty' && filter.condition !== 'is_not_empty' && !filter.value)) {
-        return;
-      }
+    if (connectionsError) throw connectionsError;
 
-      const { column, condition, value } = filter;
-      const dbColumn = getDbColumnName(column);
-      const arrayColumns = ['relationship_type', 'tags'];
-      const isArrayColumn = arrayColumns.includes(column);
-
-      switch (condition) {
-        case 'contains':
-          if (isArrayColumn) {
-            query = query.cs(dbColumn, [value]);
-          } else {
-            query = query.ilike(dbColumn, `%${value}%`);
-          }
-          break;
-        case 'does_not_contain':
-          if (isArrayColumn) {
-            query = query.not(dbColumn, 'cs', [value]);
-          } else {
-            query = query.not(dbColumn, 'ilike', `%${value}%`);
-          }
-          break;
-        case 'is':
-          if (isArrayColumn) {
-            query = query.eq(dbColumn, [value]);
-          } else {
-            query = query.eq(dbColumn, value);
-          }
-          break;
-        case 'is_not':
-          if (isArrayColumn) {
-            query = query.neq(dbColumn, [value]);
-          } else {
-            query = query.neq(dbColumn, value);
-          }
-          break;
-        case 'is_empty':
-          if (isArrayColumn) {
-            query = query.or(`${dbColumn}.is.null,${dbColumn}.eq.{}`);
-          } else {
-            query = query.or(`${dbColumn}.is.null,${dbColumn}.eq.`);
-          }
-          break;
-        case 'is_not_empty':
-          if (isArrayColumn) {
-            query = query.not(dbColumn, 'is', null).neq(dbColumn, '{}');
-          } else {
-            query = query.not(dbColumn, 'is', null).neq(dbColumn, '');
-          }
-          break;
-        default:
-          console.warn(`Unknown filter condition: ${condition}`);
-          break;
-      }
+    // Combine the data
+    const contacts = userConnections.map(userConn => {
+      const connection = connections.find(c => c.id === userConn.connection_id);
+      
+      return {
+        // Connection data
+        id: connection.id,
+        name: connection.name,
+        email: connection.email,
+        phone_number: connection.phone_number,
+        socials: connection.socials,
+        company: connection.company,
+        role: connection.role,
+        industry: connection.industry,
+        school: connection.school,
+        avatar_url: connection.avatar_url,
+        gender: connection.gender,
+        location: connection.location,
+        interests: connection.interests,
+        created_at: connection.created_at,
+        
+        // Relationship data (user-specific)
+        where_met: userConn.where_met,
+        notes: userConn.notes,
+        last_contact_at: userConn.last_contact_at,
+        interactions_count: userConn.interactions_count || 0,
+        relationship_type: userConn.relationship_type || [],
+        tags: userConn.tags || [],
+        connection_score: userConn.connection_score,
+        added_at: userConn.added_at,
+        updated_at: userConn.updated_at,
+      };
     });
 
-    const { data: contacts, error: contactsError } = await query;
-    if (contactsError) throw contactsError;
     return { success: true, data: contacts };
   } catch (error) {
     return { success: false, error: error.message };
