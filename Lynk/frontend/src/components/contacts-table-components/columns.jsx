@@ -1,5 +1,5 @@
-import { z } from "zod"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
 import AvatarDemo from "../avatar-01"
 import { RowActions } from "./row-actions"
 import { DataTableColumnHeader } from "./data-table-column-header"
@@ -151,16 +151,20 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
     cell: ({row}) => {
       const types = row.getValue("relationship_type")
       const colorMap = {
-        personal: "bg-purple-100",
-        professional: "bg-green-100",
-        social: "bg-blue-100"
+        personal: "bg-purple-100 text-purple-800 hover:bg-purple-200",
+        professional: "bg-green-100 text-green-800 hover:bg-green-200",
+        social: "bg-blue-100 text-blue-800 hover:bg-blue-200"
       }
       return (
-        <div className="text-left text-md flex gap-2">
-          {types.map((type, index) => (
-            <p key={index} className={`px-2 py-1 rounded ${colorMap[type.toLowerCase()]}`}>
+        <div className="text-left flex gap-2">
+          {types?.map((type, index) => (
+            <Badge 
+              key={index} 
+              variant="secondary"
+              className={`text-sm !${colorMap[type.toLowerCase()] }`}
+            >
               {type}
-            </p>
+            </Badge>
           ))}
         </div>
       )
@@ -239,9 +243,15 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
     cell: ({row}) => {
       const tags = row.getValue("tags")
       return (
-        <div className="text-left text-md flex gap-2">
-          {tags.map((tag, index) => (
-            <p key={index} className="px-2 py-1 rounded bg-gray-100">{tag}</p>
+        <div className="text-left flex gap-2">
+          {tags?.map((tag, index) => (
+            <Badge 
+              key={index} 
+              variant="outline"
+              className="text-sm bg-gray-100 text-black hover:bg-gray-200"
+            >
+              {tag}
+            </Badge>
           ))}
         </div>
       )
