@@ -43,10 +43,12 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
     header: "Photo",
     cell: ({row}) => {
       const name = row.getValue("name")
+      const avatar = row.getValue("avatar_url")
+      
       const initials = getInitials(name);
 
       return <div className="text-left font-medium">
-        <AvatarDemo initials={initials} />
+        <AvatarDemo initials={initials} url={avatar} className="w-12 h-12"/>
         </div>
     }
   },
@@ -161,7 +163,7 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
             <Badge 
               key={index} 
               variant="secondary"
-              className={`text-sm !${colorMap[type.toLowerCase()] }`}
+              className={`text-sm ${colorMap[type.toLowerCase()] }`}
             >
               {type}
             </Badge>
