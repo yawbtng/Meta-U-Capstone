@@ -180,16 +180,80 @@ export const createContact = async (contactData, userId) => {
   }
 };
 
-export const updateContact = async (contactId, contactData) => {
+export const updateContact = async (contactId, contactData, userId) => {
   try {
-    const { data, error } = await supabase
+    // Split the data between the two tables
+    const connectionFields = {
+      name: contactData.name,
+      email: contactData.email,
+      phone_number: contactData.phone_number,
+      socials: contactData.socials,
+      company: contactData.company,
+      role: contactData.role,
+      industry: contactData.industry,
+      school: contactData.school,
+      avatar_url: contactData.avatar_url,
+      gender: contactData.gender,
+      location: contactData.location,
+      interests: contactData.interests,
+      updated_at: new Date().toISOString(),
+    };
+
+    const relationshipFields = {
+      where_met: contactData.where_met,
+      notes: contactData.notes,
+      last_contact_at: contactData.last_contact_at,
+      relationship_type: contactData.relationship_type,
+      tags: contactData.tags,
+      interactions_count: contactData.interactions_count,
+      connection_score: contactData.connection_score,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Remove undefined fields to avoid overwriting with null
+    Object.keys(connectionFields).forEach(key => {
+      if (connectionFields[key] === undefined) {
+        delete connectionFields[key];
+      }
+    });
+
+    Object.keys(relationshipFields).forEach(key => {
+      if (relationshipFields[key] === undefined) {
+        delete relationshipFields[key];
+      }
+    });
+
+    // Update the connection info (affects all users connected to this contact)
+    const { data: connectionData, error: connectionError } = await supabase
       .from('connections')
-      .update(contactData)
+      .update(connectionFields)
       .eq('id', contactId)
       .select()
       .single();
-    if (error) throw error;
-    return { success: true, data };
+
+    if (connectionError) throw connectionError;
+
+    // Update the relationship-specific info (only for this user)
+    const { data: relationshipData, error: relationshipError } = await supabase
+      .from('user_to_connections')
+      .update(relationshipFields)
+      .eq('connection_id', contactId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (relationshipError) throw relationshipError;
+
+    // Return combined data for frontend compatibility
+    return { 
+      success: true, 
+      data: { 
+        ...connectionData, 
+        ...relationshipData,
+        id: connectionData.id 
+      } 
+    };
+
   } catch (error) {
     return { success: false, error: error.message };
   }

@@ -26,6 +26,7 @@ import AvatarDemo from "./avatar-01"
 import { getInitials } from "./contacts-table-components/columns"
 import { updateContact } from "../../../backend/index.js"
 import { toast } from "sonner"
+import { UserAuth } from "../context/AuthContext"
 
 const SectionBreakdown = ({children, title, value}) => {
     return (
@@ -57,6 +58,7 @@ function initializeForm(c = {}) {
 }
 
 export function EditContact({children,  contactData, open, onOpenChange, onContactUpdated}) {
+    const { session } = UserAuth();
     const [formData, setFormData] = useState(initializeForm(contactData))
     const [saving, setSaving]   = useState(false)
     const [errors, setErrors]   = useState({})
@@ -153,8 +155,8 @@ export function EditContact({children,  contactData, open, onOpenChange, onConta
                 updated_at: new Date().toISOString(),
             }
 
-            
-            const result = await updateContact(contactData.id, payload);
+         
+            const result = await updateContact(contactData.id, payload, session?.user?.id);
 
             if (!result.success) throw new Error(result.error);
 
