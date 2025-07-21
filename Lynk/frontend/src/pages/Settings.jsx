@@ -20,11 +20,11 @@ import { toast } from "sonner";
 import { fetchUserProfile, uploadAvatar } from "../../../backend/index.js";
 import { UserAuth } from "../context/AuthContext";
 
-// ProfileHeader – shows avatar + basic info and lets user pick a new avatar image
-function ProfileHeader({ profile, onAvatarSelect, uploading }) {
+// ProfileHeader – shows avatar + basic info
+function ProfileHeader({ profile, onAvatarSelect, uploading, avatarPreview }) {
   const displayName = profile?.name ?? "";
   const email = profile?.email ?? "";
-  const avatarUrl = profile?.avatar_url ?? "";
+  const avatarUrl = avatarPreview ?? profile?.avatar_url ?? "";
   const location = profile?.location ?? "San Francisco, CA";
   const role = profile?.role ?? "";
   const company = profile?.company ?? "";
@@ -61,6 +61,13 @@ function ProfileHeader({ profile, onAvatarSelect, uploading }) {
               className="sr-only"
               disabled={uploading}
             />
+            
+            {/* Show preview indicator */}
+            {avatarPreview && (
+              <div className="absolute -top-2 -left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                New
+              </div>
+            )}
           </div>
 
           {/* Name & details */}
@@ -80,6 +87,13 @@ function ProfileHeader({ profile, onAvatarSelect, uploading }) {
               <MapPin className="h-4 w-4" />
               <span>{location}</span>
             </div>
+            
+            {/* Show preview message */}
+            {avatarPreview && (
+              <p className="text-sm text-blue-600 font-medium">
+                New avatar selected - click "Save Changes" to upload
+              </p>
+            )}
           </div>
         </div>
       </CardContent>
@@ -281,6 +295,8 @@ export default function UserProfile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -322,24 +338,14 @@ export default function UserProfile() {
     fetch();
   }, [uid]);
 
-  // Handle avatar file upload to Storage
-  const handleAvatarSelect = async (file) => {
-    try {
-      setUploading(true);
-      const result = await uploadAvatar(uid, file);
-      
-      if (!result.success) throw new Error(result.error);
-
-      patch({ avatarUrl: result.publicUrl });
-      toast.success("Avatar uploaded ✨");
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setUploading(false);
-    }
+  const handleAvatarSelect = (file) => {
+    setSelectedAvatarFile(file);
+    
+    const reader = new FileReader();
+    reader.onload = (e) => setAvatarPreview(e.target.result);
+    reader.readAsDataURL(file);
   };
 
-  // Form submit → call updateProfile helper from context
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -350,6 +356,23 @@ export default function UserProfile() {
 
     try {
       setLoading(true);
+      
+      let avatarUrl = form.avatarUrl;
+      
+      if (selectedAvatarFile) {
+        setUploading(true);
+        const uploadResult = await uploadAvatar(uid, selectedAvatarFile);
+        
+        if (!uploadResult.success) {
+          throw new Error(uploadResult.error);
+        }
+        
+        avatarUrl = uploadResult.publicUrl;
+        toast.success("Avatar uploaded ✨");
+        setUploading(false);
+      }
+
+      // Update profile with all data including new avatar URL
       await updateProfile({
         name: form.name,
         email: form.email !== profile?.email ? form.email : undefined,
@@ -360,13 +383,19 @@ export default function UserProfile() {
         company: form.company,
         linkedin_url: form.linkedin_url,
         interests: form.interests,
-        avatarUrl: form.avatarUrl
+        avatarUrl: avatarUrl
       });
+      
+      setSelectedAvatarFile(null);
+      setAvatarPreview(null);
+      patch({ avatarUrl: avatarUrl });
+      
       toast.success("Profile updated ✅");
     } catch (err) {
       toast.error(err.message);
     } finally {
       setLoading(false);
+      setUploading(false);
     }
   };
 
@@ -385,6 +414,7 @@ export default function UserProfile() {
         }}
         onAvatarSelect={handleAvatarSelect}
         uploading={uploading}
+        avatarPreview={avatarPreview}
       />
 
       {/* Editable settings form */}
