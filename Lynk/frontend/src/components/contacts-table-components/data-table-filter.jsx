@@ -26,21 +26,84 @@ const filterConditions = [
   { value: "is_not_empty", label: "is not empty" },
 ];
 
-export function DataTableFilter({ table, onFiltersChange }) {
+export function DataTableFilter({ table }) {
   const [filters, setFilters] = useState([]);
-  const [appliedFilters, setAppliedFilters] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [searchFields, setSearchFields] = useState("");
 
+  
   const applyFilters = () => {
-    setAppliedFilters(filters);
-    if (onFiltersChange) {
-      onFiltersChange(filters);
-    }
+    // Clear existing filters first
+    table.getAllColumns().forEach(column => {
+      if (column.getCanFilter()) {
+        column.setFilterValue(undefined);
+      }
+    });
+
+    // Apply each filter to the corresponding column
+    filters.forEach(filter => {
+      if (filter.column && filter.condition) {
+        const column = table.getColumn(filter.column);
+        if (column) {
+          const filterFn = createFilterFunction(filter.condition, filter.value);
+          column.setFilterValue(filterFn);
+        }
+      }
+    });
+
     setIsOpen(false);
   };
 
-  const hasUnappliedChanges = JSON.stringify(filters) !== JSON.stringify(appliedFilters);
+  const createFilterFunction = (condition, value) => {
+    return (cellValue) => {
+      if (!cellValue && condition !== 'is_empty') return false;
+      
+      switch (condition) {
+        case 'contains':
+          if (Array.isArray(cellValue)) {
+            return cellValue.some(item => 
+              String(item).toLowerCase().includes(String(value).toLowerCase())
+            );
+          }
+          return String(cellValue).toLowerCase().includes(String(value).toLowerCase());
+          
+        case 'does_not_contain':
+          if (Array.isArray(cellValue)) {
+            return !cellValue.some(item => 
+              String(item).toLowerCase().includes(String(value).toLowerCase())
+            );
+          }
+          return !String(cellValue).toLowerCase().includes(String(value).toLowerCase());
+          
+        case 'is':
+          if (Array.isArray(cellValue)) {
+            return cellValue.length === 1 && String(cellValue[0]).toLowerCase() === String(value).toLowerCase();
+          }
+          return String(cellValue).toLowerCase() === String(value).toLowerCase();
+          
+        case 'is_not':
+          if (Array.isArray(cellValue)) {
+            return !(cellValue.length === 1 && String(cellValue[0]).toLowerCase() === String(value).toLowerCase());
+          }
+          return String(cellValue).toLowerCase() !== String(value).toLowerCase();
+          
+        case 'is_empty':
+          if (Array.isArray(cellValue)) {
+            return cellValue.length === 0;
+          }
+          return !cellValue || cellValue === '';
+          
+        case 'is_not_empty':
+          if (Array.isArray(cellValue)) {
+            return cellValue.length > 0;
+          }
+          return cellValue && cellValue !== '';
+          
+        default:
+          return true;
+      }
+    };
+  };
 
   const filterableColumns = table
     .getAllColumns()
@@ -71,27 +134,26 @@ export function DataTableFilter({ table, onFiltersChange }) {
     ));
   };
 
+  
   const resetFilters = () => {
     setFilters([]);
-    setAppliedFilters([]);
-    if (onFiltersChange) {
-      onFiltersChange([]);
-    }
+    table.getAllColumns().forEach(column => {
+      if (column.getCanFilter()) {
+        column.setFilterValue(undefined);
+      }
+    });
   };
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-14 text-2xl px-6">
+        <Button variant="outline" className="h-14 text-2xl px-6">
           <Filter className="h-6 w-6 mr-3" />
           Filter
-          {appliedFilters.length > 0 && (
+          {filters.length > 0 && (
             <span className="ml-2 bg-primary text-primary-foreground rounded-full px-2 py-1 text-sm">
-              {appliedFilters.length}
+              {filters.length}
             </span>
-          )}
-          {hasUnappliedChanges && (
-            <span className="ml-1 w-2 h-2 bg-orange-500 rounded-full" title="Unapplied changes"></span>
           )}
         </Button>
       </DropdownMenuTrigger>
@@ -152,10 +214,10 @@ export function DataTableFilter({ table, onFiltersChange }) {
                 </SelectContent>
               </Select>
 
-              {/* Value Input (hidden for empty/not empty conditions) */}
+              {/* Value Input */}
               {!['is_empty', 'is_not_empty'].includes(filter.condition) && (
                 <Input
-                  placeholder="Search titles..."
+                  placeholder="Filter value..."
                   value={filter.value}
                   onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
                   className="flex-1"
@@ -171,7 +233,6 @@ export function DataTableFilter({ table, onFiltersChange }) {
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
-
             </div>
           ))}
 
