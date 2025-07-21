@@ -1,4 +1,4 @@
-import { useState} from 'react';
+import { useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -8,15 +8,20 @@ import { Calendar22 } from '../ui/date-picker';
 import { CollapsibleSection } from '../CollapsibleSection';
 import { UserAuth } from '../../context/AuthContext';
 import { createContact } from '../../../../backend/index.js';
+import { uploadContactAvatar } from '../../../../backend/supabase/storage.js';
 import { useNavigate } from 'react-router';
 import { ComboboxDemo } from '../Combobox';
 import { industries } from '../../lib/industries';
+import AvatarDemo from '../avatar-01';
+import { getInitials } from '../contacts-table-components/columns';
+import { Upload, Link } from 'lucide-react';
 
 export default function AddContactManual() {
     //  current user who is adding the contact
     const { session } = UserAuth();
     const uid = session?.user.id;
     const navigate = useNavigate();
+    const fileInputRef = useRef(null);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -46,12 +51,18 @@ export default function AddContactManual() {
         twitter: '',
         instagram: '',
 
+        // Avatar - NEW
+        avatar_url: '',
+        avatar_file: null,
+
         // Additional info
         notes: ''
     });
 
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [avatarPreview, setAvatarPreview] = useState(null);
+    const [avatarMethod, setAvatarMethod] = useState('upload'); // 'upload' or 'url'
 
     // Collapsible sections state
     const [openSections, setOpenSections] = useState({
@@ -134,6 +145,34 @@ export default function AddContactManual() {
         return Object.keys(newErrors).length === 0;
     };
 
+    // Handle avatar file selection
+    const handleAvatarFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setFormData(prev => ({ ...prev, avatar_file: file, avatar_url: '' }));
+            
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e) => setAvatarPreview(e.target.result);
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // Handle avatar URL change
+    const handleAvatarUrlChange = (url) => {
+        setFormData(prev => ({ ...prev, avatar_url: url, avatar_file: null }));
+        setAvatarPreview(url);
+    };
+
+    // Clear avatar
+    const clearAvatar = () => {
+        setFormData(prev => ({ ...prev, avatar_file: null, avatar_url: '' }));
+        setAvatarPreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -145,12 +184,23 @@ export default function AddContactManual() {
         setIsSubmitting(true);
 
         try {
+            let avatarUrl = formData.avatar_url;
+
+            // Upload avatar file if one was selected
+            if (formData.avatar_file) {
+                const uploadResult = await uploadContactAvatar(uid, formData.avatar_file);
+                if (!uploadResult.success) {
+                    throw new Error('Failed to upload avatar: ' + uploadResult.error);
+                }
+                avatarUrl = uploadResult.publicUrl;
+            }
+
             // Prepare data for submission
             const submissionData = {
                 ...formData,
-                // Combine social media into jsonb object
+                avatar_url: avatarUrl,
                 socials: {
-                    ...(formData.linkedin && { linkedin: new URL(formData.linkedin) }),
+                    ...(formData.linkedin && { linkedin: formData.linkedin }),
                     ...(formData.twitter && { twitter: formData.twitter }),
                     ...(formData.instagram && { instagram: formData.instagram })
                 },
@@ -160,6 +210,7 @@ export default function AddContactManual() {
             delete submissionData.linkedin;
             delete submissionData.twitter;
             delete submissionData.instagram;
+            delete submissionData.avatar_file;
 
             const result = await createContact(submissionData, uid);
 
@@ -167,15 +218,16 @@ export default function AddContactManual() {
                 console.error('Error adding contact:', result.error);
                 alert('Failed to add contact. Please try again.');
             } else {
+                // Reset form
                 setFormData({
                     name: '', email: '', phone_number: '', company: '', role: '',
                     industry: '', school: '', where_met: '', last_contact_at: '',
                     relationship_type: [], tags: [], linkedin: '', twitter: '',
-                    instagram: '', notes: ''
+                    instagram: '', notes: '', avatar_url: '', avatar_file: null
                 });
-
+                clearAvatar();
                 alert('Contact added successfully!');
-                navigate("/all-contacts")
+                navigate("/all-contacts");
             }
 
         } catch (error) {
@@ -207,6 +259,72 @@ export default function AddContactManual() {
                     required={true}
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Avatar Section */}
+                        <div className="md:col-span-2">
+                            <Label className="my-2">Profile Picture</Label>
+                            <div className="flex items-center gap-4">
+                                {/* Avatar Preview */}
+                                <div className="w-20 h-20">
+                                    <AvatarDemo 
+                                        url={avatarPreview} 
+                                        initials={formData.name ? getInitials(formData.name) : '?'} 
+                                        className="w-20 h-20 text-xl"
+                                    />
+                                </div>
+                                
+                                {/* Avatar Method Toggle */}
+                                <div className="flex-1 space-y-3">
+                                    <div className="flex gap-2">
+                                        <Button
+                                            type="button"
+                                            variant={avatarMethod === 'upload' ? 'default' : 'outline'}
+                                            size="sm"
+                                            onClick={() => setAvatarMethod('upload')}
+                                        >
+                                            <Upload className="w-4 h-4 mr-2" />
+                                            Upload
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant={avatarMethod === 'url' ? 'default' : 'outline'}
+                                            size="sm"
+                                            onClick={() => setAvatarMethod('url')}
+                                        >
+                                            <Link className="w-4 h-4 mr-2" />
+                                            URL
+                                        </Button>
+                                        {(avatarPreview || formData.avatar_url || formData.avatar_file) && (
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={clearAvatar}
+                                            >
+                                                Clear
+                                            </Button>
+                                        )}
+                                    </div>
+
+                                    {avatarMethod === 'upload' ? (
+                                        <Input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleAvatarFileChange}
+                                            className="w-full"
+                                        />
+                                    ) : (
+                                        <Input
+                                            placeholder="Paste image URL here..."
+                                            value={formData.avatar_url}
+                                            onChange={(e) => handleAvatarUrlChange(e.target.value)}
+                                            className="w-full"
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="md:col-span-2">
                             <Label className="my-2" htmlFor="name">Name *</Label>
                             <Input
