@@ -5,6 +5,7 @@ import {
   useReactTable,
   getPaginationRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
 } from "@tanstack/react-table"
 
 import {
@@ -15,15 +16,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import SearchContacts from "../search-contacts";
-
-
 import { DataTablePagination } from "./data-table-pagination";
-import { DataTableFilter } from "./data-table-filter";
 import { HideColumns } from "./hide-columns";
+import { DataTableFilter } from "./data-table-filter";
 
-
-export default function DataTable({ columns, data, onFiltersChange }) {
+export default function DataTable({ columns, data }) {
   const [sorting, setSorting] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState({
@@ -34,36 +33,45 @@ export default function DataTable({ columns, data, onFiltersChange }) {
       "interactions_count": false,
       "tags": false
   });
+  
+  
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [globalFilter, setGlobalFilter] = useState("");
 
-const table = useReactTable({
-  data,
-  columns,
-  getCoreRowModel: getCoreRowModel(),
-  getPaginationRowModel: getPaginationRowModel(),
-  getSortedRowModel: getSortedRowModel(),
-  onSortingChange: setSorting,
-  onRowSelectionChange: setRowSelection,
-  onColumnVisibilityChange: setColumnVisibility,
-  state: {
-    sorting,
-    rowSelection,
-    columnVisibility,
-  },
-  initialState: {
-    pagination: {
-      pageSize: 20,
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(), 
+    onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
+    onColumnFiltersChange: setColumnFilters, 
+    onGlobalFilterChange: setGlobalFilter,   
+    state: {
+      sorting,
+      rowSelection,
+      columnVisibility,
+      columnFilters, 
+      globalFilter,  
     },
-  },
-});
+    initialState: {
+      pagination: {
+        pageSize: 20,
+      },
+    },
+  });
 
   return (
     <div className="flex flex-col">
       {/* Column Filtering and Visibility Controls */}
       <div className="flex items-center justify-between py-4 mr-1">
-        {/* Filter Component */}
-        <DataTableFilter table={table} onFiltersChange={onFiltersChange} />
+        {/* Client-side Filter Component */}
+        <DataTableFilter table={table} />
 
-        {/* Search Compononet */}
+        {/* Search Component (keep existing) */}
         <SearchContacts />
         
         {/* View/Hide Columns Component */}
