@@ -41,6 +41,7 @@ function initializeForm(c = {}) {
   return {
     name: c.name || "",
     email: c.email || "",
+    avatar_url: c.avatar_url || "",
     phone_number: c.phone_number || "",
     company: c.company || "",
     role: c.role || "",
@@ -67,7 +68,6 @@ export function EditContact({children,  contactData, open, onOpenChange, onConta
         setFormData(initializeForm(contactData))
     }, [contactData])
 
-    
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -185,11 +185,11 @@ export function EditContact({children,  contactData, open, onOpenChange, onConta
         </SheetHeader>
 
         <div className="flex justify-center mb-8">
-            <AvatarDemo initials={getInitials(formData.name)} className="w-40 h-40 text-2xl" />
+            <AvatarDemo initials={getInitials(formData.name)} url={formData.avatar_url} className="w-40 h-40 text-2xl" />
         </div>
 
 
-        <Accordion type="multiple" collapsible className="space-y-6">
+        <Accordion type="multiple" collapsible="true" className="space-y-6">
             <SectionBreakdown title="Basic Information" value="basic">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
