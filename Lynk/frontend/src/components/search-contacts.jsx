@@ -1,5 +1,6 @@
 import {useState, useEffect, useRef} from "react"
 import { Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge"; // ✅ ADD: Import Badge
 import { Trie, fetchInitialContactsForSearch } from "../../../backend/index.js"
 import { getInitials } from "./contacts-table-components/columns.jsx";
 import AvatarDemo from "./avatar-01"
@@ -9,9 +10,9 @@ import { UserAuth } from "../context/AuthContext.jsx"
 
 const SearchResult = ({ contact, index }) => {
   const colorMap = {
-    personal: "bg-purple-100",
-    professional: "bg-green-100",
-    social: "bg-blue-100"
+    personal: "bg-purple-100 text-purple-800 hover:bg-purple-200",
+    professional: "bg-green-100 text-green-800 hover:bg-green-200",
+    social: "bg-blue-100 text-blue-800 hover:bg-blue-200"
   };
 
   return (
@@ -28,13 +29,16 @@ const SearchResult = ({ contact, index }) => {
             
         </div>
 
-
         {/* Right Section: Relationship Type and Avatar */}
         <div className="flex space-x-2">
-          {contact.relationship_type.map((type, index) => (
-            <span key={index} className={`px-2 py-1 rounded ${colorMap[type.toLowerCase()]}`}>
+          {contact.relationship_type?.map((type, index) => (
+            <Badge 
+              key={index} 
+              variant="secondary"
+              className={`text-sm !${colorMap[type.toLowerCase()]}`}
+            >
               {type}
-            </span>
+            </Badge>
           ))}
         </div>
 
