@@ -3,6 +3,13 @@ import { Badge } from "@/components/ui/badge"
 import AvatarDemo from "../avatar-01"
 import { RowActions } from "./row-actions"
 import { DataTableColumnHeader } from "./data-table-column-header"
+import { Linkedin, Twitter, Instagram } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 
 
 export function getInitials(fullName) {
@@ -29,7 +36,7 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
     ),
     cell: ({ row }) => (
       <Checkbox
-        className="outline-2"
+        className="outline-2 flex justify-center"
         checked={Boolean(row.getIsSelected())}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
@@ -47,7 +54,7 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
       
       const initials = getInitials(name);
 
-      return <div className="text-left font-medium">
+      return <div className="flex justify-center font-medium">
         <AvatarDemo initials={initials} url={avatar} className="w-12 h-12"/>
         </div>
     }
@@ -91,15 +98,23 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
   },
   {
     accessorKey: "socials.linkedin",
-    header: () => <div className="text-center">LinkedIn</div>,
+    header: () => <div className="flex justify-center"><Linkedin color="blue"/></div>,
     cell: ({row}) => {
       const linkedin = row.original.socials?.linkedin
       return (
-        <div className="text-left underline text-lg">
+        <div className="flex justify-center underline text-lg">
           {linkedin ? (
-            <a href={`https://${linkedin}`} target="_blank" className="!text-gray-600">
-              {linkedin}
-            </a>
+              <Tooltip> 
+                <TooltipTrigger asChild>
+                  <a href={`https://${linkedin}`} target="_blank" className="!text-gray-600">
+                    <Linkedin color="blue"/>
+                  </a>
+                </TooltipTrigger>
+
+                <TooltipContent>
+                  <p>{linkedin}</p> 
+                </TooltipContent>
+              </Tooltip>
           ) : null}
         </div>
         
@@ -109,17 +124,20 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
   },
   {
     accessorKey: "socials.twitter",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Twitter" />
-    ),
+    header: () => <div className="flex justify-center"><Twitter color="skyblue"/></div>,
     cell: ({row}) => {
       const twitter = row.original.socials?.twitter
       return (
-        <div className="text-left underline text-lg">
+        <div className="flex justify-center text-lg">
           {twitter ? (
-            <a href={`https://twitter.com/${twitter}`} target="_blank" className="!text-gray-600">
-              {twitter}
-            </a>
+            <Tooltip>
+              <TooltipTrigger asChild>
+              <a href={`https://twitter.com/${twitter}`} target="_blank" className="!text-gray-600">
+                <Twitter color="skyblue"/>
+              </a>
+              </TooltipTrigger>
+              <TooltipContent>{twitter}</TooltipContent>
+            </Tooltip>
           ) : null}
         </div>
       )
@@ -128,17 +146,20 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
   },
   {
     accessorKey: "socials.instagram",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Instagram" />
-    ),
+    header: () => <div className="flex justify-center"><Instagram color="purple"/></div>,
     cell: ({row}) => {
       const instagram = row.original.socials?.instagram
       return (
-        <div className="text-left underline text-lg">
+        <div className="flex justify-center text-lg">
           {instagram ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
             <a href={`https://instagram.com/${instagram}`} target="_blank" className="!text-gray-600">
-              {instagram}
+              <Instagram color="purple"/>
             </a>
+              </TooltipTrigger>
+            <TooltipContent>{instagram}</TooltipContent>
+          </Tooltip>
           ) : null}
         </div>
       )
