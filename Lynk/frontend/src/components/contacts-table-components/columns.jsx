@@ -281,24 +281,3 @@ export const getColumnDisplayName = (column) => {
 
   return displayNameMap[column.id]
 };
-
-
-export const getDbColumnName = (columnId) => {
-  const dbColumnMap = {
-    'name': 'name',
-    'email': 'email',
-    'phone_number': 'phone_number',
-    'socials_linkedin': 'socials->>linkedin',
-    'socials_twitter': 'socials->>twitter',
-    'socials_instagram': 'socials->>instagram',
-    'relationship_type': 'relationship_type',
-    'industry': 'industry',
-    'company': 'company',
-    'role': 'role',
-    'last_contact_at': 'last_contact_at',
-    'interactions_count': 'interactions_count',
-    'tags': 'tags'
-  };
-
-  return dbColumnMap[columnId] || columnId;
-};
