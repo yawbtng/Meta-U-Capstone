@@ -105,17 +105,76 @@ export const fetchContacts = async (userId, filters = []) => {
 
 export const createContact = async (contactData, userId) => {
   try {
-    const { data: contact, error } = await supabase
-      .from('connections')
-      .insert(contactData)
-      .select()
-      .single();
-    if (error) throw error;
+    // Data for connections table
+    const connectionData = {
+      name: contactData.name,
+      email: contactData.email,
+      phone_number: contactData.phone_number,
+      socials: contactData.socials,
+      company: contactData.company,
+      role: contactData.role,
+      industry: contactData.industry,
+      school: contactData.school,
+      avatar_url: contactData.avatar_url || null,
+      
+    };
+
+    // Data for user_to_connections table
+    const relationshipData = {
+      where_met: contactData.where_met,
+      notes: contactData.notes,
+      last_contact_at: contactData.last_contact_at,
+      relationship_type: contactData.relationship_type || [],
+      tags: contactData.tags || [],
+      interactions_count: contactData.interactions_count || 0,
+      connection_score: contactData.connection_score || null,
+    };
+
+    // First, try to find existing connection by email
+    let connection;
+    if (connectionData.email) {
+      const { data: existingConnection } = await supabase
+        .from('connections')
+        .select('id, *')
+        .eq('email', connectionData.email)
+        .single();
+      
+      connection = existingConnection;
+    }
+
+    // If no existing connection found, create new one
+    if (!connection) {
+      const { data: newConnection, error: connectionError } = await supabase
+        .from('connections')
+        .insert(connectionData)
+        .select()
+        .single();
+      
+      if (connectionError) throw connectionError;
+      connection = newConnection;
+    }
+
+    // Create the relationship in user_to_connections
     const { error: linkError } = await supabase
       .from('user_to_connections')
-      .insert({ user_id: userId, connection_id: contact.id });
+      .insert({
+        user_id: userId,
+        connection_id: connection.id,
+        ...relationshipData,
+      });
+
     if (linkError) throw linkError;
-    return { success: true, data: contact };
+
+    // Return the combined data
+    return { 
+      success: true, 
+      data: { 
+        ...connection, 
+        ...relationshipData,
+        id: connection.id 
+      } 
+    };
+
   } catch (error) {
     return { success: false, error: error.message };
   }
