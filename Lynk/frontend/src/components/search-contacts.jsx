@@ -35,7 +35,7 @@ const SearchResult = ({ contact, index }) => {
             <Badge 
               key={index} 
               variant="secondary"
-              className={`text-sm !${colorMap[type.toLowerCase()]}`}
+              className={`text-sm ${colorMap[type.toLowerCase()]}`}
             >
               {type}
             </Badge>
@@ -43,7 +43,7 @@ const SearchResult = ({ contact, index }) => {
         </div>
 
         <div className="flex items-center space-x-4 ml-2">
-          <AvatarDemo initials={getInitials(contact.name)} className="w-12 h-12 text-xl ml-2" />
+          <AvatarDemo initials={getInitials(contact.name)} url={contact.avatar_url} className="w-12 h-12 text-xl ml-2" />
         </div>
       </div>
     </li>
