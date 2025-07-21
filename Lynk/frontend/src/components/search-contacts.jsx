@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef} from "react"
 import { Search } from "lucide-react";
-import { Badge } from "@/components/ui/badge"; // ✅ ADD: Import Badge
+import { Badge } from "@/components/ui/badge"; 
 import { Trie, fetchInitialContactsForSearch } from "../../../backend/index.js"
 import { getInitials } from "./contacts-table-components/columns.jsx";
 import AvatarDemo from "./avatar-01"
@@ -43,7 +43,7 @@ const SearchResult = ({ contact, index }) => {
         </div>
 
         <div className="flex items-center space-x-4 ml-2">
-          <AvatarDemo initials={getInitials(contact.name)} url={contact.avatar_url} className="w-12 h-12 text-xl ml-2" />
+          <AvatarDemo initials={getInitials(contact.name)} className="w-12 h-12 text-xl ml-2" />
         </div>
       </div>
     </li>
