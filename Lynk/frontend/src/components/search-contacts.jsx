@@ -6,7 +6,7 @@ import { getInitials } from "./contacts-table-components/columns.jsx";
 import AvatarDemo from "./avatar-01";
 import { useDebounce } from "../lib/useDebounce.js";
 import { UserAuth } from "../context/AuthContext.jsx";
-
+import ViewContactCard from "./ViewContactCard";
 
 const SearchResult = ({ contact }) => {
   const colorMap = {
@@ -53,7 +53,6 @@ const SearchResult = ({ contact }) => {
   );
 };
 
-
 const SearchContacts = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
@@ -62,15 +61,17 @@ const SearchContacts = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentFirstChar, setCurrentFirstChar] = useState("");
 
+  // Modal state
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
   // keyboard-navigation state 
   const [activeIndex, setActiveIndex] = useState(-1); // -1 = nothing highlighted
   const optionRefs = useRef([]);
 
-
   const typeaheadRef = useRef(null);
   const { session } = UserAuth();
   const debouncedSearchTerm = useDebounce(searchTerm);
-
 
   useEffect(() => {
     const performSearch = async () => {
@@ -138,78 +139,87 @@ const SearchContacts = () => {
   const handleSelect = (contact) => {
     setSearchTerm(contact.name);
     setShowDropdown(false);
-    // TO DO: Implement "view contact modal" upon clicking enter
+    setSelectedContact(contact);
+    setModalOpen(true);
   };
 
   return (
-    <div
-      ref={typeaheadRef}
-      className="relative w-2/4 !h-4 flex flex-col justify-center"
-    >
-      <input type="text" placeholder="Search connections..." 
-      value={searchTerm} onChange={handleChange}
-        onKeyDown={(e) => {
-          if (!showDropdown) return;
-          switch (e.key) {
-            case "ArrowDown":
-              e.preventDefault();
-              setActiveIndex((prev) =>
-                results.length ? (prev + 1) % results.length : -1
-              );
-              break;
-            case "ArrowUp":
-              e.preventDefault();
-              setActiveIndex((prev) =>
-                results.length ? prev <= 0 ? results.length - 1 : prev - 1 : -1);
-              break;
-            case "Enter":
-              if (activeIndex >= 0 && activeIndex < results.length) {
+    <>
+      <div
+        ref={typeaheadRef}
+        className="relative w-2/4 !h-4 flex flex-col justify-center"
+      >
+        <input type="text" placeholder="Search connections..." 
+        value={searchTerm} onChange={handleChange}
+          onKeyDown={(e) => {
+            if (!showDropdown) return;
+            switch (e.key) {
+              case "ArrowDown":
                 e.preventDefault();
-                handleSelect(results[activeIndex]);
-              }
-              break;
-            case "Escape":
-              setShowDropdown(false);
-              break;
-            default:
-              break;
+                setActiveIndex((prev) =>
+                  results.length ? (prev + 1) % results.length : -1
+                );
+                break;
+              case "ArrowUp":
+                e.preventDefault();
+                setActiveIndex((prev) =>
+                  results.length ? prev <= 0 ? results.length - 1 : prev - 1 : -1);
+                break;
+              case "Enter":
+                if (activeIndex >= 0 && activeIndex < results.length) {
+                  e.preventDefault();
+                  handleSelect(results[activeIndex]);
+                }
+                break;
+              case "Escape":
+                setShowDropdown(false);
+                break;
+              default:
+                break;
+            }
+          }}
+          className="outline-1 border border-gray-200 w-full rounded-md p-2 text-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
+          role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded={showDropdown}
+          aria-activedescendant={
+            activeIndex >= 0 ? `typeahead-option-${activeIndex}` : undefined
           }
-        }}
-        className="outline-1 border border-gray-200 w-full rounded-md p-2 text-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
-        role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded={showDropdown}
-        aria-activedescendant={
-          activeIndex >= 0 ? `typeahead-option-${activeIndex}` : undefined
-        }
-      />
-      <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-700" />
+        />
+        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-700" />
 
-      {searchTerm && showDropdown && (
-        <ul role="listbox"
-          className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-sm shadow-md mt-4 z-10 max-h-108 overflow-y-auto"
-        >
-          {isLoading ? (
-            <div className="p-3 text-gray-500 flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2" />
-                    Searching...
-                </div>
-          ) : results.length ? (
-            results.map((result, index) => (
-              <li key={index} id={`typeahead-option-${index}`}
-                ref={(el) => (optionRefs.current[index] = el)} role="option"
-                aria-selected={index === activeIndex} className={`py-2 px-6 cursor-pointer border-b border-gray-200 ${
-                  index === activeIndex ? "bg-blue-50" : "hover:bg-gray-100"}`}
-                onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => handleSelect(result)}
-              >
-                <SearchResult contact={result} />
-              </li>
-            ))
-          ) : (
-            <p className="p-3 text-gray-500">No results found.</p>
-          )}
-        </ul>
-      )}
-    </div>
+        {searchTerm && showDropdown && (
+          <ul role="listbox"
+            className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-sm shadow-md mt-4 z-10 max-h-108 overflow-y-auto"
+          >
+            {isLoading ? (
+              <div className="p-3 text-gray-500 flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2" />
+                      Searching...
+                  </div>
+            ) : results.length ? (
+              results.map((result, index) => (
+                <li key={index} id={`typeahead-option-${index}`}
+                  ref={(el) => (optionRefs.current[index] = el)} role="option"
+                  aria-selected={index === activeIndex} className={`py-2 px-6 cursor-pointer border-b border-gray-200 ${
+                    index === activeIndex ? "bg-blue-50" : "hover:bg-gray-100"}`}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onClick={() => handleSelect(result)}
+                >
+                  <SearchResult contact={result} />
+                </li>
+              ))
+            ) : (
+              <p className="p-3 text-gray-500">No results found.</p>
+            )}
+          </ul>
+        )}
+      </div>
+      
+      <ViewContactCard
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        contact={selectedContact}
+      />
+    </>
   )
 }
 
