@@ -21,7 +21,7 @@ export function getInitials(fullName) {
     return `${firstInitial}${lastInitial}`;
   }
 
-export const columns =  (onDeleteContact, onUpdateContact) => [
+export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
   {
     id: "select",
     header: ({ table }) => (
@@ -64,9 +64,17 @@ export const columns =  (onDeleteContact, onUpdateContact) => [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Name" />
     ),
-    cell: ({row}) => {
-      const name = row.getValue("name")
-      return <div className="text-left font-medium text-xl">{name}</div>
+    cell: ({ row }) => {
+      const name = row.getValue("name");
+      const contact = row.original;
+      return (
+        <div
+          className="text-center text-xl font-medium cursor-pointer hover:underline focus:outline-none"
+          onClick={() => onViewContact(contact)}
+        >
+          {name}
+        </div>
+      );
     },
     id: "name"
   },
