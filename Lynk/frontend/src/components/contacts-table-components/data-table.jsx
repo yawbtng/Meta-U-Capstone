@@ -47,6 +47,7 @@ export default function DataTable({ columns, data }) {
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters, 
     onGlobalFilterChange: setGlobalFilter,   
+    enableColumnFilters: true,
     state: {
       sorting,
       rowSelection,

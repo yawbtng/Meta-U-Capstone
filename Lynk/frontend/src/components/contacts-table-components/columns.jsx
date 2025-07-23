@@ -77,7 +77,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       );
     },
     id: "name", 
-    type: "text"
+    type: "text",
+    enableColumnFilter: true
   },
   {
     accessorKey: "email",
@@ -89,7 +90,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       return <div className="text-left text-lg font-medium">{email}</div>
     },
     id: "email",
-    type: "email"
+    type: "email",
+    enableColumnFilter: true
   },
   {
     accessorKey: "phone_number",
@@ -105,7 +107,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       return <div className="text-center text-lg font-medium">{parsed}</div>
     },
     id: "phone_number",
-    type: "number"
+    type: "number",
+    enableColumnFilter: true
   },
   {
     accessorKey: "socials.linkedin",
@@ -132,7 +135,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       )
     },
     id: "socials_linkedin",
-    type: "text"
+    type: "text",
+    enableColumnFilter: true
   },
   {
     accessorKey: "socials.twitter",
@@ -155,7 +159,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       )
     },
     id: "socials_twitter",
-    type: "text"
+    type: "text",
+    enableColumnFilter: true
   },
   {
     accessorKey: "socials.instagram",
@@ -178,7 +183,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       )
     },
     id: "socials_instagram",
-    type: "text"
+    type: "text",
+    enableColumnFilter: true
   },
   {
     accessorKey: "relationship_type",
@@ -208,7 +214,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "relationship_type",
     type: "multi-select",
-    options: ["personal", "professional", "social"]
+    options: ["personal", "professional", "social"],
+    enableColumnFilter: true
   },
   {
     accessorKey: "industry",
@@ -220,7 +227,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       return <div className="text-left text-lg font-medium">{industry}</div>
     },
     id: "industry",
-    type: "text"
+    type: "text",
+    enableColumnFilter: true
   },
   {
     accessorKey: "company",
@@ -232,7 +240,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       return <div className="text-left text-lg font-medium">{company}</div>
     },
     id: "company",
-    type: "text"
+    type: "text",
+    enableColumnFilter: true
   },
   {
     accessorKey: "role",
@@ -244,7 +253,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       return <div className="text-left text-lg font-medium">{role}</div>
     },
     id: "role",
-    type: "text"
+    type: "text",
+    enableColumnFilter: true
   },
   {
     accessorKey: "last_contact_at",
@@ -266,7 +276,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       return <div className="text-center text-lg font-medium">{formatted}</div>
     },
     id: "last_contact_at",
-    type: "date"
+    type: "date",
+    enableColumnFilter: true
   },
   {
     accessorKey: "interactions_count",
@@ -278,7 +289,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       return <div className="text-center font-medium text-xl">{amount}</div>
     },
     id: "interactions_count",
-    type: "number"
+    type: "number",
+    enableColumnFilter: true
   },
   {
     accessorKey: "tags",
@@ -303,6 +315,7 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "tags",
     type: "text",
+    enableColumnFilter: true
   },
   {
     id: "actions",
