@@ -4,26 +4,41 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { UserPlus } from 'lucide-react';
-import { searchContactsViaClado, getCachedCladoResults, setCachedCladoResults } from '../../../../backend/services/clado-client.js';
+import { searchContactsViaClado, getCachedCladoResults, setCachedCladoResults, getCladoQueryCount, incrementCladoQueryCount, CLADO_DAILY_LIMIT } from '../../../../backend/services/clado-client.js';
 import { UserAuth } from '@/context/AuthContext';
 
 export default function AddContactByAPI() {
-  const { profile } = UserAuth();
+  const { profile, session } = UserAuth();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searching, setSearching] = useState(false);
   const [initialTried, setInitialTried] = useState(false);
+  const [queriesLeft, setQueriesLeft] = useState(CLADO_DAILY_LIMIT);
 
   // Generate initial query from user profile
   const initialQuery = profile?.role && profile?.location
     ? `${profile.role} in ${profile.location}`
     : '';
 
-  // Fetch initial recommendations on mount (if profile info is available)
+  // Fetch initial query count on mount or user change
   useEffect(() => {
-    if (!initialTried && initialQuery) {
+    async function fetchLimit() {
+      if (session?.user?.id) {
+        try {
+          const count = await getCladoQueryCount(session.user.id);
+          setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
+        } catch {
+          setQueriesLeft(CLADO_DAILY_LIMIT);
+        }
+      }
+    }
+    fetchLimit();
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    if (!initialTried && initialQuery && session?.user?.id) {
       async function fetchInitial() {
         setLoading(true);
         setError(null);
@@ -31,7 +46,19 @@ export default function AddContactByAPI() {
           const cached = getCachedCladoResults(initialQuery);
           if (cached) {
             setResults(cached.results || []);
+            // Only check count, do not increment
+            const count = await getCladoQueryCount(session.user.id);
+            setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
           } else {
+            // Only increment if making a real API call
+            const count = await incrementCladoQueryCount(session.user.id);
+            setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
+            if (count > CLADO_DAILY_LIMIT) {
+              setError('You have reached your daily Clado search limit.');
+              setLoading(false);
+              setInitialTried(true);
+              return;
+            }
             const data = await searchContactsViaClado(initialQuery, 4);
             setResults(data.results || []);
             setCachedCladoResults(initialQuery, data);
@@ -45,19 +72,34 @@ export default function AddContactByAPI() {
       }
       fetchInitial();
     }
-  }, [initialQuery, initialTried]);
+  }, [initialQuery, initialTried, session?.user?.id]);
 
   // Handle search
   async function handleSearch(e) {
     e.preventDefault();
     if (!query.trim()) return;
+    if (!session?.user?.id) {
+      setError('You must be signed in to search.');
+      return;
+    }
     setSearching(true);
     setError(null);
     try {
       const cached = getCachedCladoResults(query);
       if (cached) {
         setResults(cached.results || []);
+        // Only check count, do not increment
+        const count = await getCladoQueryCount(session.user.id);
+        setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
       } else {
+        // Only increment if making a real API call
+        const count = await incrementCladoQueryCount(session.user.id);
+        setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
+        if (count > CLADO_DAILY_LIMIT) {
+          setError('You have reached your daily Clado search limit.');
+          setSearching(false);
+          return;
+        }
         const data = await searchContactsViaClado(query, 4);
         setResults(data.results || []);
         setCachedCladoResults(query, data);
@@ -79,16 +121,26 @@ export default function AddContactByAPI() {
             placeholder="Search for people (e.g. Product Managers in Dallas Texas)"
             className="max-w-2xl w-[420px]"
           />
-          <Button type="submit" disabled={searching || loading}>
+          <Button type="submit" disabled={searching || loading || queriesLeft <= 0}>
             {searching ? 'Searching...' : 'Search'}
           </Button>
         </form>
       </div>
-      {/* Personalized context message */}
-      <div className="flex justify-center w-full">
-        <div className="text-muted-foreground text-center text-sm max-w-xl mt-2">
-          {profile?.role && profile?.location &&
-            'Recommending people who work in similar roles and locations.'}
+      {/* Personalized context message and rate limit */}
+      <div className="flex flex-col items-center w-full">
+        <div className="flex flex-col items-center w-full max-w-xl">
+          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mt-2 shadow-sm">
+            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" /></svg>
+            <span className="text-blue-800 font-medium">
+              {profile?.role && profile?.location && 'Recommending people who work in similar roles and locations.'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+              <svg className="inline w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l2 2" /></svg>
+              {`Clado API queries left today: ${queriesLeft} / ${CLADO_DAILY_LIMIT}`}
+            </span>
+          </div>
         </div>
       </div>
 
