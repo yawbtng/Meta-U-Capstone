@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 
 const CLADO_API_KEY = import.meta.env?.VITE_CLADO_API_KEY;
 const CLADO_API_URL = 'https://search.clado.ai/api/search/users';
@@ -6,7 +5,7 @@ const CLADO_API_URL = 'https://search.clado.ai/api/search/users';
 /**
  * Search for users via Clado API
  */
-export async function searchContactsViaClado(query, limit = 10) {
+export async function searchContactsViaClado(query, limit = 16) {
   if (!CLADO_API_KEY) {
     throw new Error('Clado API key is missing. Set VITE_CLADO_API_KEY in your environment.');
   }
