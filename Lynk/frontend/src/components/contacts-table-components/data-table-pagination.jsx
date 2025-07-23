@@ -24,7 +24,7 @@ export function DataTablePagination({ table }) {
             }}
             className="h-8 w-[70px] rounded border border-gray-300 px-2 text-sm flex-shrink-0"
           >
-            {[10, 20, 25, 30, 40, 50].map((pageSize) => (
+            {[10, 15, 20, 25, 30, 40, 50].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
                 {pageSize}
               </option>

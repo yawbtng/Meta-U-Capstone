@@ -67,7 +67,7 @@ export default function DataTable({ columns, data }) {
     },
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 15,
       },
     },
   });
