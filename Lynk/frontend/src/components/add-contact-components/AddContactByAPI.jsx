@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { UserPlus } from 'lucide-react';
 import { searchContactsViaClado, getCachedCladoResults, setCachedCladoResults, getCladoQueryCount, incrementCladoQueryCount, CLADO_DAILY_LIMIT } from '../../../../backend/services/clado-client.js';
 import { UserAuth } from '@/context/AuthContext';
+import { createContact } from '../../../../backend/index.js';
+import { toast } from "sonner"
 
 export default function AddContactByAPI() {
   const { profile, session } = UserAuth();
@@ -16,6 +18,7 @@ export default function AddContactByAPI() {
   const [searching, setSearching] = useState(false);
   const [initialTried, setInitialTried] = useState(false);
   const [queriesLeft, setQueriesLeft] = useState(CLADO_DAILY_LIMIT);
+  const [addingId, setAddingId] = useState(null);
 
   // Generate initial query from user profile
   const initialQuery = profile?.role && profile?.location
@@ -110,6 +113,48 @@ export default function AddContactByAPI() {
       setSearching(false);
     }
   }
+
+  // Handler to add a Clado contact
+  async function handleAddCladoContact(item) {
+    const profile = item.profile || {};
+    const experience = Array.isArray(item.experience) && item.experience.length > 0 ? item.experience[0] : {};
+    const education = Array.isArray(item.education) && item.education.length > 0 ? item.education[0] : {};
+    setAddingId(profile.id);
+    const contactData = {
+      name: profile.name,
+      email: '',
+      phone_number: '',
+      company: experience.company_name || '',
+      role: experience.title || profile.title || '',
+      industry: '',
+      school: education.school_name || '',
+      avatar_url: profile.profile_picture_permalink || '',
+      location: profile.location || '',
+      linkedin_url: profile.linkedin_url || '',
+      notes: profile.description || '',
+      tags: ['clado', 'external'],
+      relationship_type: ['external'],
+      socials: {
+        linkedin: profile.linkedin_url || '',
+        twitter: profile.twitter_handle || ''
+      }
+    };
+    try {
+      const userId = session?.user?.id;
+      const result = await createContact(contactData, userId);
+      if (result.success) {
+        toast && toast({ title: 'Contact added!', description: `${profile.name} was added to your network.` });
+      } else {
+        toast && toast({ title: 'Failed to add contact', description: result.error || 'Unknown error', variant: 'destructive' });
+      }
+    } catch (err) {
+      toast && toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setAddingId(null);
+    }
+  }
+
+  console.log(results)
 
   return (
     <div className="space-y-6">
@@ -220,9 +265,13 @@ export default function AddContactByAPI() {
                     </div>
                   )}
                   {/* Add button and LinkedIn */}
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-base mt-4" disabled>
+                  <Button
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-base mt-4"
+                    onClick={() => handleAddCladoContact(item)}
+                    disabled={addingId === profile.id}
+                  >
                     <UserPlus className="w-5 h-5 mr-2 " />
-                    Add (Coming Soon)
+                    {addingId === profile.id ? 'Adding...' : 'Add to Contacts'}
                   </Button>
                   {profile.linkedin_url && (
                     <a
