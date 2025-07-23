@@ -28,7 +28,9 @@ export default function DataTable({ columns, data }) {
   const [columnVisibility, setColumnVisibility] = useState({
       "phone_number": false,
       "industry": false,
-      "tags": false
+      "tags": false,
+      "company": false,
+      "interactions_count": false,
   });
   
   
