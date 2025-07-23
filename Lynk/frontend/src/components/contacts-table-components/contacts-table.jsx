@@ -4,11 +4,14 @@ import { UserAuth } from "../../context/AuthContext";
 import { columns } from "./columns";
 import DataTable from "./data-table";
 import { toast } from "sonner";
+import ViewContactCard from "../ViewContactCard";
 
 const ContactsTable = () => {
   const { session } = UserAuth();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleContactUpdated = (updated) => {
     setData((prev) =>
@@ -44,12 +47,22 @@ const ContactsTable = () => {
     }
   }
 
+  const handleViewContact = (contact) => {
+    setSelectedContact(contact);
+    setModalOpen(true);
+  };
+
   return (
     <div className="mx-auto my-10">
       <DataTable 
-        columns={columns(onDeleteContact, handleContactUpdated)} 
+        columns={columns(onDeleteContact, handleContactUpdated, handleViewContact)} 
         data={data}
         loading={loading}
+      />
+      <ViewContactCard
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        contact={selectedContact}
       />
     </div>
   );

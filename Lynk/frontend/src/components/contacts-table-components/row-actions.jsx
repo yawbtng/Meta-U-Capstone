@@ -11,12 +11,14 @@ import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialo
 import { SheetTrigger } from "@/components/ui/sheet"
 import { EditContact } from "../edit-contact-sheet"
 import { useState } from "react"
+import ViewContactCard from "../ViewContactCard";
 
 export const RowActions = ({ contact, onDeleteContact, onUpdateContact }) => {
   const [openEditSheet, setOpenEditSheet] = useState(false)
+  const [openViewModal, setOpenViewModal] = useState(false)
 
     return (
-      
+      <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-9 w-9 p-0">
@@ -27,7 +29,7 @@ export const RowActions = ({ contact, onDeleteContact, onUpdateContact }) => {
         <DropdownMenuContent align="end" className="w-48">
 
           {/* Viewing a Contact */}
-          <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 cursor-pointer">
+          <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 cursor-pointer" onClick={() => setOpenViewModal(true)}>
             <Eye className="h-5 w-5" />
             View Contact
           </DropdownMenuItem>
@@ -59,6 +61,8 @@ export const RowActions = ({ contact, onDeleteContact, onUpdateContact }) => {
           </DeleteConfirmationDialog>
         </DropdownMenuContent>
       </DropdownMenu>
+      <ViewContactCard open={openViewModal} onOpenChange={setOpenViewModal} contact={contact} />
+      </>
     )
   }
   
