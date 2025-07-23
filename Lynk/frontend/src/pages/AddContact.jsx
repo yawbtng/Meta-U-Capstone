@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AddContactManual from '../components/add-contact-components/AddContactManual';
 import AddContactRecommendation from '../components/add-contact-components/AddContactRecommendation';
+import AddContactByAPI from '../components/add-contact-components/AddContactByAPI';
 
 export default function AddContact() {
     return (
@@ -20,10 +21,7 @@ export default function AddContact() {
                 </TabsList>
                 
                 <TabsContent value="api" className="mt-6">
-                    <div className="text-center py-12 text-muted-foreground">
-                        <p>API integration coming soon...</p>
-                        <p className="text-sm mt-2">This feature will allow you to import contacts from external platforms.</p>
-                    </div>
+                    <AddContactByAPI />
                 </TabsContent>
                 
                 <TabsContent value="manual" className="mt-6">
