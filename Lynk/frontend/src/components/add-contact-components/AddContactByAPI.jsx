@@ -28,7 +28,7 @@ export default function AddContactByAPI() {
         setLoading(true);
         setError(null);
         try {
-          const data = await searchContactsViaClado(initialQuery, 10);
+          const data = await searchContactsViaClado(initialQuery, 4);
           setResults(data.results || []);
         } catch (err) {
           setError(err.message || 'Failed to fetch recommendations.');
@@ -48,7 +48,7 @@ export default function AddContactByAPI() {
     setSearching(true);
     setError(null);
     try {
-      const data = await searchContactsViaClado(query, 10);
+      const data = await searchContactsViaClado(query, 4);
       setResults(data.results || []);
     } catch (err) {
       setError(err.message || 'Failed to fetch search results.');
@@ -71,6 +71,13 @@ export default function AddContactByAPI() {
             {searching ? 'Searching...' : 'Search'}
           </Button>
         </form>
+      </div>
+      {/* Personalized context message */}
+      <div className="flex justify-center w-full">
+        <div className="text-muted-foreground text-center text-sm max-w-xl mt-2">
+          {profile?.role && profile?.location &&
+            'Recommending people who work in similar roles and locations.'}
+        </div>
       </div>
 
       {!profile?.role || !profile?.location ? (

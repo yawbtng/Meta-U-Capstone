@@ -5,7 +5,7 @@ const CLADO_API_URL = 'https://search.clado.ai/api/search/users';
 /**
  * Search for users via Clado API
  */
-export async function searchContactsViaClado(query, limit = 16) {
+export async function searchContactsViaClado(query, limit = 4) {
   if (!CLADO_API_KEY) {
     throw new Error('Clado API key is missing. Set VITE_CLADO_API_KEY in your environment.');
   }
