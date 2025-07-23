@@ -15,10 +15,12 @@ export const DeleteConfirmationDialog = ({
   description, 
   onConfirm, 
   confirmText = "Delete",
-  cancelText = "Cancel" 
+  cancelText = "Cancel",
+  open,
+  onOpenChange
 }) => {
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       {children}
       <AlertDialogContent>
         <AlertDialogHeader>
