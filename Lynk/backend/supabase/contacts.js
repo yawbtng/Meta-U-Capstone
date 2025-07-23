@@ -111,6 +111,7 @@ export const createContact = async (contactData, userId) => {
   try {
     // Data for connections table
     const connectionData = {
+      id: contactData.id || uuidv4(),
       name: contactData.name,
       email: contactData.email,
       phone_number: contactData.phone_number,
@@ -157,7 +158,7 @@ export const createContact = async (contactData, userId) => {
       if (connectionError) throw connectionError;
       connection = newConnection;
     }
-
+    
     // Create the relationship in user_to_connections
     const { error: linkError } = await supabase
       .from('user_to_connections')

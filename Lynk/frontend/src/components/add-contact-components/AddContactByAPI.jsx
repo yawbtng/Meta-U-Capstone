@@ -6,8 +6,14 @@ import { Badge } from '@/components/ui/badge';
 import { UserPlus } from 'lucide-react';
 import { searchContactsViaClado, getCachedCladoResults, setCachedCladoResults, getCladoQueryCount, incrementCladoQueryCount, CLADO_DAILY_LIMIT } from '../../../../backend/services/clado-client.js';
 import { UserAuth } from '@/context/AuthContext';
-import { createContact } from '../../../../backend/index.js';
+import { createContact, fetchContacts } from '../../../../backend/index.js';
 import { toast } from "sonner"
+import { v4 as uuidv4 } from 'uuid';
+
+
+function normalizeLinkedin(url) {
+  return (url || '').trim().toLowerCase().replace(/\/+$/, '');
+}
 
 export default function AddContactByAPI() {
   const { profile, session } = UserAuth();
@@ -19,6 +25,25 @@ export default function AddContactByAPI() {
   const [initialTried, setInitialTried] = useState(false);
   const [queriesLeft, setQueriesLeft] = useState(CLADO_DAILY_LIMIT);
   const [addingId, setAddingId] = useState(null);
+  const [existingContacts, setExistingContacts] = useState([]);
+
+  // Fetch user's existing contacts (for duplicate check)
+  useEffect(() => {
+    async function fetchUserContacts() {
+      if (session?.user?.id) {
+        const { data } = await fetchContacts(session.user.id);
+        setExistingContacts(data || []);
+      }
+    }
+    fetchUserContacts();
+  }, [session?.user?.id]);
+
+  // Set of existing LinkedIn URLs (normalized)
+  const existingLinkedinSet = new Set(
+    existingContacts
+      .map(c => normalizeLinkedin(c.linkedin_url))
+      .filter(Boolean)
+  );
 
   // Generate initial query from user profile
   const initialQuery = profile?.role && profile?.location
@@ -120,41 +145,60 @@ export default function AddContactByAPI() {
     const experience = Array.isArray(item.experience) && item.experience.length > 0 ? item.experience[0] : {};
     const education = Array.isArray(item.education) && item.education.length > 0 ? item.education[0] : {};
     setAddingId(profile.id);
+    
     const contactData = {
-      name: profile.name,
-      email: '',
-      phone_number: '',
+      id: uuidv4(),
+      name: profile.name || '',
+      email: null,
+      phone_number: null,
+      socials: {
+        linkedin: profile.linkedin_url || '',
+        twitter: profile.twitter_handle || ''
+      },
       company: experience.company_name || '',
       role: experience.title || profile.title || '',
       industry: '',
       school: education.school_name || '',
-      avatar_url: profile.profile_picture_permalink || '',
+      avatar_url: profile.profile_picture_permalink || null,
+      gender: '',
       location: profile.location || '',
-      linkedin_url: profile.linkedin_url || '',
+      interests: [],
+      where_met: 'Clado',
       notes: profile.description || '',
+      last_contact_at: null,
+      relationship_type: ['professional'],
       tags: ['clado', 'external'],
-      relationship_type: ['external'],
-      socials: {
-        linkedin: profile.linkedin_url || '',
-        twitter: profile.twitter_handle || ''
-      }
+      interactions_count: 0,
+      connection_score: null,
     };
+
     try {
       const userId = session?.user?.id;
       const result = await createContact(contactData, userId);
       if (result.success) {
-        toast && toast({ title: 'Contact added!', description: `${profile.name} was added to your network.` });
+        toast(`Contact added! ${profile.name} was added to your network.`);
+        // update existingContacts to immediately disable Add button
+        setExistingContacts(prev => {
+          // Only add if not already present (normalized)
+          const newLinkedin = normalizeLinkedin(profile.linkedin_url);
+          if (!prev.some(c => normalizeLinkedin(c.linkedin_url) === newLinkedin)) {
+            return [
+              ...prev,
+              { linkedin_url: profile.linkedin_url }
+            ];
+          }
+          return prev;
+        });
       } else {
-        toast && toast({ title: 'Failed to add contact', description: result.error || 'Unknown error', variant: 'destructive' });
+        toast(`Failed to add contact: ${result.error || 'Unknown error'}`);
       }
     } catch (err) {
-      toast && toast({ title: 'Error', description: err.message, variant: 'destructive' });
+      toast(`Error: ${err.message}`);
     } finally {
       setAddingId(null);
     }
   }
 
-  console.log(results)
 
   return (
     <div className="space-y-6">
@@ -205,7 +249,7 @@ export default function AddContactByAPI() {
             const profile = item.profile || {};
             const experience = Array.isArray(item.experience) && item.experience.length > 0 ? item.experience[0] : null;
             const education = Array.isArray(item.education) && item.education.length > 0 ? item.education[0] : null;
-            
+            const alreadyExists = profile.linkedin_url && existingLinkedinSet.has(normalizeLinkedin(profile.linkedin_url));
             return (
               <Card key={profile.id || idx} className="hover:shadow-lg transition-all duration-200 relative h-auto min-h-[420px] flex flex-col justify-between my-2">
                 <CardHeader className="pb-0 pt-8 ">
@@ -267,11 +311,21 @@ export default function AddContactByAPI() {
                   {/* Add button and LinkedIn */}
                   <Button
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white text-base mt-4"
-                    onClick={() => handleAddCladoContact(item)}
-                    disabled={addingId === profile.id}
+                    onClick={() => {
+                      if (alreadyExists) {
+                        toast({ title: 'Already in your Contacts', description: `${profile.name} is already in your network.`, variant: 'info' });
+                      } else {
+                        handleAddCladoContact(item);
+                      }
+                    }}
+                    disabled={addingId === profile.id || alreadyExists}
                   >
                     <UserPlus className="w-5 h-5 mr-2 " />
-                    {addingId === profile.id ? 'Adding...' : 'Add to Contacts'}
+                    {alreadyExists
+                      ? 'Already in your Contacts'
+                      : addingId === profile.id
+                        ? 'Adding...'
+                        : 'Add to Contacts'}
                   </Button>
                   {profile.linkedin_url && (
                     <a
