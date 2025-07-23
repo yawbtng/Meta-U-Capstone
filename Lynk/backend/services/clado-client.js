@@ -11,13 +11,17 @@ export const CLADO_DAILY_LIMIT = 3; // max # of queries per day
  */
 export async function getCladoQueryCount(userId) {
   const today = new Date().toISOString().slice(0, 10);
-  let { data, error } = await supabase
+  let { data, error, status } = await supabase
     .from('clado_query_limits')
     .select('query_count')
     .eq('user_id', userId)
     .eq('query_date', today)
     .single();
-  if (error && error.code !== 'PGRST116') {
+  // Treat 406 as no row (count = 0)
+  if ((error && error.code === 'PGRST116') || status === 406) {
+    return 0;
+  }
+  if (error) {
     throw new Error('Failed to check rate limit: ' + error.message);
   }
   return data ? data.query_count : 0;
