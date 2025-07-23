@@ -200,7 +200,9 @@ const SearchContacts = () => {
                 <li key={index} id={`typeahead-option-${index}`}
                   ref={(el) => (optionRefs.current[index] = el)} role="option"
                   aria-selected={index === activeIndex} className={`py-2 px-6 cursor-pointer border-b border-gray-200 ${
-                    index === activeIndex ? "bg-blue-50" : "hover:bg-gray-100"}`}
+                    index === activeIndex 
+                      ? "bg-blue-50 border-l-4 border-l-blue-500" 
+                      : "hover:bg-gray-100"}`}
                   onMouseEnter={() => setActiveIndex(index)}
                   onClick={() => handleSelect(result)}
                 >
