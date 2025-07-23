@@ -21,6 +21,100 @@ export function getInitials(fullName) {
     return `${firstInitial}${lastInitial}`;
   }
 
+const customFilterFn = (row, columnId, filterValue) => {
+  const cellValue = row.getValue(columnId);
+  const { condition, value, columnType } = filterValue;
+  
+  if (!cellValue && condition !== 'is_empty') return false;
+  
+  switch (condition) {
+    case 'contains':
+      if (Array.isArray(cellValue)) {
+        return cellValue.some(item => 
+          String(item).toLowerCase().includes(String(value).toLowerCase())
+        );
+      }
+      return String(cellValue).toLowerCase().includes(String(value).toLowerCase());
+      
+    case 'does_not_contain':
+      if (Array.isArray(cellValue)) {
+        return !cellValue.some(item => 
+          String(item).toLowerCase().includes(String(value).toLowerCase())
+        );
+      }
+      return !String(cellValue).toLowerCase().includes(String(value).toLowerCase());
+      
+    case 'equals':
+      if (Array.isArray(cellValue)) {
+        return cellValue.length === 1 && String(cellValue[0]).toLowerCase() === String(value).toLowerCase();
+      }
+      if (columnType === 'number') {
+        return Number(cellValue) === Number(value);
+      }
+      if (columnType === 'date') {
+        return new Date(cellValue).toDateString() === new Date(value).toDateString();
+      }
+      return String(cellValue).toLowerCase() === String(value).toLowerCase();
+      
+    case 'starts_with':
+      return String(cellValue).toLowerCase().startsWith(String(value).toLowerCase());
+      
+    case 'ends_with':
+      return String(cellValue).toLowerCase().endsWith(String(value).toLowerCase());
+      
+    case 'greater_than':
+      return Number(cellValue) > Number(value);
+      
+    case 'less_than':
+      return Number(cellValue) < Number(value);
+      
+    case 'greater_than_or_equal':
+      return Number(cellValue) >= Number(value);
+      
+    case 'less_than_or_equal':
+      return Number(cellValue) <= Number(value);
+      
+    case 'before':
+      return new Date(cellValue) < new Date(value);
+      
+    case 'after':
+      return new Date(cellValue) > new Date(value);
+      
+    case 'on_or_before':
+      return new Date(cellValue) <= new Date(value);
+      
+    case 'on_or_after':
+      return new Date(cellValue) >= new Date(value);
+      
+    case 'contains_any':
+      if (Array.isArray(cellValue) && Array.isArray(value)) {
+        return value.some(v => cellValue.includes(v));
+      }
+      return false;
+      
+    case 'contains_all':
+      if (Array.isArray(cellValue) && Array.isArray(value)) {
+        return value.every(v => cellValue.includes(v));
+      }
+      return false;
+      
+    case 'is_empty':
+      if (Array.isArray(cellValue)) {
+        return cellValue.length === 0;
+      }
+      return !cellValue || cellValue === '';
+      
+    case 'is_not_empty':
+      if (Array.isArray(cellValue)) {
+        return cellValue.length > 0;
+      }
+      return cellValue && cellValue !== '';
+      
+    default:
+      return true;
+  }
+};
+
 export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
   {
     id: "select",
@@ -76,7 +170,10 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
         </div>
       );
     },
-    id: "name"
+    id: "name", 
+    type: "text",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "email",
@@ -87,7 +184,10 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       const email = row.getValue("email")
       return <div className="text-left text-lg font-medium">{email}</div>
     },
-    id: "email"
+    id: "email",
+    type: "email",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "phone_number",
@@ -102,7 +202,10 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       }
       return <div className="text-center text-lg font-medium">{parsed}</div>
     },
-    id: "phone_number"
+    id: "phone_number",
+    type: "number",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "socials.linkedin",
@@ -128,7 +231,10 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
         
       )
     },
-    id: "socials_linkedin"
+    id: "socials_linkedin",
+    type: "text",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "socials.twitter",
@@ -150,7 +256,10 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
         </div>
       )
     },
-    id: "socials_twitter"
+    id: "socials_twitter",
+    type: "text",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "socials.instagram",
@@ -172,7 +281,10 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
         </div>
       )
     },
-    id: "socials_instagram"
+    id: "socials_instagram",
+    type: "text",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "relationship_type",
@@ -200,7 +312,11 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
         </div>
       )
     },
-    id: "relationship_type"
+    id: "relationship_type",
+    type: "multi-select",
+    options: ["personal", "professional", "social"],
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "industry",
@@ -211,7 +327,10 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       const industry = row.getValue("industry")
       return <div className="text-left text-lg font-medium">{industry}</div>
     },
-    id: "industry"
+    id: "industry",
+    type: "text",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "company",
@@ -222,7 +341,10 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       const company = row.getValue("company")
       return <div className="text-left text-lg font-medium">{company}</div>
     },
-    id: "company"
+    id: "company",
+    type: "text",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "role",
@@ -233,7 +355,10 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       const role = row.getValue("role")
       return <div className="text-left text-lg font-medium">{role}</div>
     },
-    id: "role"
+    id: "role",
+    type: "text",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "last_contact_at",
@@ -254,7 +379,10 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       
       return <div className="text-center text-lg font-medium">{formatted}</div>
     },
-    id: "last_contact_at"
+    id: "last_contact_at",
+    type: "date",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "interactions_count",
@@ -264,7 +392,11 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     cell: ({row}) => {
       const amount = parseInt(row.getValue("interactions_count"))
       return <div className="text-center font-medium text-xl">{amount}</div>
-  }
+    },
+    id: "interactions_count",
+    type: "number",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "tags",
@@ -287,7 +419,10 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
         </div>
       )
     },
-    id: "tags"
+    id: "tags",
+    type: "text",
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     id: "actions",
