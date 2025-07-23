@@ -148,7 +148,7 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       
       const initials = getInitials(name);
 
-      return <div className="flex justify-center font-medium">
+      return <div className="flex justify-center font-medium cursor-pointer" onClick={() => onViewContact(row.original)}>
         <AvatarDemo initials={initials} url={avatar} className="w-12 h-12"/>
         </div>
     }
@@ -182,7 +182,9 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     ),
     cell: ({row}) => {
       const email = row.getValue("email")
-      return <div className="text-left text-lg font-medium">{email}</div>
+      const contact = row.original
+      return <div className="text-left text-lg font-medium"
+      onClick={() => onViewContact(contact)}>{email}</div>
     },
     id: "email",
     type: "email",
@@ -194,13 +196,15 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     header: () => <div className="text-center">Phone #</div>,
     cell: ({row}) => {
       const phone = row.getValue("phone_number")
+      const contact = row.original
       let parsed;
       if (phone.length === 10) {
         parsed = `${phone.substring(0, 3)}-${phone.substring(3, 6)}-${phone.substring(6, 10)}`
       } else {
         parsed = phone;
       }
-      return <div className="text-center text-lg font-medium">{parsed}</div>
+      return <div className="text-center text-lg font-medium"
+      onClick={() => onViewContact(contact)}>{parsed}</div>
     },
     id: "phone_number",
     type: "number",
@@ -213,7 +217,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     cell: ({row}) => {
       const linkedin = row.original.socials?.linkedin
       return (
-        <div className="flex justify-center underline text-lg">
+        <div className="flex justify-center underline text-lg"
+        onClick={() => onViewContact(contact)}>
           {linkedin ? (
               <Tooltip> 
                 <TooltipTrigger asChild>
@@ -325,7 +330,9 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     ),
     cell: ({row}) => {
       const industry = row.getValue("industry")
-      return <div className="text-left text-lg font-medium">{industry}</div>
+      const contact = row.original
+      return <div className="text-left text-lg font-medium"
+      onClick={() => onViewContact(contact)}>{industry}</div>
     },
     id: "industry",
     type: "text",
@@ -339,7 +346,9 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     ),
     cell: ({row}) => {
       const company = row.getValue("company")
-      return <div className="text-left text-lg font-medium">{company}</div>
+      const contact = row.original
+      return <div className="text-left text-lg font-medium"
+      onClick={() => onViewContact(contact)}>{company}</div>
     },
     id: "company",
     type: "text",
@@ -353,7 +362,9 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     ),
     cell: ({row}) => {
       const role = row.getValue("role")
-      return <div className="text-left text-lg font-medium">{role}</div>
+      const contact = row.original
+      return <div className="text-left text-lg font-medium"
+      onClick={() => onViewContact(contact)}>{role}</div>
     },
     id: "role",
     type: "text",
@@ -368,8 +379,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     cell: ({row}) => {
       const lastContact = row.getValue("last_contact_at")
       if (!lastContact) return <div className="text-center text-lg font-medium">-</div>
+      const contact = row.original
       
-      // Format the date (assuming it's in YYYY-MM-DD format)
       const date = new Date(lastContact)
       const formatted = date.toLocaleDateString('en-US', {
         month: 'short',
@@ -377,7 +388,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
         year: 'numeric'
       })
       
-      return <div className="text-center text-lg font-medium">{formatted}</div>
+      return <div className="text-center text-lg font-medium"
+      onClick={() => onViewContact(contact)}>{formatted}</div>
     },
     id: "last_contact_at",
     type: "date",
@@ -391,7 +403,9 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     ),
     cell: ({row}) => {
       const amount = parseInt(row.getValue("interactions_count"))
-      return <div className="text-center font-medium text-xl">{amount}</div>
+      const contact = row.original
+      return <div className="text-center font-medium text-xl"
+      onClick={() => onViewContact(contact)}>{amount}</div>
     },
     id: "interactions_count",
     type: "number",
@@ -405,6 +419,7 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     ),
     cell: ({row}) => {
       const tags = row.getValue("tags")
+      const contact = row.original
       return (
         <div className="text-left flex gap-2">
           {tags?.map((tag, index) => (
@@ -412,6 +427,7 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
               key={index} 
               variant="outline"
               className="text-sm bg-gray-100 text-black hover:bg-gray-200"
+              onClick={() => onViewContact(contact)}
             >
               {tag}
             </Badge>
