@@ -86,16 +86,26 @@ export function DataTableFilter({ table }) {
 
     // Apply each filter to the corresponding column
     filters.forEach(filter => {
-      if (filter.column && filter.condition) {
+      if (filter.column && filter.condition && filter.value !== '') {
         const column = table.getColumn(filter.column);
         if (column) {
-          const filterFn = createFilterFunction(filter.condition, filter.value, filter.columnType);
-          column.setFilterValue(filterFn);
+          // Create a filter value that the table can understand
+          const filterValue = createFilterValue(filter.condition, filter.value, filter.columnType);
+          column.setFilterValue(filterValue);
         }
       }
     });
 
     setIsOpen(false);
+  };
+
+  const createFilterValue = (condition, value, columnType) => {
+    // Return a filter value that TanStack can process
+    return {
+      condition,
+      value,
+      columnType
+    };
   };
 
   const createFilterFunction = (condition, value, columnType) => {
@@ -245,6 +255,14 @@ export function DataTableFilter({ table }) {
     });
   };
 
+  // Helper function to parse date string without timezone issues
+  const parseDateString = (dateString) => {
+    if (!dateString) return null;
+    const [year, month, day] = dateString.split('-').map(Number);
+    if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+    return new Date(year, month - 1, day); 
+  };
+
   // Render type-specific input component
   const renderFilterInput = (filter) => {
     if (['is_empty', 'is_not_empty'].includes(filter.condition)) {
@@ -269,6 +287,7 @@ export function DataTableFilter({ table }) {
         );
         
       case "date":
+        const parsedDate = parseDateString(filter.value);
         return (
           <Popover>
             <PopoverTrigger asChild>
@@ -280,13 +299,13 @@ export function DataTableFilter({ table }) {
                 )}
               >
                 <Calendar className="mr-2 h-4 w-4" />
-                {filter.value ? format(new Date(filter.value), "PPP") : "Pick a date"}
+                {parsedDate ? format(parsedDate, "PPP") : "Pick a date"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <CalendarComponent
                 mode="single"
-                selected={filter.value ? new Date(filter.value) : undefined}
+                selected={parsedDate}
                 onSelect={(date) => updateFilter(filter.id, 'value', date ? format(date, 'yyyy-MM-dd') : '')}
                 initialFocus
               />
