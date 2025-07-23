@@ -2,6 +2,56 @@
 const CLADO_API_KEY = import.meta.env?.VITE_CLADO_API_KEY;
 const CLADO_API_URL = 'https://search.clado.ai/api/search/users';
 
+import { supabase } from '../browser-client.js';
+
+export const CLADO_DAILY_LIMIT = 3; // max # of queries per day
+
+/**
+ * Get the user's Clado query count for today (no increment)
+ */
+export async function getCladoQueryCount(userId) {
+  const today = new Date().toISOString().slice(0, 10);
+  let { data, error } = await supabase
+    .from('clado_query_limits')
+    .select('query_count')
+    .eq('user_id', userId)
+    .eq('query_date', today)
+    .single();
+  if (error && error.code !== 'PGRST116') {
+    throw new Error('Failed to check rate limit: ' + error.message);
+  }
+  return data ? data.query_count : 0;
+}
+
+/**
+ * Increment the user's Clado query count for today (call only on real API call)
+ * Returns the new count
+ */
+export async function incrementCladoQueryCount(userId) {
+  const today = new Date().toISOString().slice(0, 10);
+  let { data, error } = await supabase
+    .from('clado_query_limits')
+    .select('query_count')
+    .eq('user_id', userId)
+    .eq('query_date', today)
+    .single();
+  if (error && error.code !== 'PGRST116') {
+    throw new Error('Failed to check rate limit: ' + error.message);
+  }
+  let query_count = 1;
+  if (data) {
+    query_count = data.query_count + 1;
+  }
+  const { error: upsertError } = await supabase
+    .from('clado_query_limits')
+    .upsert([
+      { user_id: userId, query_date: today, query_count }
+    ], { onConflict: ['user_id', 'query_date'] });
+  if (upsertError) throw new Error('Failed to update rate limit: ' + upsertError.message);
+  return query_count;
+}
+
+
 /**
  * Search for users via Clado API
  */
