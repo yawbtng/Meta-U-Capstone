@@ -21,6 +21,100 @@ export function getInitials(fullName) {
     return `${firstInitial}${lastInitial}`;
   }
 
+const customFilterFn = (row, columnId, filterValue) => {
+  const cellValue = row.getValue(columnId);
+  const { condition, value, columnType } = filterValue;
+  
+  if (!cellValue && condition !== 'is_empty') return false;
+  
+  switch (condition) {
+    case 'contains':
+      if (Array.isArray(cellValue)) {
+        return cellValue.some(item => 
+          String(item).toLowerCase().includes(String(value).toLowerCase())
+        );
+      }
+      return String(cellValue).toLowerCase().includes(String(value).toLowerCase());
+      
+    case 'does_not_contain':
+      if (Array.isArray(cellValue)) {
+        return !cellValue.some(item => 
+          String(item).toLowerCase().includes(String(value).toLowerCase())
+        );
+      }
+      return !String(cellValue).toLowerCase().includes(String(value).toLowerCase());
+      
+    case 'equals':
+      if (Array.isArray(cellValue)) {
+        return cellValue.length === 1 && String(cellValue[0]).toLowerCase() === String(value).toLowerCase();
+      }
+      if (columnType === 'number') {
+        return Number(cellValue) === Number(value);
+      }
+      if (columnType === 'date') {
+        return new Date(cellValue).toDateString() === new Date(value).toDateString();
+      }
+      return String(cellValue).toLowerCase() === String(value).toLowerCase();
+      
+    case 'starts_with':
+      return String(cellValue).toLowerCase().startsWith(String(value).toLowerCase());
+      
+    case 'ends_with':
+      return String(cellValue).toLowerCase().endsWith(String(value).toLowerCase());
+      
+    case 'greater_than':
+      return Number(cellValue) > Number(value);
+      
+    case 'less_than':
+      return Number(cellValue) < Number(value);
+      
+    case 'greater_than_or_equal':
+      return Number(cellValue) >= Number(value);
+      
+    case 'less_than_or_equal':
+      return Number(cellValue) <= Number(value);
+      
+    case 'before':
+      return new Date(cellValue) < new Date(value);
+      
+    case 'after':
+      return new Date(cellValue) > new Date(value);
+      
+    case 'on_or_before':
+      return new Date(cellValue) <= new Date(value);
+      
+    case 'on_or_after':
+      return new Date(cellValue) >= new Date(value);
+      
+    case 'contains_any':
+      if (Array.isArray(cellValue) && Array.isArray(value)) {
+        return value.some(v => cellValue.includes(v));
+      }
+      return false;
+      
+    case 'contains_all':
+      if (Array.isArray(cellValue) && Array.isArray(value)) {
+        return value.every(v => cellValue.includes(v));
+      }
+      return false;
+      
+    case 'is_empty':
+      if (Array.isArray(cellValue)) {
+        return cellValue.length === 0;
+      }
+      return !cellValue || cellValue === '';
+      
+    case 'is_not_empty':
+      if (Array.isArray(cellValue)) {
+        return cellValue.length > 0;
+      }
+      return cellValue && cellValue !== '';
+      
+    default:
+      return true;
+  }
+};
+
 export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
   {
     id: "select",
@@ -78,7 +172,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "name", 
     type: "text",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "email",
@@ -91,7 +186,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "email",
     type: "email",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "phone_number",
@@ -108,7 +204,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "phone_number",
     type: "number",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "socials.linkedin",
@@ -136,7 +233,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "socials_linkedin",
     type: "text",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "socials.twitter",
@@ -160,7 +258,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "socials_twitter",
     type: "text",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "socials.instagram",
@@ -184,7 +283,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "socials_instagram",
     type: "text",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "relationship_type",
@@ -215,7 +315,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     id: "relationship_type",
     type: "multi-select",
     options: ["personal", "professional", "social"],
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "industry",
@@ -228,7 +329,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "industry",
     type: "text",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "company",
@@ -241,7 +343,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "company",
     type: "text",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "role",
@@ -254,7 +357,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "role",
     type: "text",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "last_contact_at",
@@ -277,7 +381,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "last_contact_at",
     type: "date",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "interactions_count",
@@ -290,7 +395,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "interactions_count",
     type: "number",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     accessorKey: "tags",
@@ -315,7 +421,8 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     },
     id: "tags",
     type: "text",
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    filterFn: customFilterFn
   },
   {
     id: "actions",
