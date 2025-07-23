@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { UserPlus } from 'lucide-react';
-import { searchContactsViaClado } from '../../../../backend/services/clado-client.js';
+import { searchContactsViaClado, getCachedCladoResults, setCachedCladoResults } from '../../../../backend/services/clado-client.js';
 import { UserAuth } from '@/context/AuthContext';
 
 export default function AddContactByAPI() {
@@ -28,8 +28,14 @@ export default function AddContactByAPI() {
         setLoading(true);
         setError(null);
         try {
-          const data = await searchContactsViaClado(initialQuery, 4);
-          setResults(data.results || []);
+          const cached = getCachedCladoResults(initialQuery);
+          if (cached) {
+            setResults(cached.results || []);
+          } else {
+            const data = await searchContactsViaClado(initialQuery, 4);
+            setResults(data.results || []);
+            setCachedCladoResults(initialQuery, data);
+          }
         } catch (err) {
           setError(err.message || 'Failed to fetch recommendations.');
         } finally {
@@ -48,8 +54,14 @@ export default function AddContactByAPI() {
     setSearching(true);
     setError(null);
     try {
-      const data = await searchContactsViaClado(query, 4);
-      setResults(data.results || []);
+      const cached = getCachedCladoResults(query);
+      if (cached) {
+        setResults(cached.results || []);
+      } else {
+        const data = await searchContactsViaClado(query, 4);
+        setResults(data.results || []);
+        setCachedCladoResults(query, data);
+      }
     } catch (err) {
       setError(err.message || 'Failed to fetch search results.');
     } finally {
