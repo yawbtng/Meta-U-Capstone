@@ -1,4 +1,4 @@
-import { MoreHorizontal, Eye, Edit, Trash } from "lucide-react"
+import { MoreHorizontal, Eye, Edit, Trash, Pin, PinOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -12,10 +12,25 @@ import { SheetTrigger } from "@/components/ui/sheet"
 import { EditContact } from "../edit-contact-sheet"
 import { useState } from "react"
 import ViewContactCard from "../ViewContactCard";
+import { pinContact } from "../../../../backend/supabase/contacts.js";
+import { UserAuth } from "../../context/AuthContext";
 
 export const RowActions = ({ contact, onDeleteContact, onUpdateContact }) => {
   const [openEditSheet, setOpenEditSheet] = useState(false)
   const [openViewModal, setOpenViewModal] = useState(false)
+  const { session } = UserAuth();
+  const [pinning, setPinning] = useState(false);
+
+  const handlePinToggle = async () => {
+    if (!session?.user?.id) return;
+    setPinning(true);
+    const newPinned = !contact.pinned;
+    const result = await pinContact(session.user.id, contact.id, newPinned);
+    setPinning(false);
+    if (result.success) {
+      onUpdateContact({ ...contact, pinned: newPinned });
+    }
+  };
 
     return (
       <>
@@ -27,6 +42,20 @@ export const RowActions = ({ contact, onDeleteContact, onUpdateContact }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
+
+          {/* Pin/Unpin Contact */}
+          <DropdownMenuItem
+            className="flex items-center gap-3 text-lg py-3 cursor-pointer"
+            onClick={handlePinToggle}
+            disabled={pinning}
+          >
+            {contact.pinned ? (
+              <PinOff className="h-5 w-5 text-yellow-600" />
+            ) : (
+              <Pin className="h-5 w-5" />
+            )}
+            {contact.pinned ? "Unpin Contact" : "Pin Contact"}
+          </DropdownMenuItem>
 
           {/* Viewing a Contact */}
           <DropdownMenuItem className="flex items-center gap-3 text-lg py-3 cursor-pointer" onClick={() => setOpenViewModal(true)}>
