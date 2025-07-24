@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { fetchContacts, deleteContact } from "../../../../backend/index.js";
 import { UserAuth } from "../../context/AuthContext";
 import { columns } from "./columns";
@@ -12,6 +12,7 @@ const ContactsTable = () => {
   const [loading, setLoading] = useState(true);
   const [selectedContact, setSelectedContact] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const isMounted = useRef(true);
 
   const handleContactUpdated = (updated) => {
     setData((prev) =>
@@ -20,11 +21,14 @@ const ContactsTable = () => {
   }
 
   useEffect(() => {
+    isMounted.current = true;
     if (!session) return;
     
     const fetchContactsData = async () => {
+      if (!isMounted.current) return;
       setLoading(true);
       const result = await fetchContacts(session?.user?.id);
+      if (!isMounted.current) return;
       if (!result.success) {
         console.error(result.error);
         toast.error("There was an error fetching the contacts");
@@ -35,6 +39,9 @@ const ContactsTable = () => {
     };
     
     fetchContactsData();
+    return () => {
+      isMounted.current = false;
+    };
   }, [session]); 
 
   const onDeleteContact = async (id) => {

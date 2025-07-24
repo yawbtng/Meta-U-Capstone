@@ -34,7 +34,8 @@ export const fetchContacts = async (userId) => {
         connection_score,
         added_at,
         updated_at,
-        connection_id
+        connection_id,
+        pinned
       `)
       .eq('user_id', userId);
 
@@ -70,7 +71,6 @@ export const fetchContacts = async (userId) => {
     // Combine the data
     const contacts = userConnections.map(userConn => {
       const connection = connections.find(c => c.id === userConn.connection_id);
-      
       return {
         // Connection data
         id: connection.id,
@@ -87,7 +87,6 @@ export const fetchContacts = async (userId) => {
         location: connection.location,
         interests: connection.interests,
         created_at: connection.created_at,
-        
         // Relationship data (user-specific)
         where_met: userConn.where_met,
         notes: userConn.notes,
@@ -98,6 +97,7 @@ export const fetchContacts = async (userId) => {
         connection_score: userConn.connection_score,
         added_at: userConn.added_at,
         updated_at: userConn.updated_at,
+        pinned: userConn.pinned,
       };
     });
 
