@@ -34,7 +34,7 @@ function ProfileHeader({ profile, onAvatarSelect, uploading, avatarPreview }) {
   };
 
   return (
-    <Card className="scale-100 mt-20">
+    <Card className="scale-100 mt-10">
       <CardContent className="p-5">
         <div className="flex flex-col md:flex-row gap-6 md:items-center">
           {/* Avatar */}

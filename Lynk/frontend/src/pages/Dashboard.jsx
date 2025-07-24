@@ -27,91 +27,10 @@ const Dashboard = () => {
             </div>
 
             {/* Main Dashboard Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                {/* Top Left - Stats */}
-                <div className="lg:col-span-1">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <TrendingUp className="h-5 w-5" />
-                                Quick Stats
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm text-muted-foreground">Total Connections</span>
-                                <span className="text-2xl font-bold">127</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm text-muted-foreground">New This Month</span>
-                                <span className="text-lg font-semibold text-green-600">+12</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm text-muted-foreground">Network Score</span>
-                                <span className="text-lg font-semibold text-blue-600">8.5/10</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Top Right - Top Connections Carousel */}
-                <div className="lg:col-span-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Users className="h-5 w-5" />
-                                Top Connections
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Carousel
-                                plugins={[plugin.current]}
-                                className="w-full"
-                                onMouseEnter={plugin.current.stop}
-                                onMouseLeave={plugin.current.reset}
-                                opts={{
-                                    align: "start",
-                                    loop: true,
-                                }}
-                            >
-                                <CarouselContent className="-ml-2">
-                                    {[1, 2, 3, 4, 5].map((i) => (
-                                        <CarouselItem key={i} className="pl-2 md:basis-1/2 lg:basis-1/3">
-                                            <div className="p-1">
-                                                <Card className="border-2">
-                                                    <CardContent className="flex flex-col p-4">
-                                                        <div className="flex items-center gap-3 mb-3">
-                                                            <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                                                                <span className="text-sm font-semibold">U{i}</span>
-                                                            </div>
-                                                            <div className="flex-1">
-                                                                <p className="font-medium text-sm">User {i}</p>
-                                                                <p className="text-xs text-muted-foreground">Company {i}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <p className="text-xs text-muted-foreground">Last contact: 2 days ago</p>
-                                                            <p className="text-xs text-muted-foreground">Connection strength: {8 + i}/10</p>
-                                                        </div>
-                                                    </CardContent>
-                                                </Card>
-                                            </div>
-                                        </CarouselItem>
-                                    ))}
-                                </CarouselContent>
-                                <CarouselPrevious />
-                                <CarouselNext />
-                            </Carousel>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-
-            {/* Bottom Section */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-                {/* Pinned Contacts */}
+                {/* Top Left - Pinned Contacts */}
                 <div className="lg:col-span-1">
-                    <Card>
+                    <Card className="h-full">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Star className="h-5 w-5" />
@@ -136,40 +55,100 @@ const Dashboard = () => {
                     </Card>
                 </div>
 
-                {/* Graphs/Visualization */}
-                <div className="lg:col-span-3">
-                    <Card>
+                {/* Top Center - Quick Stats */}
+                <div className="lg:col-span-2">
+                    <Card className="h-full">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <BarChart3 className="h-5 w-5" />
-                                Network Analytics
+                                <TrendingUp className="h-5 w-5" />
+                                Quick Stats
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div className="h-64 flex items-center justify-center bg-muted/20 rounded-lg">
-                                <p className="text-muted-foreground">Charts and visualizations coming soon...</p>
+                        <CardContent className="space-y-8 flex-1 flex flex-col justify-center">
+                            <div className="flex justify-between items-center">
+                                <span className="text-lg text-muted-foreground">Total Connections</span>
+                                <span className="text-4xl font-bold">127</span>
                             </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-lg text-muted-foreground">New This Month</span>
+                                <span className="text-2xl font-semibold text-green-600">+12</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-lg text-muted-foreground">Network Score</span>
+                                <span className="text-2xl font-semibold text-blue-600">8.5/10</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Top Right - Top Connections Carousel */}
+                <div className="lg:col-span-1">
+                    <Card className="h-full">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Users className="h-5 w-5" />
+                                Top Connections
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-1">
+                            <Carousel
+                                plugins={[plugin.current]}
+                                className="w-full h-full"
+                                onMouseEnter={plugin.current.stop}
+                                onMouseLeave={plugin.current.reset}
+                                opts={{
+                                    align: "center",
+                                    loop: true,
+                                }}
+                            >
+                                <CarouselContent className="h-full">
+                                    {[1, 2, 3, 4, 5].map((i) => (
+                                        <CarouselItem key={i} className="basis-full h-full">
+                                            <div className="p-4 h-full flex items-center">
+                                                <div className="bg-background border-2 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 w-full">
+                                                    <div className="flex items-center gap-4 mb-4">
+                                                        <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
+                                                            <span className="text-lg font-semibold">U{i}</span>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="font-semibold text-lg">User {i}</p>
+                                                            <p className="text-sm text-muted-foreground">Company {i}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <p className="text-sm text-muted-foreground">Last contact: 2 days ago</p>
+                                                        <p className="text-sm text-muted-foreground">Connection strength: {8 + i}/10</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </CarouselItem>
+                                    ))}
+                                </CarouselContent>
+                                <CarouselPrevious />
+                                <CarouselNext />
+                            </Carousel>
                         </CardContent>
                     </Card>
                 </div>
             </div>
 
-            {/* Quote of the Day - Bottom Center */}
-            <div className="flex justify-center">
-                <Card className="w-full max-w-2xl">
+            {/* Network Analytics - Full Width */}
+            <div className="mb-8">
+                <Card>
                     <CardHeader>
-                        <CardTitle className="text-center">Quote of the Day</CardTitle>
+                        <CardTitle className="flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5" />
+                            Visualize Your Network
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-center">
-                            <blockquote className="text-lg italic mb-4">
-                                "Loading inspirational quote..."
-                            </blockquote>
-                            <cite className="text-sm text-muted-foreground">— Loading author</cite>
+                        <div className="h-80 flex items-center justify-center bg-muted/20 rounded-lg">
+                            <p className="text-muted-foreground">Charts and visualizations coming soon...</p>
                         </div>
                     </CardContent>
                 </Card>
             </div>
+
         </div>
     )
 }
