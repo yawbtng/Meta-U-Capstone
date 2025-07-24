@@ -16,23 +16,28 @@ const PinnedContacts = ({ contacts = [], loading, onUnpin }) => {
     const { session } = UserAuth();
     const [unpinningId, setUnpinningId] = useState(null);
     const isMounted = useRef(true);
+    // Local state for instant UI feedback
+    const [localPinned, setLocalPinned] = useState([]);
 
     useEffect(() => {
         isMounted.current = true;
+        setLocalPinned(contacts.filter(c => c.pinned));
         return () => {
             isMounted.current = false;
         };
-    }, []);
-
-    const pinnedContacts = contacts.filter(c => c.pinned);
+    }, [contacts]);
 
     const handleUnpin = async (contact) => {
         if (!session?.user?.id) return;
-        setUnpinningId(contact.id);
+        setUnpinningId(() => contact.id);
+        // Instantly remove from local pinned list for UI feedback
+        setLocalPinned((prev) => prev.filter(c => c.id !== contact.id));
         const result = await pinContact(session.user.id, contact.id, false);
-        if (isMounted.current) setUnpinningId(null);
+        if (isMounted.current) setUnpinningId(() => null);
         if (result.success && onUnpin && isMounted.current) {
-            onUnpin(contact.id);
+            setTimeout(() => {
+                if (isMounted.current) onUnpin(contact.id);
+            }, 0);
         }
     };
 
@@ -50,11 +55,11 @@ const PinnedContacts = ({ contacts = [], loading, onUnpin }) => {
                         <div className="flex justify-center items-center h-32">
                             <LoadingSpinner size={24} text="Loading pinned..." />
                         </div>
-                    ) : pinnedContacts.length === 0 ? (
+                    ) : localPinned.length === 0 ? (
                         <div className="text-center text-muted-foreground py-6">No pinned contacts yet.</div>
                     ) : (
                         <div className="space-y-1">
-                            {pinnedContacts.map((contact) => (
+                            {localPinned.map((contact) => (
                                 <div
                                     key={contact.id}
                                     className="flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer hover:bg-blue-50"
