@@ -5,9 +5,9 @@ import AddContactByAPI from '../components/add-contact-components/AddContactByAP
 
 export default function AddContact() {
     return (
-        <div className="container mx-auto p-6 max-w-7xl">
+        <div className="container mx-auto p-6 max-w-screen-2xl">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">Add New Contact</h1>
+                <h1 className="text-3xl font-bold mb-2">Add a New Contact</h1>
                 <p className="text-muted-foreground">
                     Add a new contact to your network. Choose your preferred method below.
                 </p>

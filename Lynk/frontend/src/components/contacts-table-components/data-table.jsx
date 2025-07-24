@@ -101,20 +101,20 @@ export default function DataTable({ columns, data }) {
     <div className="flex flex-col">
       {/* Controls Row: Filter left, Search center, View/Hide Columns right */}
       <div className="relative w-full flex items-center py-4" style={{ minHeight: 64 }}>
-        <div className="absolute left-8 flex items-center gap-3">
+        <div className="absolute left-8 flex items-center gap-2">
           <DataTableFilter table={table} />
           
           <button
             onClick={() => navigate('/add-contact')}
-            className="ml-3 flex items-center gap-2 rounded-full bg-black hover:bg-gray-700 text-white px-5 py-2 shadow-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-black text-base font-semibold"
+            className="ml-3 mr-3 flex items-center gap-1 rounded-full bg-black hover:bg-gray-700 text-white px-5 py-2 shadow-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-black text-base font-semibold"
             title="Add Contact"
             aria-label="Add Contact"
           >
-            <Plus className="w-5 h-5 mr-1" />
-            Click here to add a contact
+            <Plus className="w-4 h-4 mr-0.5" />
+            Add a contact
           </button>
         </div>
-        <div className="flex justify-center items-center w-full">
+        <div className="flex justify-center items-center w-full ml-10">
           <SearchContacts />
         </div>
         <div className="absolute right-8 flex items-center gap-3">

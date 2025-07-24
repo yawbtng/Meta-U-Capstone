@@ -9,6 +9,7 @@ import AddContact from './pages/AddContact';
 import AllContacts from './pages/AllContacts';
 // import TestPipeline from './pages/TestPipeline';
 import { Toaster } from "sonner";
+import AppLayout from './components/layout/AppLayout';
 
 export const router = createBrowserRouter([
   {
@@ -21,33 +22,56 @@ export const router = createBrowserRouter([
     children: [
       { path: 'signup', element: <SignUp /> },
       { path: 'signin', element: <SignIn /> },
-      { path: 'home', element: <PrivateRoute><Dashboard /></PrivateRoute> },
-      { path: 'settings', element: <PrivateRoute><UserProfile /></PrivateRoute> },
-      { path: 'add-contact', element: <PrivateRoute><AddContact /></PrivateRoute> },
-      { path: 'all-contacts', element: <PrivateRoute><AllContacts /></PrivateRoute> },
+      { 
+        path: 'home', 
+        element: (
+          <PrivateRoute>
+            <AppLayout>
+              <Dashboard />
+            </AppLayout>
+          </PrivateRoute>
+        ) 
+      },
+      { 
+        path: 'settings', 
+        element: (
+          <PrivateRoute>
+            <AppLayout>
+              <UserProfile />
+            </AppLayout>
+          </PrivateRoute>
+        ) 
+      },
+      { 
+        path: 'add-contact', 
+        element: (
+          <PrivateRoute>
+            <AppLayout>
+              <AddContact />
+            </AppLayout>
+          </PrivateRoute>
+        ) 
+      },
+      { 
+        path: 'all-contacts', 
+        element: (
+          <PrivateRoute>
+            <AppLayout>
+              <AllContacts />
+            </AppLayout>
+          </PrivateRoute>
+        ) 
+      },
       // { path: 'test-pipeline', element: <PrivateRoute><TestPipeline /></PrivateRoute> },
     ],
   },
 ]);
 
 function App() {
-
   return (
     <>
       <Toaster richColors position="bottom-center" />
-
-      <header>
-        <h1 className="text-center text-xl font-bold ">Lynk!</h1>
-      </header>
-
-      <main>
-        <Outlet />
-      </main>
-
-      <footer>
-
-      </footer>
-
+      <Outlet />
     </>
   )
 }
