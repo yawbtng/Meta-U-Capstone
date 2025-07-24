@@ -25,8 +25,9 @@ import { useNavigate } from "react-router-dom";
 import { DeleteConfirmationDialog } from "../delete-confirmation-dialog.jsx";
 import { deleteContact } from "../../../../backend/supabase/contacts.js";
 import { toast } from "sonner";
+import LoadingSpinner from "../ui/loading-spinner";
 
-export default function DataTable({ columns, data }) {
+export default function DataTable({ columns, data, loading }) {
   const navigate = useNavigate();
   const [sorting, setSorting] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
@@ -159,7 +160,13 @@ export default function DataTable({ columns, data }) {
           </TableHeader>
 
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center text-2xl text-bold">
+                  <LoadingSpinner size={32} text="Loading contacts..." />
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map(row => (
                 <TableRow
                   className="cursor-pointer hover:bg-gray-100 h-15"
