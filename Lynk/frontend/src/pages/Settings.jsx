@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -289,7 +288,6 @@ function AccountSettings({ form, onChange, onSubmit, loading }) {
 // UserProfile – container that ties everything together
 export default function UserProfile() {
   const { session, updateProfile } = UserAuth();
-  const navigate = useNavigate();
   const uid = session?.user.id;
 
   const [profile, setProfile] = useState(null);
@@ -427,14 +425,7 @@ export default function UserProfile() {
         />
       </section>
 
-      <div className="flex justify-center">
-        <Button 
-          className="text-lg font-bold py-2 px-4 rounded scale-125"
-          onClick={() => navigate("/home")}
-        >
-          Return to Dashboard
-        </Button>
-      </div>
+
     </div>
   );
 }

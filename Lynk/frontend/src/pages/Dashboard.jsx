@@ -1,62 +1,34 @@
 import React from "react";
 import { UserAuth } from "../context/AuthContext"
-import { useNavigate } from "react-router-dom"
-import { Button } from "../components/ui/button"
 
 const Dashboard = () => {
-    const {session, signOut} = UserAuth();
-    const navigate = useNavigate();
-
-
-    const handleSignOut = async (e) => {
-        e.preventDefault()
-        try {
-            await signOut();
-            navigate("/")
-
-        } catch( error) {
-            console.error(error)
-        }
-    }
-
+    const { session } = UserAuth();
 
     return (
-        <div>
-            <nav className="inline-flex justify-center my-5 w-max">
+        <div className="container mx-auto p-6">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+                <h2 className="text-xl text-muted-foreground">
+                    Welcome back, {session?.user?.user_metadata?.display_name || 'User'}
+                </h2>
+            </div>
 
-                <Button onClick={() => navigate("/all-contacts")}
-                className="bg-black text-white mx-2 ">
-                    All Connections
-                </Button>
-
-                <Button onClick={() => navigate("/add-contact")}
-                className="bg-black text-white mx-2">
-                    Add Connection
-                </Button>
-
-                <Button onClick={() => navigate("/settings")}
-                className="bg-black text-white mx-2">
-                    Settings
-                </Button>
-
-                {/* <Button onClick={() => navigate("/test-pipeline")}
-                className="bg-blue-600 text-white mx-2">
-                    Test Pipeline
-                </Button> */}
-            </nav>
-
-            <h1 className="bg-blue-500">Dashboard</h1>
-            <h2>Welcome, {session?.user?.user_metadata?.display_name}</h2>
-
-
-            <div className="flex justify-center">
-                <Button onClick={handleSignOut}
-                className="m-10 border p-3 text-white bg-black">
-                Sign out
-                </Button>
+            {/* Placeholder for future dashboard content */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="p-6 border rounded-lg">
+                    <h3 className="text-lg font-semibold mb-2">Quick Stats</h3>
+                    <p className="text-muted-foreground">Dashboard content coming soon...</p>
+                </div>
+                <div className="p-6 border rounded-lg">
+                    <h3 className="text-lg font-semibold mb-2">Recent Activity</h3>
+                    <p className="text-muted-foreground">Activity feed coming soon...</p>
+                </div>
+                <div className="p-6 border rounded-lg">
+                    <h3 className="text-lg font-semibold mb-2">Top Connections</h3>
+                    <p className="text-muted-foreground">Connection carousel coming soon...</p>
+                </div>
             </div>
         </div>
-
     )
 }
 

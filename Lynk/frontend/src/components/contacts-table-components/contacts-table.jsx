@@ -53,7 +53,7 @@ const ContactsTable = () => {
   };
 
   return (
-    <div className="mx-auto my-10">
+    <div className="mx-auto my-10 max-w-screen-2xl w-full">
       <DataTable 
         columns={columns(onDeleteContact, handleContactUpdated, handleViewContact)} 
         data={data}
