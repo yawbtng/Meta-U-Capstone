@@ -11,7 +11,7 @@ const PinnedContacts = () => (
                     Pinned Contacts
                 </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-y-auto">
                 <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50">

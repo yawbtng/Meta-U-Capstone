@@ -382,3 +382,104 @@ export const fetchInitialContactsForSearch = async (userId, firstChar) => {
     return [];
   }
 }; 
+
+export const pinContact = async (userId, contactId, pinned = true) => {
+  try {
+    const { error } = await supabase
+      .from('user_to_connections')
+      .update({ pinned })
+      .eq('user_id', userId)
+      .eq('connection_id', contactId);
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+export const fetchPinnedContacts = async (userId) => {
+  try {
+    // Get all pinned user_to_connections for this user
+    const { data: userConnections, error: userError } = await supabase
+      .from('user_to_connections')
+      .select(`
+        where_met,
+        notes,
+        last_contact_at,
+        interactions_count,
+        relationship_type,
+        tags,
+        connection_score,
+        added_at,
+        updated_at,
+        connection_id
+      `)
+      .eq('user_id', userId)
+      .eq('pinned', true);
+
+    if (userError) throw userError;
+    if (userConnections.length === 0) return { success: true, data: [] };
+
+    // Get all connection IDs
+    const connectionIds = userConnections.map(row => row.connection_id);
+
+    // Get connection details
+    const { data: connections, error: connectionsError } = await supabase
+      .from('connections')
+      .select(`
+        id,
+        name,
+        email,
+        phone_number,
+        socials,
+        company,
+        role,
+        industry,
+        school,
+        avatar_url,
+        gender,
+        location,
+        interests,
+        created_at
+      `)
+      .in('id', connectionIds);
+
+    if (connectionsError) throw connectionsError;
+
+    // Combine the data
+    const contacts = userConnections.map(userConn => {
+      const connection = connections.find(c => c.id === userConn.connection_id);
+      return {
+        // Connection data
+        id: connection.id,
+        name: connection.name,
+        email: connection.email,
+        phone_number: connection.phone_number,
+        socials: connection.socials,
+        company: connection.company,
+        role: connection.role,
+        industry: connection.industry,
+        school: connection.school,
+        avatar_url: connection.avatar_url,
+        gender: connection.gender,
+        location: connection.location,
+        interests: connection.interests,
+        created_at: connection.created_at,
+        // Relationship data (user-specific)
+        where_met: userConn.where_met,
+        notes: userConn.notes,
+        last_contact_at: userConn.last_contact_at,
+        interactions_count: userConn.interactions_count || 0,
+        relationship_type: userConn.relationship_type || [],
+        tags: userConn.tags || [],
+        connection_score: userConn.connection_score,
+        added_at: userConn.added_at,
+        updated_at: userConn.updated_at,
+      };
+    });
+
+    return { success: true, data: contacts };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}; 
