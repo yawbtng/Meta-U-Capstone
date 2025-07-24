@@ -74,8 +74,8 @@ const Navigation = () => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-8 w-8">
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <Avatar className="h-12 w-12">
               <AvatarImage src={avatarUrl} alt={displayName} />
               <AvatarFallback>
                 {displayName.slice(0, 2).toUpperCase()}
@@ -148,9 +148,15 @@ const Navigation = () => {
             <Button
               variant="ghost"
               onClick={() => navigate('/home')}
-              className="text-xl font-bold hover:bg-transparent"
+              className="p-0 hover:bg-transparent focus:bg-transparent border-none shadow-none"
+              aria-label="Go to Dashboard"
             >
-              Lynk
+              <img
+                src='../../../lynk-logo.png'
+                alt="Lynk Logo"
+                className="h-20 w-20 object-contain mr-2"
+                style={{ minWidth: 40 }}
+              />
             </Button>
           </div>
 
