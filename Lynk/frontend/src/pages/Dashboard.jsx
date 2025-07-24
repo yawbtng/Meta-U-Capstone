@@ -5,7 +5,7 @@ import PinnedContacts from "../components/dashboard-components/PinnedContacts";
 import QuickStats from "../components/dashboard-components/QuickStats";
 import TopConnectionsCarousel from "../components/dashboard-components/TopConnectionsCarousel";
 import NetworkAnalytics from "../components/dashboard-components/NetworkAnalytics";
-import { fetchContacts } from "../../backend/index.js";
+import { fetchContacts } from "../../../backend/supabase/contacts.js";
 
 const Dashboard = () => {
     const { session } = UserAuth();
