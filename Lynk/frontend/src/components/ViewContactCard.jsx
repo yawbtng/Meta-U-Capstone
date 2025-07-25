@@ -20,7 +20,7 @@ export default function ViewContactCard({ open, onOpenChange, contact }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-screen-xl !w-[80vw] !max-h-[76vh] p-0 rounded-2xl shadow-2xl bg-white border-0 overflow-y-auto">
+      <DialogContent className="!max-w-screen-xl !w-[80vw] !max-h-[60vh] scrollbar-hide p-0 rounded-2xl shadow-2xl bg-white border-0 overflow-y-auto">
         <div className="p-6 flex flex-col gap-6">
           {/* Profile Header */}
           <div className="flex flex-col md:flex-row gap-6 items-center md:items-start pb-3 border-b border-gray-100">

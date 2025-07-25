@@ -217,3 +217,243 @@ const NetworkNodeCloud = ({ data, groupBy, onNodeHover, onNodeClick }) => {
   );
 };
 
+const NetworkAnalytics = ({ contacts, loading, user }) => {
+  const { profile } = UserAuth();
+  const [groupBy, setGroupBy] = useState("none");
+  const [hoveredNode, setHoveredNode] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [graphData, setGraphData] = useState({ nodes: [], links: [] });
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Create nodes
+    const nodes = [
+      // Main user node
+      {
+        id: user?.id || "main-user",
+        name: profile?.name || user?.user_metadata?.full_name || "You",
+        isMainUser: true,
+        avatar_url: profile?.avatar_url || user?.user_metadata?.avatar_url,
+        groupBy: "main"
+      },
+      ...contacts.map(contact => ({
+        id: contact.id,
+        name: contact.name,
+        email: contact.email,
+        company: contact.company,
+        role: contact.role,
+        industry: contact.industry,
+        location: contact.location,
+        relationship_type: contact.relationship_type?.[0] || "professional",
+        avatar_url: contact.avatar_url,
+        connection_score: contact.connection_score,
+        interactions_count: contact.interactions_count,
+        last_contact_at: contact.last_contact_at,
+        isMainUser: false
+      }))
+    ];
+    setGraphData({ nodes });
+  }, [contacts, user, groupBy, profile]);
+
+  const handleNodeHover = useCallback((node, event) => {
+    setHoveredNode(node);
+    if (event && node) {
+      // Position tooltip near the node
+      const rect = event.currentTarget.getBoundingClientRect();
+      const containerRect = event.currentTarget.closest('.relative').getBoundingClientRect();
+      setTooltipPosition({
+        x: rect.left - containerRect.left + rect.width / 2,
+        y: rect.top - containerRect.top - 10
+      });
+    }
+  }, []);
+
+  const handleNodeClick = useCallback((node) => {
+    if (node && !node.isMainUser) {
+      // Find the original contact data from the contacts array
+      const originalContact = contacts.find(contact => contact.id === node.id);
+      if (originalContact) {
+        setSelectedContact(originalContact);
+        setIsViewModalOpen(true);
+      }
+    }
+  }, [contacts]);
+
+
+
+  const getGroupOptions = () => [
+    { value: "none", label: "No Grouping", icon: Users },
+    { value: "industry", label: "Industry", icon: Building },
+    { value: "relationship_type", label: "Relationship", icon: Heart },
+    { value: "location", label: "Location", icon: MapPin },
+    { value: "role", label: "Role", icon: Briefcase }
+  ];
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Never";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return "Today";
+    if (diffDays === 2) return "Yesterday";
+    if (diffDays <= 7) return `${diffDays - 1} days ago`;
+    if (diffDays <= 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays <= 365) return `${Math.floor(diffDays / 30)} months ago`;
+    return `${Math.floor(diffDays / 365)} years ago`;
+  };
+
+  if (loading) {
+    return (
+    <Card>
+        <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Visualize Your Network
+            </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-125 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+        </CardContent>
+    </Card>
+);
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <BarChart3 className="h-5 w-5" />
+          Visualize Your Network
+        </CardTitle>
+        <div className="flex items-center gap-4 mt-4">
+          <label className="text-sm font-medium">Group by:</label>
+          <Select value={groupBy} onValueChange={setGroupBy}>
+            <SelectTrigger className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {getGroupOptions().map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  <div className="flex items-center gap-2">
+                    <option.icon className="h-4 w-4" />
+                    {option.label}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent className="h-[500px]">
+        <div className="relative">
+          <NetworkNodeCloud
+            data={graphData}
+            groupBy={groupBy}
+            onNodeHover={handleNodeHover}
+            onNodeClick={handleNodeClick}
+
+          />
+          {/* Custom Tooltip positioned over the node */}
+          {hoveredNode && (
+            <div 
+              className="absolute z-50 pointer-events-none"
+              style={{
+                left: tooltipPosition.x,
+                top: tooltipPosition.y,
+                transform: 'translateX(-50%) translateY(-100%)'
+              }}
+            >
+              <div className="bg-white border border-gray-200 shadow-lg rounded-lg p-4 max-w-xs">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12 border-2 border-gray-100">
+                      <AvatarImage src={hoveredNode.avatar_url} />
+                      <AvatarFallback className="bg-gray-100 text-gray-600">
+                        {hoveredNode.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{hoveredNode.name}</p>
+                      {hoveredNode.role && (
+                        <p className="text-sm text-gray-600 truncate">{hoveredNode.role}</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {hoveredNode.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <p className="text-sm text-gray-700 truncate">{hoveredNode.email}</p>
+                    </div>
+                  )}
+                  
+                  {hoveredNode.company && (
+                    <div className="flex items-center gap-2">
+                      <Building className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <p className="text-sm text-gray-700 truncate">{hoveredNode.company}</p>
+                    </div>
+                  )}
+                  
+                  {hoveredNode.location && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <p className="text-sm text-gray-700 truncate">{hoveredNode.location}</p>
+                    </div>
+                  )}
+                  
+                  {hoveredNode.industry && (
+                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                      {industries.find(i => i.value === hoveredNode.industry)?.label || hoveredNode.industry}
+                    </Badge>
+                  )}
+                  
+                  {hoveredNode.relationship_type && (
+                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                      {RELATIONSHIP_LABELS[hoveredNode.relationship_type] || hoveredNode.relationship_type}
+                    </Badge>
+                  )}
+                  
+                  <div className="flex gap-4 text-xs text-gray-600">
+                    {hoveredNode.connection_score && (
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span>Score: {hoveredNode.connection_score}</span>
+                      </div>
+                    )}
+                    {hoveredNode.interactions_count && (
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <span>Interactions: {hoveredNode.interactions_count}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {hoveredNode.last_contact_at && (
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <Calendar className="h-3 w-3" />
+                      <span>Last contact: {formatDate(hoveredNode.last_contact_at)}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+
+      {/* Contact Detail Modal */}
+      <ViewContactCard
+        open={isViewModalOpen}
+        onOpenChange={setIsViewModalOpen}
+        contact={selectedContact}
+      />
+    </Card>
+  );
+};
+
+export default NetworkAnalytics; 
