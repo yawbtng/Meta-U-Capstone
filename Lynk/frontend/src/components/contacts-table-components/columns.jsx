@@ -130,7 +130,7 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     ),
     cell: ({ row }) => (
       <Checkbox
-        className="outline-2 flex justify-center"
+        className="outline-2 flex justify-left"
         checked={Boolean(row.getIsSelected())}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
@@ -163,7 +163,7 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
       const contact = row.original;
       return (
         <div
-          className="text-center text-xl font-medium cursor-pointer hover:underline focus:outline-none"
+          className="text-center text-lg font-medium cursor-pointer hover:underline focus:outline-none"
           onClick={() => onViewContact(contact)}
         >
           {name}
@@ -304,7 +304,7 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
         social: "bg-blue-100 text-blue-800 hover:bg-blue-200"
       }
       return (
-        <div className="text-left flex gap-2">
+        <div className="text-left flex gap-1">
           {types?.map((type, index) => (
             <Badge 
               key={index} 
@@ -378,7 +378,7 @@ export const columns = (onDeleteContact, onUpdateContact, onViewContact) => [
     ),
     cell: ({row}) => {
       const lastContact = row.getValue("last_contact_at")
-      if (!lastContact) return <div className="text-center text-lg font-medium">-</div>
+      if (!lastContact) return <div className="text-center text-sm font-medium">-</div>
       const contact = row.original
       
       const date = new Date(lastContact)
