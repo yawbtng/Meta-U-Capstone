@@ -27,6 +27,7 @@ import {
   LogOut, 
   User
 } from 'lucide-react';
+import lynkLogo from "../..//lynk-logo.png";
 
 const Navigation = () => {
   const { session, signOut, profile } = UserAuth();
@@ -155,7 +156,7 @@ const Navigation = () => {
               aria-label="Go to Dashboard"
             >
               <img
-                src='../../../lynk-logo.png'
+                src={lynkLogo}
                 alt="Lynk Logo"
                 className="h-24 w-24 object-contain mr-2"
                 style={{ minWidth: 48 }}
