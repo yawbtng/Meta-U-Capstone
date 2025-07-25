@@ -67,7 +67,11 @@ const Dashboard = () => {
 
             {/* Network Analytics - Full Width */}
             <div className="mb-8">
-                <NetworkAnalytics />
+                <NetworkAnalytics 
+                    contacts={contacts} 
+                    loading={loading} 
+                    user={session?.user}
+                />
             </div>
 
             {/* View Contact Modal */}
