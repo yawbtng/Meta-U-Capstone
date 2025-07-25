@@ -14,6 +14,7 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -28,7 +29,7 @@ import {
 } from 'lucide-react';
 
 const Navigation = () => {
-  const { session, signOut } = UserAuth();
+  const { session, signOut, profile } = UserAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -66,17 +67,15 @@ const Navigation = () => {
   };
 
   const UserProfileDropdown = () => {
-    const displayName = session?.user?.user_metadata?.display_name || 
-                       session?.user?.user_metadata?.name ||
-                       session?.user?.email?.split('@')[0] || 'User';
-    const email = session?.user?.email || '';
-    const avatarUrl = session?.user?.user_metadata?.avatar_url || '';
+    const displayName = profile?.displayName || profile?.name || profile?.email?.split('@')[0] || 'User';
+    const email = profile?.email || '';
+    const avatarUrl = profile?.avatar_url || '';
 
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-12 w-12 rounded-full">
-            <Avatar className="h-14 w-14">
+            <Avatar className="h-14 w-14 border-2 border-gray-200">
               <AvatarImage src={avatarUrl} alt={displayName} />
               <AvatarFallback>
                 {displayName.slice(0, 2).toUpperCase()}
@@ -119,6 +118,9 @@ const Navigation = () => {
       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
         <SheetHeader>
           <SheetTitle className="text-left">Navigation</SheetTitle>
+          <SheetDescription className="text-left">
+            Access your dashboard, contacts, and profile settings
+          </SheetDescription>
         </SheetHeader>
                  <div className="flex flex-col space-y-3 mt-6">
            {navigationItems.map((item) => (

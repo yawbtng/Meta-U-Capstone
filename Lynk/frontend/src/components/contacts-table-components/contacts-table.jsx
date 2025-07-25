@@ -59,6 +59,17 @@ const ContactsTable = () => {
     setModalOpen(true);
   };
 
+ 
+  if (!session) {
+    return (
+      <div className="mx-auto my-10 max-w-screen-2xl w-full">
+        <div className="text-center py-8">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto my-10 max-w-screen-2xl w-full">
       <DataTable 

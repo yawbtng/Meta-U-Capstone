@@ -59,11 +59,31 @@ export async function incrementCladoQueryCount(userId) {
 /**
  * Search for users via Clado API
  */
-export async function searchContactsViaClado(query, limit = 4) {
+export async function searchContactsViaClado(query, limit = 4, options = {}) {
   if (!CLADO_API_KEY) {
     throw new Error('Clado API key is missing. Set VITE_CLADO_API_KEY in your environment.');
   }
-  const url = `${CLADO_API_URL}?query=${encodeURIComponent(query)}&limit=${limit}`;
+  
+  // Build query parameters
+  const params = new URLSearchParams({
+    query: query,
+    limit: limit.toString()
+  });
+  
+  // Add optional filters
+  if (options.school && Array.isArray(options.school)) {
+    options.school.forEach(school => params.append('school', school));
+  }
+  
+  if (options.company && Array.isArray(options.company)) {
+    options.company.forEach(company => params.append('company', company));
+  }
+  
+  if (options.acceptance_threshold && typeof options.acceptance_threshold === 'number') {
+    params.append('acceptance_threshold', options.acceptance_threshold.toString());
+  }
+  
+  const url = `${CLADO_API_URL}?${params.toString()}`;
   const res = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${CLADO_API_KEY}`,
@@ -104,4 +124,42 @@ export function setCachedCladoResults(query, data) {
   if (typeof window === 'undefined' || !window.localStorage) return;
   const key = getCladoCacheKey(query);
   localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
+}
+
+// --- Last Query of the Day ---
+export function getLastQueryKey() {
+  const today = new Date().toISOString().slice(0, 10);
+  return `clado_last_query_${today}`;
+}
+
+export function getLastQueryOfDay() {
+  if (typeof window === 'undefined' || !window.localStorage) return null;
+  const key = getLastQueryKey();
+  const lastQuery = localStorage.getItem(key);
+  if (!lastQuery) return null;
+  
+  try {
+    const { query, results, timestamp } = JSON.parse(lastQuery);
+    // Check if it's from today
+    const today = new Date().toISOString().slice(0, 10);
+    const queryDate = new Date(timestamp).toISOString().slice(0, 10);
+    if (queryDate !== today) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return { query, results };
+  } catch {
+    localStorage.removeItem(key);
+    return null;
+  }
+}
+
+export function setLastQueryOfDay(query, results) {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  const key = getLastQueryKey();
+  localStorage.setItem(key, JSON.stringify({ 
+    query, 
+    results, 
+    timestamp: Date.now() 
+  }));
 }

@@ -60,7 +60,7 @@ const PinnedContacts = ({ contacts = [], loading, onUnpin, onContactClick }) => 
                         Pinned Contacts
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="overflow-y-auto max-h-96 scrollbar-hide">
+                <CardContent className="overflow-y-auto max-h-80 scrollbar-hide">
                     {loading ? (
                         <div className="flex justify-center items-center h-32">
                             <LoadingSpinner size={24} text="Loading pinned..." />

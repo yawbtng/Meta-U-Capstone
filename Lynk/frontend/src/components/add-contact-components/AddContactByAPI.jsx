@@ -3,8 +3,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { UserPlus } from 'lucide-react';
-import { searchContactsViaClado, getCachedCladoResults, setCachedCladoResults, getCladoQueryCount, incrementCladoQueryCount, CLADO_DAILY_LIMIT } from '../../../../backend/services/clado-client.js';
+import { UserPlus, X, Plus, Search, Users, CheckCircle } from 'lucide-react';
+import { searchContactsViaClado, getLastQueryOfDay, setLastQueryOfDay, getCladoQueryCount, incrementCladoQueryCount, CLADO_DAILY_LIMIT } from '../../../../backend/services/clado-client.js';
 import { UserAuth } from '@/context/AuthContext';
 import { createContact, fetchContacts } from '../../../../backend/index.js';
 import { toast } from "sonner"
@@ -22,10 +22,21 @@ export default function AddContactByAPI() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searching, setSearching] = useState(false);
-  const [initialTried, setInitialTried] = useState(false);
   const [queriesLeft, setQueriesLeft] = useState(CLADO_DAILY_LIMIT);
   const [addingId, setAddingId] = useState(null);
   const [existingContacts, setExistingContacts] = useState([]);
+  const [hasSearchedToday, setHasSearchedToday] = useState(false);
+  
+  // Filter states
+  const [schools, setSchools] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [newSchool, setNewSchool] = useState('');
+  const [newCompany, setNewCompany] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Loading state management
+  const [loadingStage, setLoadingStage] = useState('');
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   // Fetch user's existing contacts (for duplicate check)
   useEffect(() => {
@@ -45,62 +56,81 @@ export default function AddContactByAPI() {
       .filter(Boolean)
   );
 
-  // Generate initial query from user profile
-  const initialQuery = profile?.role && profile?.location
-    ? `${profile.role} in ${profile.location}`
-    : '';
-
-  // Fetch initial query count on mount or user change
+  // Fetch initial query count and last query results on mount
   useEffect(() => {
-    async function fetchLimit() {
+    async function initializeComponent() {
       if (session?.user?.id) {
         try {
+          // Get query count
           const count = await getCladoQueryCount(session.user.id);
           setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
-        } catch {
+          
+          // Get last query of the day
+          const lastQuery = getLastQueryOfDay();
+          if (lastQuery) {
+            setQuery(lastQuery.query);
+            setResults(lastQuery.results || []);
+            setHasSearchedToday(true);
+            // Note: We don't restore filters from last query for simplicity
+          }
+        } catch (err) {
+          console.error('Error initializing component:', err);
           setQueriesLeft(CLADO_DAILY_LIMIT);
         }
       }
     }
-    fetchLimit();
+    initializeComponent();
   }, [session?.user?.id]);
 
-  useEffect(() => {
-    if (!initialTried && initialQuery && session?.user?.id) {
-      async function fetchInitial() {
-        setLoading(true);
-        setError(null);
-        try {
-          const cached = getCachedCladoResults(initialQuery);
-          if (cached) {
-            setResults(cached.results || []);
-            // Only check count, do not increment
-            const count = await getCladoQueryCount(session.user.id);
-            setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
-          } else {
-            // Only increment if making a real API call
-            const count = await incrementCladoQueryCount(session.user.id);
-            setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
-            if (count > CLADO_DAILY_LIMIT) {
-              setError('You have reached your daily Clado search limit.');
-              setLoading(false);
-              setInitialTried(true);
-              return;
-            }
-            const data = await searchContactsViaClado(initialQuery, 4);
-            setResults(data.results || []);
-            setCachedCladoResults(initialQuery, data);
-          }
-        } catch (err) {
-          setError(err.message || 'Failed to fetch recommendations.');
-        } finally {
-          setLoading(false);
-          setInitialTried(true);
-        }
-      }
-      fetchInitial();
+  // Add school filter
+  const addSchool = () => {
+    if (newSchool.trim() && !schools.includes(newSchool.trim())) {
+      setSchools([...schools, newSchool.trim()]);
+      setNewSchool('');
     }
-  }, [initialQuery, initialTried, session?.user?.id]);
+  };
+
+  // Remove school filter
+  const removeSchool = (schoolToRemove) => {
+    setSchools(schools.filter(school => school !== schoolToRemove));
+  };
+
+  // Add company filter
+  const addCompany = () => {
+    if (newCompany.trim() && !companies.includes(newCompany.trim())) {
+      setCompanies([...companies, newCompany.trim()]);
+      setNewCompany('');
+    }
+  };
+
+  // Remove company filter
+  const removeCompany = (companyToRemove) => {
+    setCompanies(companies.filter(company => company !== companyToRemove));
+  };
+
+  // Simulate loading stages
+  const simulateLoadingStages = async () => {
+    const stages = [
+      { message: 'Checking your search quota...', progress: 5, duration: 1000 },
+      { message: 'Preparing search filters...', progress: 10, duration: 1500 },
+      { message: 'Connecting to Clado AI...', progress: 15, duration: 2000 },
+      { message: 'Initializing search engine...', progress: 20, duration: 3000 },
+      { message: 'Searching through millions of profiles...', progress: 30, duration: 8000 },
+      { message: 'Filtering by your criteria...', progress: 45, duration: 6000 },
+      { message: 'Analyzing profile relevance...', progress: 60, duration: 7000 },
+      { message: 'Processing AI insights...', progress: 75, duration: 5000 },
+      { message: 'Ranking best matches...', progress: 85, duration: 4000 },
+      { message: 'Finalizing your results...', progress: 95, duration: 2000 }
+    ];
+
+    for (let i = 0; i < stages.length; i++) {
+      setLoadingStage(stages[i].message);
+      setLoadingProgress(stages[i].progress);
+      
+      // Use the specified duration for each stage
+      await new Promise(resolve => setTimeout(resolve, stages[i].duration));
+    }
+  };
 
   // Handle search
   async function handleSearch(e) {
@@ -110,30 +140,54 @@ export default function AddContactByAPI() {
       setError('You must be signed in to search.');
       return;
     }
+    
     setSearching(true);
     setError(null);
+    setLoadingStage('');
+    setLoadingProgress(0);
+    
     try {
-      const cached = getCachedCladoResults(query);
-      if (cached) {
-        setResults(cached.results || []);
-        // Only check count, do not increment
-        const count = await getCladoQueryCount(session.user.id);
-        setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
-      } else {
-        // Only increment if making a real API call
-        const count = await incrementCladoQueryCount(session.user.id);
-        setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
-        if (count > CLADO_DAILY_LIMIT) {
-          setError('You have reached your daily Clado search limit.');
-          setSearching(false);
-          return;
-        }
-        const data = await searchContactsViaClado(query, 4);
-        setResults(data.results || []);
-        setCachedCladoResults(query, data);
+      // Start loading simulation
+      const loadingPromise = simulateLoadingStages();
+      
+      // Actual API call
+      const count = await incrementCladoQueryCount(session.user.id);
+      setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
+      if (count > CLADO_DAILY_LIMIT) {
+        setError('You have reached your daily Clado search limit.');
+        setSearching(false);
+        return;
       }
+      
+      // Build search options
+      const searchOptions = {};
+      if (schools.length > 0) searchOptions.school = schools;
+      if (companies.length > 0) searchOptions.company = companies;
+      
+      // Make the API call
+      const data = await searchContactsViaClado(query, 4, searchOptions);
+      
+      // Wait for loading simulation to complete (ensures minimum loading time)
+      await loadingPromise;
+      
+      setResults(data.results || []);
+      setLastQueryOfDay(query, data.results || []);
+      setHasSearchedToday(true);
+      
+      // Final success message
+      setLoadingStage('Search completed!');
+      setLoadingProgress(100);
+      
+      // Clear loading state after a brief moment
+      setTimeout(() => {
+        setLoadingStage('');
+        setLoadingProgress(0);
+      }, 1500);
+      
     } catch (err) {
       setError(err.message || 'Failed to fetch search results.');
+      setLoadingStage('');
+      setLoadingProgress(0);
     } finally {
       setSearching(false);
     }
@@ -199,49 +253,195 @@ export default function AddContactByAPI() {
     }
   }
 
+  // Loading component
+  const LoadingDisplay = () => (
+    <div className="text-center py-12 space-y-6">
+      <div className="flex justify-center">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Search className="w-6 h-6 text-blue-600" />
+          </div>
+        </div>
+      </div>
+      
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold text-gray-800">
+          {loadingStage || 'Searching for contacts...'}
+        </h3>
+        
+        {/* Progress bar */}
+        <div className="w-64 mx-auto bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+            style={{ width: `${loadingProgress}%` }}
+          ></div>
+        </div>
+        
+        <p className="text-sm text-gray-600">
+          {loadingProgress < 100 ? 'Please wait while we find the best matches...' : 'Almost done!'}
+        </p>
+      </div>
+      
+      {/* Loading tips */}
+      <div className="max-w-md mx-auto bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start space-x-3">
+          <Users className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-blue-800">
+            <p className="font-medium mb-1">Searching through millions of profiles</p>
+            <p className="text-blue-700">We're using AI to find the most relevant contacts based on your criteria.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex justify-center w-full">
-        <form onSubmit={handleSearch} className="flex gap-2 items-center">
-          <Input
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="Search for people (e.g. Product Managers in Dallas Texas)"
-            className="max-w-2xl w-[420px]"
-          />
-          <Button type="submit" disabled={searching || loading || queriesLeft <= 0}>
-            {searching ? 'Searching...' : 'Search'}
-          </Button>
+        <form onSubmit={handleSearch} className="flex flex-col gap-4 w-full max-w-2xl">
+          {/* Main search form */}
+          <div className="flex gap-2 items-center">
+            <Input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Search for people (e.g. Product Managers in Dallas Texas)"
+              className="flex-1"
+            />
+            <Button type="submit" disabled={searching || loading || queriesLeft <= 0}>
+              {searching ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Searching...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Search className="w-4 h-4" />
+                  <span>Search</span>
+                </div>
+              )}
+            </Button>
+          </div>
+          
+          {/* Filters toggle */}
+          <div className="flex justify-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="text-sm"
+            >
+              {showFilters ? 'Hide' : 'Show'} Filters
+            </Button>
+          </div>
+          
+          {/* Filters section */}
+          {showFilters && (
+            <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+              {/* School filters */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Filter by Schools</label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newSchool}
+                    onChange={e => setNewSchool(e.target.value)}
+                    placeholder="Add school (e.g. Stanford University)"
+                    className="flex-1"
+                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), addSchool())}
+                  />
+                  <Button type="button" onClick={addSchool} size="sm" variant="outline">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {schools.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {schools.map((school, index) => (
+                      <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                        {school}
+                        <button
+                          onClick={() => removeSchool(school)}
+                          className="ml-1 hover:text-red-500"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* Company filters */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Filter by Companies</label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newCompany}
+                    onChange={e => setNewCompany(e.target.value)}
+                    placeholder="Add company (e.g. Google, Apple)"
+                    className="flex-1"
+                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), addCompany())}
+                  />
+                  <Button type="button" onClick={addCompany} size="sm" variant="outline">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {companies.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {companies.map((company, index) => (
+                      <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                        {company}
+                        <button
+                          onClick={() => removeCompany(company)}
+                          className="ml-1 hover:text-red-500"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* Clear filters */}
+              {(schools.length > 0 || companies.length > 0) && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSchools([]);
+                    setCompanies([]);
+                  }}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  Clear All Filters
+                </Button>
+              )}
+            </div>
+          )}
         </form>
       </div>
-      {/* Personalized context message and rate limit */}
+      
+      {/* Rate limit info */}
       <div className="flex flex-col items-center w-full">
-        <div className="flex flex-col items-center w-full max-w-xl">
-          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mt-2 shadow-sm">
-            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" /></svg>
-            <span className="text-blue-800 font-medium">
-              {profile?.role && profile?.location && 'Recommending people who work in similar roles and locations.'}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
-              <svg className="inline w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l2 2" /></svg>
-              {`Clado API queries left today: ${queriesLeft} / ${CLADO_DAILY_LIMIT}`}
-            </span>
-          </div>
+        <div className="flex items-center gap-2 mt-2">
+          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+            <svg className="inline w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l2 2" /></svg>
+            {`Clado API queries left today: ${queriesLeft} / ${CLADO_DAILY_LIMIT}`}
+          </span>
         </div>
       </div>
 
-      {!profile?.role || !profile?.location ? (
-        <div className="text-center py-12 text-muted-foreground">
-          Please update your profile with your role and location to see personalized recommendations.
-        </div>
-      ) : loading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading recommendations...</div>
+      {loading ? (
+        <LoadingDisplay />
+      ) : searching ? (
+        <LoadingDisplay />
       ) : error ? (
         <div className="text-center py-12 text-red-600">{error}</div>
-      ) : results.length === 0 ? (
+      ) : results.length === 0 && !hasSearchedToday ? (
+        <div className="text-center py-12 text-muted-foreground">Enter a search query to find people.</div>
+      ) : results.length === 0 && hasSearchedToday ? (
         <div className="text-center py-12 text-muted-foreground">No results found.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

@@ -22,7 +22,7 @@ const RELATIONSHIP_LABELS = {
   social: "Social"
 };
 
-const getNodeColor = (node, groupBy) => {
+const getNodeColor = (node, groupBy, contacts = []) => {
   if (groupBy === "relationship_type") {
     const colors = {
       professional: "#2563eb",
@@ -36,10 +36,24 @@ const getNodeColor = (node, groupBy) => {
     const palette = ["#2563eb", "#059669", "#d97706", "#db2777", "#7c3aed", "#16a34a", "#4b5563", "#dc2626", "#0891b2", "#f59e42", "#f472b6", "#a3e635", "#fbbf24", "#f87171", "#818cf8", "#facc15", "#f472b6", "#a3e635", "#fbbf24", "#f87171", "#818cf8"]; // repeat if needed
     return idx >= 0 ? palette[idx % palette.length] : "#6b7280";
   }
+  if (groupBy === "location") {
+    const palette = ["#2563eb", "#059669", "#d97706", "#db2777", "#7c3aed", "#16a34a", "#4b5563", "#dc2626", "#0891b2", "#f59e42", "#f472b6", "#a3e635", "#fbbf24", "#f87171", "#818cf8", "#facc15"];
+    // Get all unique locations and find the index of this node's location
+    const allLocations = [...new Set(contacts.map(c => c.location).filter(Boolean))];
+    const locationIndex = allLocations.indexOf(node.location);
+    return locationIndex >= 0 ? palette[locationIndex % palette.length] : "#6b7280";
+  }
+  if (groupBy === "role") {
+    const palette = ["#2563eb", "#059669", "#d97706", "#db2777", "#7c3aed", "#16a34a", "#4b5563", "#dc2626", "#0891b2", "#f59e42", "#f472b6", "#a3e635", "#fbbf24", "#f87171", "#818cf8", "#facc15"];
+    // Get all unique roles and find the index of this node's role
+    const allRoles = [...new Set(contacts.map(c => c.role).filter(Boolean))];
+    const roleIndex = allRoles.indexOf(node.role);
+    return roleIndex >= 0 ? palette[roleIndex % palette.length] : "#6b7280";
+  }
   return node.isMainUser ? "#2563eb" : "#6b7280";
 };
 
-const NetworkNodeCloud = ({ data, groupBy, onNodeHover, onNodeClick }) => {
+const NetworkNodeCloud = ({ data, groupBy, onNodeHover, onNodeClick, contacts }) => {
   const svgRef = useRef(null);
   const simulationRef = useRef(null);
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
@@ -107,7 +121,7 @@ const NetworkNodeCloud = ({ data, groupBy, onNodeHover, onNodeClick }) => {
         
       node.append("circle")
         .attr("r", nodeRadius)
-        .attr("fill", d => getNodeColor(d, groupBy))
+        .attr("fill", d => getNodeColor(d, groupBy, contacts))
         .attr("stroke", "#ffffff")
         .attr("stroke-width", 3)
         .attr("stroke-opacity", 1)
@@ -170,7 +184,7 @@ const NetworkNodeCloud = ({ data, groupBy, onNodeHover, onNodeClick }) => {
         simulationRef.current = null;
       }
     };
-  }, [data, groupBy, onNodeHover, onNodeClick]);
+  }, [data, groupBy, onNodeHover, onNodeClick, contacts]);
 
   // Zoom controls
   const handleZoomIn = () => setTransform(prev => ({ ...prev, k: Math.min(prev.k * 1.2, 3) }));
@@ -290,6 +304,51 @@ const NetworkAnalytics = ({ contacts, loading, user }) => {
     { value: "role", label: "Role", icon: Briefcase }
   ];
 
+  const getLegendData = () => {
+    if (groupBy === "none") return [];
+    
+    if (groupBy === "relationship_type") {
+      return [
+        { label: "Professional", color: "#2563eb" },
+        { label: "Personal", color: "#059669" },
+        { label: "Social", color: "#d97706" }
+      ];
+    }
+    
+    if (groupBy === "industry") {
+      // Get unique industries from the data
+      const uniqueIndustries = [...new Set(contacts.map(c => c.industry).filter(Boolean))];
+      const palette = ["#2563eb", "#059669", "#d97706", "#db2777", "#7c3aed", "#16a34a", "#4b5563", "#dc2626", "#0891b2", "#f59e42", "#f472b6", "#a3e635", "#fbbf24", "#f87171", "#818cf8", "#facc15"];
+      
+      return uniqueIndustries.map((industry, index) => ({
+        label: industries.find(i => i.value === industry)?.label || industry,
+        color: palette[index % palette.length]
+      }));
+    }
+    
+    if (groupBy === "location") {
+      const uniqueLocations = [...new Set(contacts.map(c => c.location).filter(Boolean))];
+      const palette = ["#2563eb", "#059669", "#d97706", "#db2777", "#7c3aed", "#16a34a", "#4b5563", "#dc2626", "#0891b2", "#f59e42", "#f472b6", "#a3e635", "#fbbf24", "#f87171", "#818cf8", "#facc15"];
+      
+      return uniqueLocations.map((location, index) => ({
+        label: location,
+        color: palette[index % palette.length]
+      }));
+    }
+    
+    if (groupBy === "role") {
+      const uniqueRoles = [...new Set(contacts.map(c => c.role).filter(Boolean))];
+      const palette = ["#2563eb", "#059669", "#d97706", "#db2777", "#7c3aed", "#16a34a", "#4b5563", "#dc2626", "#0891b2", "#f59e42", "#f472b6", "#a3e635", "#fbbf24", "#f87171", "#818cf8", "#facc15"];
+      
+      return uniqueRoles.map((role, index) => ({
+        label: role,
+        color: palette[index % palette.length]
+      }));
+    }
+    
+    return [];
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "Never";
     const date = new Date(dateString);
@@ -356,7 +415,7 @@ const NetworkAnalytics = ({ contacts, loading, user }) => {
             groupBy={groupBy}
             onNodeHover={handleNodeHover}
             onNodeClick={handleNodeClick}
-
+            contacts={contacts}
           />
           {/* Custom Tooltip positioned over the node */}
           {hoveredNode && (
@@ -445,6 +504,26 @@ const NetworkAnalytics = ({ contacts, loading, user }) => {
           )}
         </div>
       </CardContent>
+
+      {/* Legend */}
+      {groupBy !== "none" && getLegendData().length > 0 && (
+        <div className="px-6 pb-6">
+          <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Legend</h4>
+            <div className="flex flex-wrap gap-3">
+              {getLegendData().map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div 
+                    className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-sm text-gray-600">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Contact Detail Modal */}
       <ViewContactCard

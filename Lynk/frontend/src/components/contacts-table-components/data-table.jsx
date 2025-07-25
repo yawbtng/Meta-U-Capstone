@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -32,7 +32,6 @@ export default function DataTable({ columns, data, loading }) {
   const [sorting, setSorting] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
   const [showMassDeleteDialog, setShowMassDeleteDialog] = useState(false);
-  const [tableData, setTableData] = useState(data);
   const [deleting, setDeleting] = useState(false);
   const [columnVisibility, setColumnVisibility] = useState({
       "phone_number": false,
@@ -45,6 +44,14 @@ export default function DataTable({ columns, data, loading }) {
   
   const [columnFilters, setColumnFilters] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const table = useReactTable({
     data,
@@ -69,9 +76,19 @@ export default function DataTable({ columns, data, loading }) {
     initialState: {
       pagination: {
         pageSize: 15,
+        pageIndex: 0,
       },
     },
+    manualPagination: false,
+    autoResetPageIndex: false,
   });
+
+  
+  useEffect(() => {
+    if (isMounted.current && table) {
+      table.resetPageIndex();
+    }
+  }, [data.length, table]);
 
   // Get selected rows
   const selectedRows = table.getSelectedRowModel().rows;
@@ -86,10 +103,10 @@ export default function DataTable({ columns, data, loading }) {
         const result = await deleteContact(row.original.id);
         if (!result.success) allSuccess = false;
       }
-      setTableData(prev => prev.filter(contact => !selectedIds.includes(contact.id)));
+      
       toast.success(allSuccess ? "Contacts deleted ✅" : "Some contacts could not be deleted");
       setShowMassDeleteDialog(false);
-      // Optionally, clear selection
+     
       setRowSelection({});
     } catch (err) {
       toast.error("Failed to delete contacts");
