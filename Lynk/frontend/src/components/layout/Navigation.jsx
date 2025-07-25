@@ -14,6 +14,7 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -117,6 +118,9 @@ const Navigation = () => {
       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
         <SheetHeader>
           <SheetTitle className="text-left">Navigation</SheetTitle>
+          <SheetDescription className="text-left">
+            Access your dashboard, contacts, and profile settings
+          </SheetDescription>
         </SheetHeader>
                  <div className="flex flex-col space-y-3 mt-6">
            {navigationItems.map((item) => (
