@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { UserPlus } from 'lucide-react';
-import { searchContactsViaClado, getCachedCladoResults, setCachedCladoResults, getCladoQueryCount, incrementCladoQueryCount, CLADO_DAILY_LIMIT } from '../../../../backend/services/clado-client.js';
+import { searchContactsViaClado, getLastQueryOfDay, setLastQueryOfDay, getCladoQueryCount, incrementCladoQueryCount, CLADO_DAILY_LIMIT } from '../../../../backend/services/clado-client.js';
 import { UserAuth } from '@/context/AuthContext';
 import { createContact, fetchContacts } from '../../../../backend/index.js';
 import { toast } from "sonner"
@@ -22,10 +22,10 @@ export default function AddContactByAPI() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searching, setSearching] = useState(false);
-  const [initialTried, setInitialTried] = useState(false);
   const [queriesLeft, setQueriesLeft] = useState(CLADO_DAILY_LIMIT);
   const [addingId, setAddingId] = useState(null);
   const [existingContacts, setExistingContacts] = useState([]);
+  const [hasSearchedToday, setHasSearchedToday] = useState(false);
 
   // Fetch user's existing contacts (for duplicate check)
   useEffect(() => {
@@ -45,62 +45,30 @@ export default function AddContactByAPI() {
       .filter(Boolean)
   );
 
-  // Generate initial query from user profile
-  const initialQuery = profile?.role && profile?.location
-    ? `${profile.role} in ${profile.location}`
-    : '';
-
-  // Fetch initial query count on mount or user change
+  // Fetch initial query count and last query results on mount
   useEffect(() => {
-    async function fetchLimit() {
+    async function initializeComponent() {
       if (session?.user?.id) {
         try {
+          // Get query count
           const count = await getCladoQueryCount(session.user.id);
           setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
-        } catch {
+          
+          // Get last query of the day
+          const lastQuery = getLastQueryOfDay();
+          if (lastQuery) {
+            setQuery(lastQuery.query);
+            setResults(lastQuery.results || []);
+            setHasSearchedToday(true);
+          }
+        } catch (err) {
+          console.error('Error initializing component:', err);
           setQueriesLeft(CLADO_DAILY_LIMIT);
         }
       }
     }
-    fetchLimit();
+    initializeComponent();
   }, [session?.user?.id]);
-
-  useEffect(() => {
-    if (!initialTried && initialQuery && session?.user?.id) {
-      async function fetchInitial() {
-        setLoading(true);
-        setError(null);
-        try {
-          const cached = getCachedCladoResults(initialQuery);
-          if (cached) {
-            setResults(cached.results || []);
-            // Only check count, do not increment
-            const count = await getCladoQueryCount(session.user.id);
-            setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
-          } else {
-            // Only increment if making a real API call
-            const count = await incrementCladoQueryCount(session.user.id);
-            setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
-            if (count > CLADO_DAILY_LIMIT) {
-              setError('You have reached your daily Clado search limit.');
-              setLoading(false);
-              setInitialTried(true);
-              return;
-            }
-            const data = await searchContactsViaClado(initialQuery, 4);
-            setResults(data.results || []);
-            setCachedCladoResults(initialQuery, data);
-          }
-        } catch (err) {
-          setError(err.message || 'Failed to fetch recommendations.');
-        } finally {
-          setLoading(false);
-          setInitialTried(true);
-        }
-      }
-      fetchInitial();
-    }
-  }, [initialQuery, initialTried, session?.user?.id]);
 
   // Handle search
   async function handleSearch(e) {
@@ -113,25 +81,17 @@ export default function AddContactByAPI() {
     setSearching(true);
     setError(null);
     try {
-      const cached = getCachedCladoResults(query);
-      if (cached) {
-        setResults(cached.results || []);
-        // Only check count, do not increment
-        const count = await getCladoQueryCount(session.user.id);
-        setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
-      } else {
-        // Only increment if making a real API call
-        const count = await incrementCladoQueryCount(session.user.id);
-        setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
-        if (count > CLADO_DAILY_LIMIT) {
-          setError('You have reached your daily Clado search limit.');
-          setSearching(false);
-          return;
-        }
-        const data = await searchContactsViaClado(query, 4);
-        setResults(data.results || []);
-        setCachedCladoResults(query, data);
+      const count = await incrementCladoQueryCount(session.user.id);
+      setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
+      if (count > CLADO_DAILY_LIMIT) {
+        setError('You have reached your daily Clado search limit.');
+        setSearching(false);
+        return;
       }
+      const data = await searchContactsViaClado(query, 4);
+      setResults(data.results || []);
+      setLastQueryOfDay(query, data.results || []);
+      setHasSearchedToday(true);
     } catch (err) {
       setError(err.message || 'Failed to fetch search results.');
     } finally {
@@ -215,33 +175,23 @@ export default function AddContactByAPI() {
           </Button>
         </form>
       </div>
-      {/* Personalized context message and rate limit */}
+      {/* Rate limit info */}
       <div className="flex flex-col items-center w-full">
-        <div className="flex flex-col items-center w-full max-w-xl">
-          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mt-2 shadow-sm">
-            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" /></svg>
-            <span className="text-blue-800 font-medium">
-              {profile?.role && profile?.location && 'Recommending people who work in similar roles and locations.'}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
-              <svg className="inline w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l2 2" /></svg>
-              {`Clado API queries left today: ${queriesLeft} / ${CLADO_DAILY_LIMIT}`}
-            </span>
-          </div>
+        <div className="flex items-center gap-2 mt-2">
+          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+            <svg className="inline w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l2 2" /></svg>
+            {`Clado API queries left today: ${queriesLeft} / ${CLADO_DAILY_LIMIT}`}
+          </span>
         </div>
       </div>
 
-      {!profile?.role || !profile?.location ? (
-        <div className="text-center py-12 text-muted-foreground">
-          Please update your profile with your role and location to see personalized recommendations.
-        </div>
-      ) : loading ? (
+      {loading ? (
         <div className="text-center py-12 text-muted-foreground">Loading recommendations...</div>
       ) : error ? (
         <div className="text-center py-12 text-red-600">{error}</div>
-      ) : results.length === 0 ? (
+      ) : results.length === 0 && !hasSearchedToday ? (
+        <div className="text-center py-12 text-muted-foreground">Enter a search query to find people.</div>
+      ) : results.length === 0 && hasSearchedToday ? (
         <div className="text-center py-12 text-muted-foreground">No results found.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

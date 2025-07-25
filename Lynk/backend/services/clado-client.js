@@ -105,3 +105,41 @@ export function setCachedCladoResults(query, data) {
   const key = getCladoCacheKey(query);
   localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
 }
+
+// --- Last Query of the Day ---
+export function getLastQueryKey() {
+  const today = new Date().toISOString().slice(0, 10);
+  return `clado_last_query_${today}`;
+}
+
+export function getLastQueryOfDay() {
+  if (typeof window === 'undefined' || !window.localStorage) return null;
+  const key = getLastQueryKey();
+  const lastQuery = localStorage.getItem(key);
+  if (!lastQuery) return null;
+  
+  try {
+    const { query, results, timestamp } = JSON.parse(lastQuery);
+    // Check if it's from today
+    const today = new Date().toISOString().slice(0, 10);
+    const queryDate = new Date(timestamp).toISOString().slice(0, 10);
+    if (queryDate !== today) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return { query, results };
+  } catch {
+    localStorage.removeItem(key);
+    return null;
+  }
+}
+
+export function setLastQueryOfDay(query, results) {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  const key = getLastQueryKey();
+  localStorage.setItem(key, JSON.stringify({ 
+    query, 
+    results, 
+    timestamp: Date.now() 
+  }));
+}
