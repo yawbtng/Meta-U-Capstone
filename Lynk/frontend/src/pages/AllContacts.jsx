@@ -3,7 +3,7 @@ import ContactsTable from '../components/contacts-table-components/contacts-tabl
 
 const AllContacts = () => {
     return(
-        <div className="container mx-auto p-6">
+        <div className="w-full ">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold mb-2">All Contacts</h1>
                 <p className="text-muted-foreground">
