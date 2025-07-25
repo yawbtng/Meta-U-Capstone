@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { UserPlus, X, Plus } from 'lucide-react';
+import { UserPlus, X, Plus, Search, Users, CheckCircle } from 'lucide-react';
 import { searchContactsViaClado, getLastQueryOfDay, setLastQueryOfDay, getCladoQueryCount, incrementCladoQueryCount, CLADO_DAILY_LIMIT } from '../../../../backend/services/clado-client.js';
 import { UserAuth } from '@/context/AuthContext';
 import { createContact, fetchContacts } from '../../../../backend/index.js';
@@ -33,6 +33,10 @@ export default function AddContactByAPI() {
   const [newSchool, setNewSchool] = useState('');
   const [newCompany, setNewCompany] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Loading state management
+  const [loadingStage, setLoadingStage] = useState('');
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   // Fetch user's existing contacts (for duplicate check)
   useEffect(() => {
@@ -104,6 +108,30 @@ export default function AddContactByAPI() {
     setCompanies(companies.filter(company => company !== companyToRemove));
   };
 
+  // Simulate loading stages
+  const simulateLoadingStages = async () => {
+    const stages = [
+      { message: 'Checking your search quota...', progress: 5, duration: 1000 },
+      { message: 'Preparing search filters...', progress: 10, duration: 1500 },
+      { message: 'Connecting to Clado AI...', progress: 15, duration: 2000 },
+      { message: 'Initializing search engine...', progress: 20, duration: 3000 },
+      { message: 'Searching through millions of profiles...', progress: 30, duration: 8000 },
+      { message: 'Filtering by your criteria...', progress: 45, duration: 6000 },
+      { message: 'Analyzing profile relevance...', progress: 60, duration: 7000 },
+      { message: 'Processing AI insights...', progress: 75, duration: 5000 },
+      { message: 'Ranking best matches...', progress: 85, duration: 4000 },
+      { message: 'Finalizing your results...', progress: 95, duration: 2000 }
+    ];
+
+    for (let i = 0; i < stages.length; i++) {
+      setLoadingStage(stages[i].message);
+      setLoadingProgress(stages[i].progress);
+      
+      // Use the specified duration for each stage
+      await new Promise(resolve => setTimeout(resolve, stages[i].duration));
+    }
+  };
+
   // Handle search
   async function handleSearch(e) {
     e.preventDefault();
@@ -112,9 +140,17 @@ export default function AddContactByAPI() {
       setError('You must be signed in to search.');
       return;
     }
+    
     setSearching(true);
     setError(null);
+    setLoadingStage('');
+    setLoadingProgress(0);
+    
     try {
+      // Start loading simulation
+      const loadingPromise = simulateLoadingStages();
+      
+      // Actual API call
       const count = await incrementCladoQueryCount(session.user.id);
       setQueriesLeft(Math.max(0, CLADO_DAILY_LIMIT - (count || 0)));
       if (count > CLADO_DAILY_LIMIT) {
@@ -128,12 +164,30 @@ export default function AddContactByAPI() {
       if (schools.length > 0) searchOptions.school = schools;
       if (companies.length > 0) searchOptions.company = companies;
       
+      // Make the API call
       const data = await searchContactsViaClado(query, 4, searchOptions);
+      
+      // Wait for loading simulation to complete (ensures minimum loading time)
+      await loadingPromise;
+      
       setResults(data.results || []);
       setLastQueryOfDay(query, data.results || []);
       setHasSearchedToday(true);
+      
+      // Final success message
+      setLoadingStage('Search completed!');
+      setLoadingProgress(100);
+      
+      // Clear loading state after a brief moment
+      setTimeout(() => {
+        setLoadingStage('');
+        setLoadingProgress(0);
+      }, 1500);
+      
     } catch (err) {
       setError(err.message || 'Failed to fetch search results.');
+      setLoadingStage('');
+      setLoadingProgress(0);
     } finally {
       setSearching(false);
     }
@@ -199,6 +253,48 @@ export default function AddContactByAPI() {
     }
   }
 
+  // Loading component
+  const LoadingDisplay = () => (
+    <div className="text-center py-12 space-y-6">
+      <div className="flex justify-center">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Search className="w-6 h-6 text-blue-600" />
+          </div>
+        </div>
+      </div>
+      
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold text-gray-800">
+          {loadingStage || 'Searching for contacts...'}
+        </h3>
+        
+        {/* Progress bar */}
+        <div className="w-64 mx-auto bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+            style={{ width: `${loadingProgress}%` }}
+          ></div>
+        </div>
+        
+        <p className="text-sm text-gray-600">
+          {loadingProgress < 100 ? 'Please wait while we find the best matches...' : 'Almost done!'}
+        </p>
+      </div>
+      
+      {/* Loading tips */}
+      <div className="max-w-md mx-auto bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start space-x-3">
+          <Users className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-blue-800">
+            <p className="font-medium mb-1">Searching through millions of profiles</p>
+            <p className="text-blue-700">We're using AI to find the most relevant contacts based on your criteria.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -213,7 +309,17 @@ export default function AddContactByAPI() {
               className="flex-1"
             />
             <Button type="submit" disabled={searching || loading || queriesLeft <= 0}>
-              {searching ? 'Searching...' : 'Search'}
+              {searching ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Searching...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Search className="w-4 h-4" />
+                  <span>Search</span>
+                </div>
+              )}
             </Button>
           </div>
           
@@ -328,7 +434,9 @@ export default function AddContactByAPI() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading recommendations...</div>
+        <LoadingDisplay />
+      ) : searching ? (
+        <LoadingDisplay />
       ) : error ? (
         <div className="text-center py-12 text-red-600">{error}</div>
       ) : results.length === 0 && !hasSearchedToday ? (
