@@ -11,7 +11,7 @@ const NetworkAnalytics = () => (
             </CardTitle>
         </CardHeader>
         <CardContent>
-            <div className="h-80 flex items-center justify-center bg-muted/20 rounded-lg">
+            <div className="h-125 flex items-center justify-center bg-muted/20 rounded-lg">
                 <p className="text-muted-foreground">Charts and visualizations coming soon...</p>
             </div>
         </CardContent>
