@@ -31,12 +31,18 @@ const badgeColors = [
   "bg-orange-100 text-orange-800"
 ];
 
-const TopConnectionsCarousel = ({ contacts, loading, plugin }) => {
+const TopConnectionsCarousel = ({ contacts, loading, plugin, onContactClick }) => {
   // Sort by connection_score descending, take top 5
   const topConnections = [...contacts]
     .filter(c => typeof c.connection_score === 'number')
     .sort((a, b) => b.connection_score - a.connection_score)
     .slice(0, 5);
+
+  const handleContactClick = (connection) => {
+    if (onContactClick) {
+      onContactClick(connection);
+    }
+  };
 
   return (
     <div className="lg:col-span-1">
@@ -69,7 +75,10 @@ const TopConnectionsCarousel = ({ contacts, loading, plugin }) => {
                 {topConnections.map((connection, idx) => (
                   <CarouselItem key={connection.id} className="basis-full h-full">
                     <div className="flex justify-center items-center h-1/2">
-                      <Card className="relative w-full max-w-[250px] h-[300px] flex flex-col items-center shadow-lg border-2 hover:shadow-xl transition-all duration-200">
+                      <Card 
+                        className="relative w-full max-w-[250px] h-[300px] flex flex-col items-center shadow-lg border-2 hover:shadow-xl transition-all duration-200 cursor-pointer"
+                        onClick={() => handleContactClick(connection)}
+                      >
                         {/* Rank badge top left */}
                         <div className="absolute top-4 left-4">
                           <span className="px-2 py-1 rounded text-lg font-semibold bg-gray-100 text-gray-700">#{idx + 1}</span>
