@@ -59,11 +59,31 @@ export async function incrementCladoQueryCount(userId) {
 /**
  * Search for users via Clado API
  */
-export async function searchContactsViaClado(query, limit = 4) {
+export async function searchContactsViaClado(query, limit = 4, options = {}) {
   if (!CLADO_API_KEY) {
     throw new Error('Clado API key is missing. Set VITE_CLADO_API_KEY in your environment.');
   }
-  const url = `${CLADO_API_URL}?query=${encodeURIComponent(query)}&limit=${limit}`;
+  
+  // Build query parameters
+  const params = new URLSearchParams({
+    query: query,
+    limit: limit.toString()
+  });
+  
+  // Add optional filters
+  if (options.school && Array.isArray(options.school)) {
+    options.school.forEach(school => params.append('school', school));
+  }
+  
+  if (options.company && Array.isArray(options.company)) {
+    options.company.forEach(company => params.append('company', company));
+  }
+  
+  if (options.acceptance_threshold && typeof options.acceptance_threshold === 'number') {
+    params.append('acceptance_threshold', options.acceptance_threshold.toString());
+  }
+  
+  const url = `${CLADO_API_URL}?${params.toString()}`;
   const res = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${CLADO_API_KEY}`,
