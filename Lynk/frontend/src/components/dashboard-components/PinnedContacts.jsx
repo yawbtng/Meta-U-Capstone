@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Star, PinOff } from "lucide-react";
 import LoadingSpinner from "../ui/loading-spinner";
@@ -12,7 +12,7 @@ const getInitials = (name) => {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-const PinnedContacts = ({ contacts = [], loading, onUnpin }) => {
+const PinnedContacts = ({ contacts = [], loading, onUnpin, onContactClick }) => {
     const { session } = UserAuth();
     const [unpinningId, setUnpinningId] = useState(null);
     const isMounted = useRef(true);
@@ -41,6 +41,16 @@ const PinnedContacts = ({ contacts = [], loading, onUnpin }) => {
         }
     };
 
+    const handleContactClick = (contact, event) => {
+        // Prevent click if clicking on the unpin button
+        if (event.target.closest('button')) {
+            return;
+        }
+        if (onContactClick) {
+            onContactClick(contact);
+        }
+    };
+
     return (
         <div className="lg:col-span-1">
             <Card className="h-full">
@@ -63,6 +73,7 @@ const PinnedContacts = ({ contacts = [], loading, onUnpin }) => {
                                 <div
                                     key={contact.id}
                                     className="flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer hover:bg-blue-50"
+                                    onClick={(e) => handleContactClick(contact, e)}
                                 >
                                     {contact.avatar_url ? (
                                         <img

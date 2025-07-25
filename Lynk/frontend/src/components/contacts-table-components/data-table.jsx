@@ -140,8 +140,8 @@ export default function DataTable({ columns, data, loading }) {
         confirmText={deleting ? "Deleting..." : "Delete"}
       />
 
-      <div className="flex items-center pt-5 pb-4 overflow-x-auto scrollbar-hide">
-        <Table className="border mx-auto">
+      <div className="flex items-center pt-4 pb-4 overflow-x-auto scrollbar-hide w-full">
+        <Table className="border w-full">
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>

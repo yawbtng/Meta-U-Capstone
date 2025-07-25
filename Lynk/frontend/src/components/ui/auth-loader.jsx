@@ -1,4 +1,3 @@
-import React from 'react';
 import LoadingSpinner from './loading-spinner';
 
 const AuthLoader = ({ message = "Checking authentication..." }) => {
