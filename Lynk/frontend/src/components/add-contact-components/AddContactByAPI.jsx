@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, X, Plus } from 'lucide-react';
 import { searchContactsViaClado, getLastQueryOfDay, setLastQueryOfDay, getCladoQueryCount, incrementCladoQueryCount, CLADO_DAILY_LIMIT } from '../../../../backend/services/clado-client.js';
 import { UserAuth } from '@/context/AuthContext';
 import { createContact, fetchContacts } from '../../../../backend/index.js';
@@ -26,6 +26,13 @@ export default function AddContactByAPI() {
   const [addingId, setAddingId] = useState(null);
   const [existingContacts, setExistingContacts] = useState([]);
   const [hasSearchedToday, setHasSearchedToday] = useState(false);
+  
+  // Filter states
+  const [schools, setSchools] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [newSchool, setNewSchool] = useState('');
+  const [newCompany, setNewCompany] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   // Fetch user's existing contacts (for duplicate check)
   useEffect(() => {
@@ -60,6 +67,7 @@ export default function AddContactByAPI() {
             setQuery(lastQuery.query);
             setResults(lastQuery.results || []);
             setHasSearchedToday(true);
+            // Note: We don't restore filters from last query for simplicity
           }
         } catch (err) {
           console.error('Error initializing component:', err);
@@ -69,6 +77,32 @@ export default function AddContactByAPI() {
     }
     initializeComponent();
   }, [session?.user?.id]);
+
+  // Add school filter
+  const addSchool = () => {
+    if (newSchool.trim() && !schools.includes(newSchool.trim())) {
+      setSchools([...schools, newSchool.trim()]);
+      setNewSchool('');
+    }
+  };
+
+  // Remove school filter
+  const removeSchool = (schoolToRemove) => {
+    setSchools(schools.filter(school => school !== schoolToRemove));
+  };
+
+  // Add company filter
+  const addCompany = () => {
+    if (newCompany.trim() && !companies.includes(newCompany.trim())) {
+      setCompanies([...companies, newCompany.trim()]);
+      setNewCompany('');
+    }
+  };
+
+  // Remove company filter
+  const removeCompany = (companyToRemove) => {
+    setCompanies(companies.filter(company => company !== companyToRemove));
+  };
 
   // Handle search
   async function handleSearch(e) {
@@ -88,7 +122,13 @@ export default function AddContactByAPI() {
         setSearching(false);
         return;
       }
-      const data = await searchContactsViaClado(query, 4);
+      
+      // Build search options
+      const searchOptions = {};
+      if (schools.length > 0) searchOptions.school = schools;
+      if (companies.length > 0) searchOptions.company = companies;
+      
+      const data = await searchContactsViaClado(query, 4, searchOptions);
       setResults(data.results || []);
       setLastQueryOfDay(query, data.results || []);
       setHasSearchedToday(true);
@@ -163,18 +203,120 @@ export default function AddContactByAPI() {
   return (
     <div className="space-y-6">
       <div className="flex justify-center w-full">
-        <form onSubmit={handleSearch} className="flex gap-2 items-center">
-          <Input
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="Search for people (e.g. Product Managers in Dallas Texas)"
-            className="max-w-2xl w-[420px]"
-          />
-          <Button type="submit" disabled={searching || loading || queriesLeft <= 0}>
-            {searching ? 'Searching...' : 'Search'}
-          </Button>
+        <form onSubmit={handleSearch} className="flex flex-col gap-4 w-full max-w-2xl">
+          {/* Main search form */}
+          <div className="flex gap-2 items-center">
+            <Input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Search for people (e.g. Product Managers in Dallas Texas)"
+              className="flex-1"
+            />
+            <Button type="submit" disabled={searching || loading || queriesLeft <= 0}>
+              {searching ? 'Searching...' : 'Search'}
+            </Button>
+          </div>
+          
+          {/* Filters toggle */}
+          <div className="flex justify-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="text-sm"
+            >
+              {showFilters ? 'Hide' : 'Show'} Filters
+            </Button>
+          </div>
+          
+          {/* Filters section */}
+          {showFilters && (
+            <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+              {/* School filters */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Filter by Schools</label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newSchool}
+                    onChange={e => setNewSchool(e.target.value)}
+                    placeholder="Add school (e.g. Stanford University)"
+                    className="flex-1"
+                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), addSchool())}
+                  />
+                  <Button type="button" onClick={addSchool} size="sm" variant="outline">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {schools.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {schools.map((school, index) => (
+                      <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                        {school}
+                        <button
+                          onClick={() => removeSchool(school)}
+                          className="ml-1 hover:text-red-500"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* Company filters */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Filter by Companies</label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newCompany}
+                    onChange={e => setNewCompany(e.target.value)}
+                    placeholder="Add company (e.g. Google, Apple)"
+                    className="flex-1"
+                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), addCompany())}
+                  />
+                  <Button type="button" onClick={addCompany} size="sm" variant="outline">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {companies.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {companies.map((company, index) => (
+                      <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                        {company}
+                        <button
+                          onClick={() => removeCompany(company)}
+                          className="ml-1 hover:text-red-500"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* Clear filters */}
+              {(schools.length > 0 || companies.length > 0) && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSchools([]);
+                    setCompanies([]);
+                  }}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  Clear All Filters
+                </Button>
+              )}
+            </div>
+          )}
         </form>
       </div>
+      
       {/* Rate limit info */}
       <div className="flex flex-col items-center w-full">
         <div className="flex items-center gap-2 mt-2">
