@@ -3,17 +3,14 @@ import { generateUserEmbeddingsBatch, generateConnectionEmbeddingsBatch, prepare
 import { upsertVectorsBatch } from "./supabase-vector.js";
 
 export async function processAllUserEmbeddings() {
-  console.log('Starting user embeddings processing with Supabase...');
   const users = await fetchAllUsers();
   if (!users.length) {
-    console.log("No users found.");
-    return;
+    throw new Error("No users found for embedding processing.");
   }
 
   const batchResult = await generateUserEmbeddingsBatch(users);
   if (!batchResult.success) {
-    console.error("Embedding batch failed:", batchResult.error);
-    return;
+    throw new Error(`Embedding batch failed: ${batchResult.error}`);
   }
 
   const vectorPoints = [];
@@ -26,37 +23,33 @@ export async function processAllUserEmbeddings() {
         if (valid.success) {
           vectorPoints.push(point);
         } else {
-          console.warn("Invalid vector point:", valid.error);
+          throw new Error(`Invalid vector point: ${valid.error}`);
         }
       } catch (err) {
-        console.warn("Error preparing vector point:", err.message);
+        throw new Error(`Error preparing vector point: ${err.message}`);
       }
     } else {
-      console.warn("Skipping user due to embedding error:", result.error);
+      throw new Error(`Skipping user due to embedding error: ${result.error}`);
     }
   });
 
   if (!vectorPoints.length) {
-    console.log("No valid user vector points to upsert.");
-    return;
+    throw new Error("No valid user vector points to upsert.");
   }
 
   await upsertVectorsBatch(vectorPoints);
-  console.log(`Upserted ${vectorPoints.length} user vectors to Supabase.`);
+  return { success: true, count: vectorPoints.length };
 }
 
 export async function processAllConnectionEmbeddings() {
-  console.log('Starting connection embeddings processing with Supabase...');
   const connections = await fetchAllConnections();
   if (!connections.length) {
-    console.log("No connections found.");
-    return;
+    throw new Error("No connections found for embedding processing.");
   }
 
   const batchResult = await generateConnectionEmbeddingsBatch(connections);
   if (!batchResult.success) {
-    console.error("Connection embedding batch failed:", batchResult.error);
-    return;
+    throw new Error(`Connection embedding batch failed: ${batchResult.error}`);
   }
 
   const vectorPoints = [];
@@ -73,21 +66,20 @@ export async function processAllConnectionEmbeddings() {
         if (valid.success) {
           vectorPoints.push(point);
         } else {
-          console.warn("Invalid connection vector point:", valid.error);
+          throw new Error(`Invalid connection vector point: ${valid.error}`);
         }
       } catch (err) {
-        console.warn("Error preparing connection vector point:", err.message);
+        throw new Error(`Error preparing connection vector point: ${err.message}`);
       }
     } else {
-      console.warn("Skipping connection due to embedding error:", result.error);
+      throw new Error(`Skipping connection due to embedding error: ${result.error}`);
     }
   });
 
   if (!vectorPoints.length) {
-    console.log("No valid connection vector points to upsert.");
-    return;
+    throw new Error("No valid connection vector points to upsert.");
   }
 
   await upsertVectorsBatch(vectorPoints);
-  console.log(`Upserted ${vectorPoints.length} connection vectors to Supabase.`);
+  return { success: true, count: vectorPoints.length };
 }

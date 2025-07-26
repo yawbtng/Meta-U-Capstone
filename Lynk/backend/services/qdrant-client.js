@@ -37,8 +37,6 @@ export async function initializeCollection() {
       );
   
       if (!collectionExists) {
-        console.log(`Creating collection: ${COLLECTION_NAME}`);
-        
         await qdrantRequest(`/collections/${COLLECTION_NAME}`, {
           method: 'PUT',
           body: JSON.stringify({
@@ -65,15 +63,10 @@ export async function initializeCollection() {
             field_schema: "keyword",
           })
         });
-  
-        console.log(`Collection ${COLLECTION_NAME} created successfully`);
-      } else {
-        console.log(`Collection ${COLLECTION_NAME} already exists`);
       }
   
       return true;
     } catch (error) {
-      console.error("Failed to initialize Qdrant collection:", error);
       throw new Error(`Qdrant initialization failed: ${error.message}`);
     }
 }
@@ -83,7 +76,6 @@ export async function getCollectionInfo() {
       const info = await qdrantRequest(`/collections/${COLLECTION_NAME}`);
       return info;
     } catch (error) {
-      console.error(" Failed to get collection info:", error);
       throw error;
     }
 }
@@ -113,10 +105,8 @@ export async function upsertVector(id, vector, payload) {
         })
       });
   
-      console.log(`Upserted vector with ID: ${id}`);
       return true;
     } catch (error) {
-      console.error(` Failed to upsert vector ${id}:`, error);
       throw new Error(`Vector upsert failed: ${error.message}`);
     }
 }
@@ -144,10 +134,8 @@ export async function upsertVectorsBatch(points) {
         })
       });
   
-      console.log(`Upserted ${points.length} vectors successfully`);
       return true;
     } catch (error) {
-      console.error(" Failed to upsert vectors batch:", error);
       throw new Error(`Batch upsert failed: ${error.message}`);
     }
 }
@@ -165,10 +153,8 @@ export async function deleteVectors(ids) {
         })
       });
   
-      console.log(`Deleted ${ids.length} vectors successfully`);
       return true;
     } catch (error) {
-      console.error(" Failed to delete vectors:", error);
       throw new Error(`Vector deletion failed: ${error.message}`);
     }
 }
@@ -196,12 +182,9 @@ export async function searchSimilarVectors(queryVector, limit = 20, filter = nul
         method: 'POST',
         body: JSON.stringify(searchParams)
       });
-  
-      console.info(`Found ${results.length} similar vectors with score >= ${scoreThreshold}`);
       
       return results;
     } catch (error) {
-      console.error("Failed to search similar vectors:", error);
       throw new Error(`Vector search failed: ${error.message}`);
     }
   }
@@ -253,7 +236,6 @@ export async function findRecommendations({
       }
     };
   } catch (error) {
-    console.error("Recommendation search failed:", error);
     throw new Error(`Recommendation search failed: ${error.message}`);
   }
 }
@@ -269,7 +251,6 @@ async function estimateTotalCount(filter) {
     });
     return stats.count;
   } catch (error) {
-    console.error("Failed to get total count:", error);
     // Fallback: return a reasonable estimate
     return 1000;
   }
@@ -383,7 +364,6 @@ export async function getRecommendationsAPI({
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error("Failed to get recommendations:", error);
     return {
       success: false,
       error: error.message,

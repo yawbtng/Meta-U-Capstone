@@ -304,8 +304,7 @@ export const fetchInitialContactsForSearch = async (userId, firstChar) => {
       .eq('user_id', userId);
 
     if (userError) {
-      console.error('Error fetching user connections:', userError);
-      return [];
+      throw new Error(`Error fetching user connections: ${userError.message}`);
     }
 
     if (userConnections.length === 0) return [];
@@ -334,8 +333,7 @@ export const fetchInitialContactsForSearch = async (userId, firstChar) => {
       .in('id', connectionIds);
 
     if (connectionsError) {
-      console.error('Error fetching connections:', connectionsError);
-      return [];
+      throw new Error(`Error fetching connections: ${connectionsError.message}`);
     }
 
     // Combine the data and filter by first character
@@ -378,8 +376,7 @@ export const fetchInitialContactsForSearch = async (userId, firstChar) => {
     );
 
   } catch (error) {
-    console.error('Error in fetchInitialContactsForSearch:', error);
-    return [];
+    throw new Error(`Error in fetchInitialContactsForSearch: ${error.message}`);
   }
 }; 
 

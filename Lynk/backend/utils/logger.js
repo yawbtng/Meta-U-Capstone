@@ -1,5 +1,4 @@
-// Simple logging utility for production
-// You can replace this with Winston, Pino, or other logging libraries
+
 
 const LOG_LEVELS = {
   ERROR: 'error',
@@ -20,8 +19,6 @@ function shouldLog(level) {
 export const logger = {
   error: (message, error = null) => {
     if (shouldLog(LOG_LEVELS.ERROR)) {
-      // In production, you might want to send this to a logging service
-      // For now, we'll just store it in memory or send to a monitoring service
       const logEntry = {
         level: LOG_LEVELS.ERROR,
         message,
@@ -30,8 +27,6 @@ export const logger = {
         stack: error?.stack
       };
       
-      // You could send this to a logging service here
-      // Example: sendToLoggingService(logEntry);
     }
   },
   

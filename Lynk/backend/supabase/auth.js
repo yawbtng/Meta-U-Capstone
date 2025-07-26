@@ -39,7 +39,6 @@ export const signUpNewUser = async (email, password, name) => {
 export const signOut = async () => {
   const { error } = await supabase.auth.signOut();
   if (error) {
-    console.error("Sign out error:", error);
     return { success: false, error: error.message };
   }
   return { success: true };
