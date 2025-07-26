@@ -7,6 +7,7 @@ import AvatarDemo from "./avatar-01";
 import { useDebounce } from "../lib/useDebounce.js";
 import { UserAuth } from "../context/AuthContext.jsx";
 import ViewContactCard from "./ViewContactCard";
+import { toast } from "sonner";
 
 const SearchResult = ({ contact }) => {
   const colorMap = {
@@ -101,7 +102,7 @@ const SearchContacts = () => {
 
         setShowDropdown(true);
       } catch (err) {
-        console.error("Error performing search:", err)
+        toast.error("Error performing search");
       } finally {
         setIsLoading(false);
       }

@@ -30,7 +30,6 @@ const ContactsTable = () => {
       const result = await fetchContacts(session?.user?.id);
       if (!isMounted.current) return;
       if (!result.success) {
-        console.error(result.error);
         toast.error("There was an error fetching the contacts");
       } else {
         setData(result.data);
