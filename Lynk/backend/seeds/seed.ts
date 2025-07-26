@@ -147,31 +147,28 @@ function makeContact() {
     contacts.push(c);
   }
 
-await seed.connections(
-  contacts.map(c => ({
-    id: c.id,          
-    name: c.name,
-    email: c.email,
-    phone_number: c.phone_number,
-    socials: c.socials,
-    avatar_url: c.avatar_url,
-    industry: c.industry,
-    company: c.company,
-    role: c.role,
-    school: c.school,
-    gender: c.gender,
-    location: c.location,
-    notes: null,
-    where_met: c.where_met,
-    relationship_type: c.relationship_type,
-    connection_score: null,       
-    tags: c.tags,
-    interests: c.interests
-  }))
-);
-console.log('connections inserted:', contacts.length);
-
-
+  await seed.connections(
+    contacts.map(c => ({
+      id: c.id,          
+      name: c.name,
+      email: c.email,
+      phone_number: c.phone_number,
+      socials: c.socials,
+      avatar_url: c.avatar_url,
+      industry: c.industry,
+      company: c.company,
+      role: c.role,
+      school: c.school,
+      gender: c.gender,
+      location: c.location,
+      notes: null,
+      where_met: c.where_met,
+      relationship_type: c.relationship_type,
+      connection_score: null,       
+      tags: c.tags,
+      interests: c.interests
+    }))
+  );
 
   await seed.user_to_connections(
     contacts.map((c) => ({
@@ -189,7 +186,6 @@ console.log('connections inserted:', contacts.length);
       updated_at: new Date().toISOString(),
     }))
   );
-  console.log('user_to_connections inserted:', contacts.length);
 
   process.exit(0);
 })();
