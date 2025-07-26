@@ -164,8 +164,7 @@ export function EditContact({children,  contactData, open, onOpenChange, onConta
             toast.success("Contact updated ✅")
             onOpenChange(false)       
         } catch (err) {
-            console.error(err)
-            toast.error("Failed to update contact")
+            toast.error("Failed to update contact");
         } finally {
             setSaving(false)
         }
