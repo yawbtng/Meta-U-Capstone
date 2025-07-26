@@ -28,6 +28,7 @@ import {
   User
 } from 'lucide-react';
 import lynkLogo from "../..//lynk-logo.png";
+import { toast } from 'sonner';
 
 const Navigation = () => {
   const { session, signOut, profile } = UserAuth();
@@ -40,7 +41,7 @@ const Navigation = () => {
       await signOut();
       navigate('/');
     } catch (error) {
-      console.error('Error signing out:', error);
+      toast.error('Error signing out');
     }
   };
 
