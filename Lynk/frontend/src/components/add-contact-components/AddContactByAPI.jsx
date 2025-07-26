@@ -74,8 +74,7 @@ export default function AddContactByAPI() {
             // Note: We don't restore filters from last query for simplicity
           }
         } catch (err) {
-          console.error('Error initializing component:', err);
-          setQueriesLeft(CLADO_DAILY_LIMIT);
+            toast.error('Error initializing component');
         }
       }
     }

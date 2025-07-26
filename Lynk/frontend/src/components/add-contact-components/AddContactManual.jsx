@@ -15,6 +15,7 @@ import { industries } from '../../lib/industries';
 import AvatarDemo from '../avatar-01';
 import { getInitials } from '../contacts-table-components/columns';
 import { Upload, Link } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AddContactManual() {
     //  current user who is adding the contact
@@ -215,8 +216,8 @@ export default function AddContactManual() {
             const result = await createContact(submissionData, uid);
 
             if (!result.success) {
-                console.error('Error adding contact:', result.error);
-                alert('Failed to add contact. Please try again.');
+                toast.error(`Error adding contact: ${result.error}`);
+                return;
             } else {
                 // Reset form
                 setFormData({
@@ -226,13 +227,12 @@ export default function AddContactManual() {
                     instagram: '', notes: '', avatar_url: '', avatar_file: null
                 });
                 clearAvatar();
-                alert('Contact added successfully!');
+                toast.success('Contact added successfully!');
                 navigate("/all-contacts");
             }
 
         } catch (error) {
-            console.error('Unexpected error adding contact:', error);
-            alert('An unexpected error occurred. Please try again.');
+            toast.error(`Unexpected error adding contact: ${error.message}`);
         } finally {
             setIsSubmitting(false);
         }
