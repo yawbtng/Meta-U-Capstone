@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { toast } from 'sonner';
 import { processAllUserEmbeddings, processAllConnectionEmbeddings } from '../../../backend/services/batch-embedding-pipeline.js';
 import { getRecommendationsAPI } from '../../../backend/services/supabase-vector.js';
 import { generateUserEmbedding } from '../../../backend/services/embedding-service.js';
@@ -19,12 +20,12 @@ export default function TestPipeline() {
         setResults(null);
 
         try {
-            console.log('Starting Supabase embedding pipeline...');
+            toast.info('Starting Supabase embedding pipeline...');
             
-            console.log('Processing user embeddings...');
+            toast.info('Processing user embeddings...');
             await processAllUserEmbeddings();
             
-            console.log('Processing connection embeddings...');
+            toast.info('Processing connection embeddings...');
             await processAllConnectionEmbeddings();
             
             setResults({
@@ -33,8 +34,10 @@ export default function TestPipeline() {
                 timestamp: new Date().toISOString()
             });
             
+            toast.success('Supabase LangChain pipeline completed successfully!');
+            
         } catch (err) {
-            console.error('Pipeline failed:', err);
+            toast.error(`Pipeline failed: ${err.message}`);
             setError(err.message);
         } finally {
             setIsProcessing(false);
@@ -47,7 +50,7 @@ export default function TestPipeline() {
         setSearchResults(null);
 
         try {
-            console.log('Testing vector similarity search...');
+            toast.info('Testing vector similarity search...');
             
             const users = await fetchAllUsers();
             if (!users.length) {
@@ -55,14 +58,14 @@ export default function TestPipeline() {
             }
 
             const testUser = users[0];
-            console.log('Testing with user:', testUser.name);
+            toast.info(`Testing with user: ${testUser.name}`);
 
             const embeddingResult = await generateUserEmbedding(testUser);
             if (!embeddingResult.success) {
                 throw new Error(`Failed to generate test embedding: ${embeddingResult.error}`);
             }
 
-            console.log('Generated test query vector, searching for similar connections...');
+            toast.info('Generated test query vector, searching for similar connections...');
             const connectionResults = await getRecommendationsAPI({
                 userVector: embeddingResult.embedding,
                 userId: testUser.id,
@@ -78,10 +81,10 @@ export default function TestPipeline() {
                 timestamp: new Date().toISOString()
             });
 
-            console.log('Search test completed successfully!');
+            toast.success('Search test completed successfully!');
             
         } catch (err) {
-            console.error('Search test failed:', err);
+            toast.error(`Search test failed: ${err.message}`);
             setError(err.message);
         } finally {
             setIsSearching(false);
