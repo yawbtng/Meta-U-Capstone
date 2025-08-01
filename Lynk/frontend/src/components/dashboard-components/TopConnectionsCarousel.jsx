@@ -92,7 +92,7 @@ const TopConnectionsCarousel = ({ contacts, loading, plugin, onContactClick }) =
                             initials={getInitials(connection.name)}
                             className="w-24 h-24 text-3xl mb-1"
                           />
-                          <div className="font-semibold text-xl text-black text-left w-auto mb-1">
+                          <div className="font-semibold text-xl text-left w-auto mb-1">
                             {connection.name}
                           </div>
                         </CardHeader>

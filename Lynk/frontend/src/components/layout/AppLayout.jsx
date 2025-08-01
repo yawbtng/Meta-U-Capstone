@@ -4,7 +4,7 @@ import GlobalLoadingIndicator from './GlobalLoadingIndicator';
 const AppLayout = ({ children }) => {
   const currentYear = new Date().getFullYear();
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col w-full">
       <Navigation />
       <main className="flex-1">{children}</main>
       <GlobalLoadingIndicator />
