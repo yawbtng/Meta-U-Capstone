@@ -10,6 +10,7 @@ import AllContacts from './pages/AllContacts';
 // import TestPipeline from './pages/TestPipeline';
 import { Toaster } from "sonner";
 import AppLayout from './components/layout/AppLayout';
+import { ThemeProvider } from './components/theme-provider';
 
 export const router = createBrowserRouter([
   {
@@ -69,10 +70,10 @@ export const router = createBrowserRouter([
 
 function App() {
   return (
-    <>
+    <ThemeProvider defaultTheme="system" storageKey="lynk-ui-theme">
       <Toaster richColors position="bottom-center" />
       <Outlet />
-    </>
+    </ThemeProvider>
   )
 }
 
