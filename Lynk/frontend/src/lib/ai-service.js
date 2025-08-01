@@ -12,7 +12,7 @@ export async function generateRelationshipGuidanceStream(contact, userProfile) {
     const prompt = `
 You are a relationship advisor helping someone strengthen their professional and personal connections. 
 
-Based on the following contact information and relationship context, provide comprehensive, actionable guidance on how the user can strengthen their relationship with this contact.
+Based on the following contact information and relationship context, provide concise, actionable guidance on how the user can strengthen their relationship with this contact.
 
 CONTACT INFORMATION:
 - Name: ${contact.name}
@@ -38,21 +38,24 @@ USER PROFILE:
 Please provide your guidance in the following structured format with clear markdown headers:
 
 ## Immediate Actions
-Provide 3-5 specific, actionable steps they can take this week to strengthen the relationship.
+Provide 2-3 specific, actionable steps they can take this week to strengthen the relationship.
 
 ## Relationship Building Strategies
-Suggest medium-term strategies to strengthen the connection and build trust.
+Suggest 2-3 medium-term strategies to strengthen the connection.
 
 ## Value Proposition
-Explain how they can provide value to this contact and create mutual benefit.
+Explain how they can provide value to this contact in 1-2 sentences.
 
 ## Communication Approach
-Suggest specific ways to reach out and maintain contact effectively.
+Suggest 2-3 specific ways to reach out and maintain contact.
 
 ## Follow-up Plan
-Provide a timeline and methods for staying connected and nurturing the relationship.
+Provide a brief timeline and methods for staying connected.
 
-Make your advice specific, practical, and tailored to their relationship context. Focus on mutual value creation and genuine relationship building. Use bullet points and clear, actionable language.
+Keep your advice concise, practical, and tailored to their relationship context. 
+Focus on mutual value creation and genuine relationship building. 
+Use clear markdown formatting.
+Keep each section brief and to the point - avoid lengthy explanations.
 `;
 
     const google = createGoogleGenerativeAI({
