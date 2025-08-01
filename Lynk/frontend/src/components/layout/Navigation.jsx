@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import lynkLogo from "../../lynk-logo.png";
 import { toast } from 'sonner';
+import { ModeToggle } from '../mode-toggle';
 
 const Navigation = () => {
   const { session, signOut, profile } = UserAuth();
@@ -137,7 +138,11 @@ const Navigation = () => {
              />
            ))}
          </div>
-        <div className="mt-auto pt-6 border-t">
+        <div className="mt-auto pt-6 border-t space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Theme</span>
+            <ModeToggle />
+          </div>
           <UserProfileDropdown />
         </div>
       </SheetContent>
@@ -178,6 +183,7 @@ const Navigation = () => {
 
           {/* User Profile and Mobile Menu */}
           <div className="flex items-center space-x-2">
+            <ModeToggle />
             <UserProfileDropdown />
             <MobileMenu />
           </div>

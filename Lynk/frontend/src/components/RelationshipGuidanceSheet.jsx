@@ -293,7 +293,7 @@ export default function RelationshipGuidanceSheet({
                       Sources & Research
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {sources.slice(0, 6).map((source, index) => (
+                      {sources.slice(0, 10).map((source, index) => (
                         <a href={source.url} target="_blank" rel="noopener noreferrer" key={index}>
                           <HoverCard>
                           <HoverCardTrigger asChild>
@@ -342,9 +342,9 @@ export default function RelationshipGuidanceSheet({
                         </a>
                       ))}
                     </div>
-                    {sources.length > 6 && (
+                    {sources.length > 10 && (
                       <p className="text-xs text-gray-500 mt-2 text-center">
-                        Showing top 6 of {sources.length} sources
+                        Showing top 10 of {sources.length} sources
                       </p>
                     )}
                   </div>
