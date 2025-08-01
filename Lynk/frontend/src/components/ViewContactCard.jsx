@@ -8,8 +8,14 @@ import { Badge } from "@/components/ui/badge"
 import AvatarDemo from "./avatar-01"
 import { Mail, Phone, Building2, School, MapPin, Tag, Briefcase, Globe, Heart, User, CalendarDays, Users, Star, MessageCircle, BookOpen, Info, Linkedin, Twitter, Instagram } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import RelationshipGuidanceSheet from "./RelationshipGuidanceSheet"
+import { UserAuth } from "@/context/AuthContext"
 
 export default function ViewContactCard({ open, onOpenChange, contact }) {
+  const { user } = UserAuth()
+  const [guidanceSheetOpen, setGuidanceSheetOpen] = useState(false)
+  
   if (!contact) return null
 
   const colorMap = {
@@ -21,7 +27,7 @@ export default function ViewContactCard({ open, onOpenChange, contact }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-screen-xl !w-[80vw] !max-h-[60vh] scrollbar-hide p-0 rounded-2xl shadow-2xl bg-white border-0 overflow-y-auto">
+      <DialogContent className="!max-w-screen-xl !w-[90vw] !max-h-[70vh] scrollbar-hide p-0 rounded-2xl shadow-2xl bg-white border-0 overflow-y-auto">
         <DialogDescription className="sr-only">
           View detailed information about {contact.name}
         </DialogDescription>
@@ -43,6 +49,7 @@ export default function ViewContactCard({ open, onOpenChange, contact }) {
                 <Button
                   className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-6 py-2 rounded-xl text-base font-semibold shadow-md hover:from-blue-600 hover:to-pink-600 transition-all"
                   type="button"
+                  onClick={() => setGuidanceSheetOpen(true)}
                 >
                   How can I help {contact.name}?
                 </Button>
@@ -162,6 +169,14 @@ export default function ViewContactCard({ open, onOpenChange, contact }) {
           </div>
         </div>
       </DialogContent>
+      
+      {/* Relationship Guidance Sheet */}
+      <RelationshipGuidanceSheet
+        open={guidanceSheetOpen}
+        onOpenChange={setGuidanceSheetOpen}
+        contact={contact}
+        userProfile={user}
+      />
     </Dialog>
   )
 }
