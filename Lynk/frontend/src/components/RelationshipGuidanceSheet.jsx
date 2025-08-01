@@ -69,22 +69,26 @@ export default function RelationshipGuidanceSheet({
   const [error, setError] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [sheetWidth, setSheetWidth] = useState(600)
+  const [currentContactId, setCurrentContactId] = useState(null)
   const isResizing = useRef(false)
   const startX = useRef(0)
   const startWidth = useRef(0)
 
   useEffect(() => {
     if (open && contact) {
-      // Clear previous guidance when a new contact is selected
-      setGuidance('')
-      setError('')
-      setLoading(false)
-      setIsGenerating(false)
-      
-      // Generate new guidance for the current contact
-      generateGuidance()
+      // Only regenerate if this is a different contact
+      if (currentContactId !== contact.id) {
+        setCurrentContactId(contact.id)
+        setGuidance('')
+        setError('')
+        setLoading(false)
+        setIsGenerating(false)
+        
+        // Generate new guidance for the new contact
+        generateGuidance()
+      }
     }
-  }, [open, contact])
+  }, [open, contact, currentContactId])
 
   const generateGuidance = async () => {
     if (!contact) return
@@ -171,7 +175,7 @@ export default function RelationshipGuidanceSheet({
               <Brain className="w-6 h-6" />
               AI Relationship Guidance
             </SheetTitle>
-            <SheetDescription className="text-white/90 mt-2">
+            <SheetDescription className="text-white/90 mt-2 text-lg font-semibold">
               Personalized suggestions to strengthen your relationship with {contact?.name}
             </SheetDescription>
             <div className="flex items-center gap-2 mt-4">
