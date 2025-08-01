@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import LoadingSpinner from "@/components/ui/loading-spinner"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { generateRelationshipGuidanceStream } from "@/lib/ai-service"
 import { UserAuth } from "@/context/AuthContext"
-import { Lightbulb, Sparkles, RefreshCw, Brain, Zap, GripVertical } from "lucide-react"
+import { Lightbulb, Sparkles, RefreshCw, Brain, Zap, GripVertical, Globe, ExternalLink } from "lucide-react"
 import ReactMarkdown from 'react-markdown'
 
 // Memoized markdown component for better performance, with extra vertical spacing and larger text for readability
@@ -68,6 +69,9 @@ export default function RelationshipGuidanceSheet({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [sources, setSources] = useState([])
+  const [groundingMetadata, setGroundingMetadata] = useState(null)
+  const [urlContextMetadata, setUrlContextMetadata] = useState(null)
   const [sheetWidth, setSheetWidth] = useState(600)
   const [currentContactId, setCurrentContactId] = useState(null)
   const isResizing = useRef(false)
@@ -81,6 +85,9 @@ export default function RelationshipGuidanceSheet({
         setCurrentContactId(contact.id)
         setGuidance('')
         setError('')
+        setSources([])
+        setGroundingMetadata(null)
+        setUrlContextMetadata(null)
         setLoading(false)
         setIsGenerating(false)
         
@@ -97,13 +104,30 @@ export default function RelationshipGuidanceSheet({
     setError('')
     setIsGenerating(true)
     setGuidance('')
+    setSources([])
+    setGroundingMetadata(null)
+    setUrlContextMetadata(null)
     
     try {
       const result = await generateRelationshipGuidanceStream(contact, userProfile)
       
+      console.log('AI Service Result:', result) // Debug log
+      
+      // Check if result has textStream before streaming
+      if (!result.textStream) {
+        console.error('Result structure:', result) // Debug log
+        throw new Error('No text stream returned from AI service');
+      }
+      
       // Stream the response using the correct AI SDK v5 pattern
       for await (const chunk of result.textStream) {
         setGuidance(prev => prev + chunk);
+      }
+      
+      // Set sources after streaming is complete
+      if (result.sources) {
+        setSources(result.sources)
+        console.log('Sources found:', result.sources) // Debug log
       }
     } catch (err) {
       setError('Failed to generate guidance. Please try again.')
@@ -258,6 +282,71 @@ export default function RelationshipGuidanceSheet({
                   <div className="flex items-center gap-3 text-gray-500 bg-gray-50 rounded-lg p-4">
                     <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
                     <span className="text-sm font-medium">Generating additional suggestions...</span>
+                  </div>
+                )}
+
+                {/* Sources Section */}
+                {sources && sources.length > 0 && (
+                  <div className="pt-6 border-t border-gray-200">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Globe className="w-5 h-5 text-blue-500" />
+                      Sources & Research
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {sources.slice(0, 6).map((source, index) => (
+                        <a href={source.url} target="_blank" rel="noopener noreferrer" key={index}>
+                          <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <div className=" hover:bg-gray-100 rounded-lg p-1 border border-gray-200 cursor-pointer transition-colors">
+                              <div className="flex items-start gap-2">
+                                <div className="w-2 h-2 bg-blue-500 hidden rounded-full mt-2 flex-shrink-0"></div>
+                                <div className="flex-1 min-w-0">
+                                  <h5 className="font-medium text-gray-900 text-sm truncate">
+                                    {source.title || `Source ${index + 1}`}
+                                  </h5>
+                                  {source.url && (
+                                    <div className="flex flex-row items-center justify-center gap-0 mt-1 text-center">
+                                      <ExternalLink className="w-3 h-3 text-blue-500 mx-1" />
+                                      <span className="text-blue-600 text-xs truncate">
+                                        {source.title}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-80">
+                            <div className="space-y-2">
+                              <h4 className="font-semibold text-sm">
+                                {source.title || `Source ${index + 1}`}
+                              </h4>
+                              {source.url && (
+                                <a 
+                                  href={source.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 text-xs break-all block"
+                                >
+                                  {source.title}
+                                </a>
+                              )}
+                              {source.snippet && (
+                                <p className="text-gray-600 text-xs">
+                                  {source.snippet}
+                                </p>
+                              )}
+                            </div>
+                            </HoverCardContent>
+                          </HoverCard>
+                        </a>
+                      ))}
+                    </div>
+                    {sources.length > 6 && (
+                      <p className="text-xs text-gray-500 mt-2 text-center">
+                        Showing top 6 of {sources.length} sources
+                      </p>
+                    )}
                   </div>
                 )}
 

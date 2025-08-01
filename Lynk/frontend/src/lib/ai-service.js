@@ -1,5 +1,6 @@
-import { streamText } from 'ai'
+import { streamText, generateText } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { google } from '@ai-sdk/google';
 
 export async function generateRelationshipGuidanceStream(contact, userProfile) {
   try {
@@ -56,21 +57,46 @@ Keep your advice concise, practical, and tailored to their relationship context.
 Focus on mutual value creation and genuine relationship building. 
 Use clear markdown formatting.
 Keep each section brief and to the point - avoid lengthy explanations.
+
+IMPORTANT: Use Google Search to find current information about the contact's company, industry trends, recent news, 
+interests or relevant events that could provide valuable context for relationship building. 
+Search for recent developments, company updates, industry insights, or current events that 
+could be conversation starters or value-add opportunities. Specify how the information
+is relevant and how it can be used in a conversation.
+
+If you find relevant current information through search, include it in your guidance and cite the sources.
 `;
 
-    const google = createGoogleGenerativeAI({
+    const googleAI = createGoogleGenerativeAI({
       apiKey: apiKey,
     });
-
-    const result = await streamText({
-      model: google('gemini-2.5-flash-lite'),
-      apiKey,
+    
+    // For tools, we need to use generateText instead of streamText
+    const result = await generateText({
+      model: googleAI('gemini-2.5-flash'),
+      tools: {
+        google_search: googleAI.tools.googleSearch({}),
+      },
       prompt,
       temperature: 0.7,
       maxTokens: 8000,
     });
 
-    return result;
+    console.log('Result:', result)
+    
+    // Extract sources from the result
+    const sources = result.sources || [];
+    console.log('Sources:', sources);
+
+    // Return the result with sources
+    return {
+      text: result.text,
+      sources,
+      // Create a mock textStream for compatibility
+      textStream: (async function* () {
+        yield result.text;
+      })(),
+    };
   } catch (error) {
     console.error('Error generating relationship guidance:', error);
     throw new Error('Failed to generate relationship guidance');
