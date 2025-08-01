@@ -27,7 +27,7 @@ import {
   LogOut, 
   User
 } from 'lucide-react';
-import lynkLogo from "../..//lynk-logo.png";
+import lynkLogo from "../../lynk-logo.png";
 import { toast } from 'sonner';
 
 const Navigation = () => {

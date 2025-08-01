@@ -6,7 +6,7 @@ import { Card, CardContent } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { cn } from "../../lib/utils";
-import lynkLogo from "../..//lynk-logo.png";
+import lynkLogo from "../../lynk-logo.png";
 
 const SignUp = () => {
     const [name, setName] = useState("");
