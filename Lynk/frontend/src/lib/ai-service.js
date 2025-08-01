@@ -1,5 +1,5 @@
 import { streamText } from 'ai'
-import { google, createGoogleGenerativeAI } from '@ai-sdk/google'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
 
 export async function generateRelationshipGuidanceStream(contact, userProfile) {
   try {
