@@ -74,7 +74,14 @@ export default function RelationshipGuidanceSheet({
   const startWidth = useRef(0)
 
   useEffect(() => {
-    if (open && contact && !guidance) {
+    if (open && contact) {
+      // Clear previous guidance when a new contact is selected
+      setGuidance('')
+      setError('')
+      setLoading(false)
+      setIsGenerating(false)
+      
+      // Generate new guidance for the current contact
       generateGuidance()
     }
   }, [open, contact])
