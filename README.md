@@ -16,7 +16,9 @@ Lynk is an intelligent professional networking platform that leverages AI-powere
 <add any other links here as you work on your project>
 
 ## Demo Video
-[TBD](<insert link in Week 9!>)
+[![Watch the video](https://github.com/user-attachments/assets/108cb011-0838-4005-b344-7a1e59b25eb8)](https://www.youtube.com/watch?v=2ap1pTe5oAA)
+
+
 
 
 
