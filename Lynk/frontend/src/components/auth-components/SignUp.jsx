@@ -47,7 +47,7 @@ const SignUp = () => {
                     <CardContent className="grid p-0 md:grid-cols-2 h-[500px]">
                         <div className="relative">
                             <div className="absolute right-0 top-0 bottom-0 w-px bg-gray-200"></div>
-                            <div className="flex items-center justify-center p-8 h-full scale-200">
+                            <div className="flex items-center justify-center p-8 h-full">
                                 <img
                                     src={lynkLogo}
                                     alt="Lynk Logo"

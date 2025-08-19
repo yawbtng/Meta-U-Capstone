@@ -124,7 +124,7 @@ export default function DataTable({ columns, data, loading }) {
           
           <button
             onClick={() => navigate('/add-contact')}
-            className="ml-3 mr-3 flex items-center gap-1 rounded-full hover:bg-gray-700 px-5 py-2 shadow-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-black text-base font-semibold"
+            className="ml-3 mr-3 flex items-center gap-1 rounded-full bg-black hover:bg-gray-700 text-white px-5 py-2 shadow-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-black text-base font-semibold"
             title="Add Contact"
             aria-label="Add Contact"
           >
@@ -186,7 +186,7 @@ export default function DataTable({ columns, data, loading }) {
             ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map(row => (
                 <TableRow
-                  className="cursor-pointer hover:bg-blue-500 h-15"
+                  className="cursor-pointer hover:bg-gray-100 h-15"
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >

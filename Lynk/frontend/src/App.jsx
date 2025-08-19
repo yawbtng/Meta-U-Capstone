@@ -11,16 +11,14 @@ import AllContacts from './pages/AllContacts';
 import { Toaster } from "sonner";
 import AppLayout from './components/layout/AppLayout';
 import { ThemeProvider } from './components/theme-provider';
+import LandingPage from './components/landing-page-components/landing-page';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/signup" />, // Redirect to signup as the default
-  },
-  {
-    path: '/',
     element: <App />,
     children: [
+      { path: '', element: <LandingPage /> },
       { path: 'signup', element: <SignUp /> },
       { path: 'signin', element: <SignIn /> },
       { 
