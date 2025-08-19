@@ -8,8 +8,18 @@ import { Badge } from '../ui/badge';
 import useEmblaCarousel from 'embla-carousel-react';
 
 const Testimonials = () => {
-  const [topViewportRef, topEmblaApi] = useEmblaCarousel({ loop: true, dragFree: true });
-  const [bottomViewportRef, bottomEmblaApi] = useEmblaCarousel({ loop: true, dragFree: true });
+  const [topViewportRef, topEmblaApi] = useEmblaCarousel({ 
+    loop: true, 
+    dragFree: false,
+    containScroll: 'trimSnaps',
+    align: 'start'
+  });
+  const [bottomViewportRef, bottomEmblaApi] = useEmblaCarousel({ 
+    loop: true, 
+    dragFree: false,
+    containScroll: 'trimSnaps',
+    align: 'start'
+  });
   const [isPaused, setIsPaused] = React.useState(false);
 
   const testimonials = [
@@ -97,12 +107,6 @@ const Testimonials = () => {
 
   const togglePause = () => {
     setIsPaused(!isPaused);
-    if (topEmblaApi && bottomEmblaApi) {
-      if (isPaused) {
-        topEmblaApi.scrollNext();
-        bottomEmblaApi.scrollNext();
-      }
-    }
   };
 
   React.useEffect(() => {
@@ -113,7 +117,7 @@ const Testimonials = () => {
         topEmblaApi.scrollNext();
         bottomEmblaApi.scrollNext();
       }
-    }, 3000);
+    }, 4000); // Slightly slower for better readability
 
     return () => clearInterval(interval);
   }, [topEmblaApi, bottomEmblaApi, isPaused]);
@@ -197,7 +201,7 @@ const Testimonials = () => {
             <div className="embla__container flex">
               {testimonials.map((testimonial, index) => (
                 <motion.div
-                  key={index}
+                  key={`top-${index}`}
                   className="embla__slide flex-[0_0_320px] mr-6"
                   variants={itemVariants}
                 >
@@ -236,7 +240,7 @@ const Testimonials = () => {
           </div>
         </motion.div>
 
-        {/* Bottom Marquee - Moves Right */}
+        {/* Bottom Marquee - Moves Right (reversed order) */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -247,7 +251,7 @@ const Testimonials = () => {
             <div className="embla__container flex">
               {testimonials.slice().reverse().map((testimonial, index) => (
                 <motion.div
-                  key={index}
+                  key={`bottom-${index}`}
                   className="embla__slide flex-[0_0_320px] mr-6"
                   variants={itemVariants}
                 >

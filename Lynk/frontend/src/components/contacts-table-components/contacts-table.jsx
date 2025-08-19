@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { fetchContacts, deleteContact } from "../../../../backend/index.js";
+import { fetchContacts, deleteContact } from "../../../backend/index.js";
 import { UserAuth } from "../../context/AuthContext";
 import { columns } from "./columns";
 import DataTable from "./data-table";

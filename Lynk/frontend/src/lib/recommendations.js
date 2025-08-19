@@ -1,5 +1,5 @@
-import { supabase } from '../../../backend/browser-client.js';
-import { getRecommendationsAPI } from '../../../backend/services/supabase-vector.js';
+import { supabase } from '../../backend/browser-client.js';
+import { getRecommendationsAPI } from '../../backend/services/supabase-vector.js';
 
 export async function fetchUserRecommendations(userId, limit = 16, offset = 0) {
     try {

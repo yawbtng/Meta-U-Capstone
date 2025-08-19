@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { fetchUserProfile, uploadAvatar } from "../../../backend/index.js";
+import { fetchUserProfile, uploadAvatar } from "../../backend/index.js";
 import { UserAuth } from "../context/AuthContext";
 
 // ProfileHeader – shows avatar + basic info

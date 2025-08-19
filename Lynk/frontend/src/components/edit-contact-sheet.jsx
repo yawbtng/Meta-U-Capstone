@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/accordion"
 import AvatarDemo from "./avatar-01"
 import { getInitials } from "./contacts-table-components/columns"
-import { updateContact } from "../../../backend/index.js"
+import { updateContact } from "../../backend/index.js"
 import { toast } from "sonner"
 import { UserAuth } from "../context/AuthContext"
 

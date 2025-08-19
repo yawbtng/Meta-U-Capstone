@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { UserPlus, X, Plus, Search, Users, CheckCircle } from 'lucide-react';
-import { searchContactsViaClado, getLastQueryOfDay, setLastQueryOfDay, getCladoQueryCount, incrementCladoQueryCount, CLADO_DAILY_LIMIT } from '../../../../backend/services/clado-client.js';
+import { searchContactsViaClado, getLastQueryOfDay, setLastQueryOfDay, getCladoQueryCount, incrementCladoQueryCount, CLADO_DAILY_LIMIT } from '../../../backend/services/clado-client.js';
 import { UserAuth } from '@/context/AuthContext';
-import { createContact, fetchContacts } from '../../../../backend/index.js';
+import { createContact, fetchContacts } from '../../../backend/index.js';
 import { toast } from "sonner"
 import { v4 as uuidv4 } from 'uuid';
 

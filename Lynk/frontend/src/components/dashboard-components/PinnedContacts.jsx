@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Star, PinOff } from "lucide-react";
 import LoadingSpinner from "../ui/loading-spinner";
-import { pinContact } from "../../../../backend/supabase/contacts.js";
+import { pinContact } from "../../../backend/supabase/contacts.js";
 import { UserAuth } from "../../context/AuthContext";
 
 const getInitials = (name) => {

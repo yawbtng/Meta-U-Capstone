@@ -23,7 +23,7 @@ import { DataTableFilter } from "./data-table-filter";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DeleteConfirmationDialog } from "../delete-confirmation-dialog.jsx";
-import { deleteContact } from "../../../../backend/supabase/contacts.js";
+import { deleteContact } from "../../../backend/supabase/contacts.js";
 import { toast } from "sonner";
 import LoadingSpinner from "../ui/loading-spinner";
 

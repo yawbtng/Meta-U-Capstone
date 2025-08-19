@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
-import { processAllUserEmbeddings, processAllConnectionEmbeddings } from '../../../backend/services/batch-embedding-pipeline.js';
-import { getRecommendationsAPI } from '../../../backend/services/supabase-vector.js';
-import { generateUserEmbedding } from '../../../backend/services/embedding-service.js';
-import { fetchAllUsers } from '../../../backend/services/data-fetch.js';
+import { processAllUserEmbeddings, processAllConnectionEmbeddings } from '../../backend/services/batch-embedding-pipeline.js';
+import { getRecommendationsAPI } from '../../backend/services/supabase-vector.js';
+import { generateUserEmbedding } from '../../backend/services/embedding-service.js';
+import { fetchAllUsers } from '../../backend/services/data-fetch.js';
 
 export default function TestPipeline() {
     const [isProcessing, setIsProcessing] = useState(false);

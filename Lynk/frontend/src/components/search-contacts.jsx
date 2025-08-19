@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Trie, fetchInitialContactsForSearch } from "../../../backend/index.js";
+import { Trie, fetchInitialContactsForSearch } from "../../backend/index.js";
 import { getInitials } from "./contacts-table-components/columns.jsx";
 import AvatarDemo from "./avatar-01";
 import { useDebounce } from "../lib/useDebounce.js";

@@ -182,7 +182,7 @@ const Navigation = () => {
           </div>
 
           {/* User Profile and Mobile Menu */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-5">
             <ModeToggle />
             <UserProfileDropdown />
             <MobileMenu />

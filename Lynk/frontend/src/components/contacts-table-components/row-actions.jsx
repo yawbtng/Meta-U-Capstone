@@ -12,7 +12,7 @@ import { SheetTrigger } from "@/components/ui/sheet"
 import { EditContact } from "../edit-contact-sheet"
 import { useState } from "react"
 import ViewContactCard from "../ViewContactCard";
-import { pinContact } from "../../../../backend/supabase/contacts.js";
+import { pinContact } from "../../../backend/supabase/contacts.js";
 import { UserAuth } from "../../context/AuthContext";
 
 export const RowActions = ({ contact, onDeleteContact, onUpdateContact }) => {

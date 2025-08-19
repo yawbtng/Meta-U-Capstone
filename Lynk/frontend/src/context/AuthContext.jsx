@@ -3,7 +3,7 @@ import { signInUser as backendSignIn,
     signUpNewUser as backendSignUp, 
     signOut as backendSignOut, 
     updateUserProfile, fetchUserProfile, 
-    getSession, onAuthStateChange } from "../../../backend/index.js";
+    getSession, onAuthStateChange } from "../../backend/index.js";
 
 
 const AuthContext = createContext()
