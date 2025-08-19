@@ -1,0 +1,78 @@
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import SignUp from './components/auth-components/SignUp';
+import SignIn from './components/auth-components/SignIn';
+import Dashboard from './pages/Dashboard'
+import PrivateRoute from './context/PrivateRoute';
+import { Outlet } from 'react-router-dom'
+import UserProfile from './pages/Settings';
+import AddContact from './pages/AddContact';
+import AllContacts from './pages/AllContacts';
+// import TestPipeline from './pages/TestPipeline';
+import { Toaster } from "sonner";
+import AppLayout from './components/layout/AppLayout';
+import { ThemeProvider } from './components/theme-provider';
+import LandingPage from './components/landing-page-components/landing-page';
+
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />,
+    children: [
+      { path: '', element: <LandingPage /> },
+      { path: 'signup', element: <SignUp /> },
+      { path: 'signin', element: <SignIn /> },
+      { 
+        path: 'home', 
+        element: (
+          <PrivateRoute>
+            <AppLayout>
+              <Dashboard />
+            </AppLayout>
+          </PrivateRoute>
+        ) 
+      },
+      { 
+        path: 'settings', 
+        element: (
+          <PrivateRoute>
+            <AppLayout>
+              <UserProfile />
+            </AppLayout>
+          </PrivateRoute>
+        ) 
+      },
+      { 
+        path: 'add-contact', 
+        element: (
+          <PrivateRoute>
+            <AppLayout>
+              <AddContact />
+            </AppLayout>
+          </PrivateRoute>
+        ) 
+      },
+      { 
+        path: 'all-contacts', 
+        element: (
+          <PrivateRoute>
+            <AppLayout>
+              <AllContacts />
+            </AppLayout>
+          </PrivateRoute>
+        ) 
+      },
+      // { path: 'test-pipeline', element: <PrivateRoute><TestPipeline /></PrivateRoute> },
+    ],
+  },
+]);
+
+function App() {
+  return (
+    <ThemeProvider defaultTheme="system" storageKey="lynk-ui-theme">
+      <Toaster richColors position="bottom-center" />
+      <Outlet />
+    </ThemeProvider>
+  )
+}
+
+export default App
