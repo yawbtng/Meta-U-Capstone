@@ -96,7 +96,7 @@ const CTABand = () => {
             <Button
               size="lg"
               variant="secondary"
-              className="text-lg px-8 py-6 bg-white text-primary hover:bg-white/90"
+              className="text-lg px-8 py-6 text-primary"
               asChild
             >
               <a href="/signup">Launch App</a>
