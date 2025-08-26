@@ -16,8 +16,7 @@ Lynk is an intelligent professional networking platform that leverages AI-powere
 <add any other links here as you work on your project>
 
 ## Demo Video
-[TBD](<insert link in Week 9!>)
-
+[![Project Demo](<img width="1407" height="826" alt="Screenshot 2025-08-26 at 10 25 29 AM" src="https://github.com/user-attachments/assets/17de17d7-5408-4e90-ba81-03bca5690fee" />)](https://drive.google.com/file/d/1e4Gcdz_djTSsnb5HdvckwMwPOQu3RHoG/view?usp=sharing)
 
 
 
@@ -163,4 +162,5 @@ Lynk/
    npm run dev
    
    # Backend services run in the browser
+
    ```
