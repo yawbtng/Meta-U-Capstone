@@ -1,7 +1,7 @@
 # Meta-U-Capstone-Project
 ## Lynk
 
-**Deployed site**: <add a link to your deployment here, if you create one>
+**Deployed site**: [Lynk!](https://lynk-gray.vercel.app/)
 
 ## Overview
 Lynk is an intelligent professional networking platform that leverages AI-powered recommendations and vector search to help users build meaningful professional connections. The application combines traditional contact management with advanced machine learning capabilities to suggest relevant connections based on user profiles, interests, and professional backgrounds.
@@ -165,4 +165,5 @@ Lynk/
    # Backend services run in the browser
 
    ```
+
 
