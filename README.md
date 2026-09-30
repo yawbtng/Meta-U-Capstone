@@ -1,7 +1,6 @@
-# Meta-U-Capstone-Project
-## Lynk
+# Lynk
 
-**Deployed site**: [Lynk!](https://lynk-gray.vercel.app/)
+**Live: [lynk-gray.vercel.app](https://lynk-gray.vercel.app/)** — my Meta University capstone: an AI-powered professional networking CRM.
 
 ## Overview
 Lynk is an intelligent professional networking platform that leverages AI-powered recommendations and vector search to help users build meaningful professional connections. The application combines traditional contact management with advanced machine learning capabilities to suggest relevant connections based on user profiles, interests, and professional backgrounds.
@@ -9,11 +8,6 @@ Lynk is an intelligent professional networking platform that leverages AI-powere
 
 ## Links
 **Project Plan**: [doc](https://docs.google.com/document/d/1247j3yXhOr8HSFaHEmbuIilBysTZ2g5dqh01ur1Pmog) <br>
-
-**Wireframes**: [here]<add a link to wire frames>
-<img src="OR_INSERT_INLINE_YOUR_WIREFRAME_IMAGE_URL" width=600>
-
-<add any other links here as you work on your project>
 
 ## Demo Video
 [![Project Demo](https://github.com/user-attachments/assets/17de17d7-5408-4e90-ba81-03bca5690fee)](https://drive.google.com/file/d/1e4Gcdz_djTSsnb5HdvckwMwPOQu3RHoG/view?usp=sharing)
@@ -165,5 +159,3 @@ Lynk/
    # Backend services run in the browser
 
    ```
-
-
